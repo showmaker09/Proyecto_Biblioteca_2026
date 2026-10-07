@@ -1,0 +1,5 @@
+El diseño de arquitecturas de software requiere un análisis lógico y exhaustivo. ¿Cómo aseguramos que la inyección masiva de datos funcione correctamente en la nube? La respuesta yace en la optimización de los algoritmos y la correcta lectura de la codificación.
+
+Este párrafo es una prueba de estrés para el pipeline de Python. Incluye caracteres especiales del español que suelen romper los sistemas mal configurados: la cigüeña voló sobre el pingüino; el niño comió un jalapeño en el cañón. Además, contiene múltiples signos de puntuación (¡increíble!), vocales acentuadas (á, é, í, ó, ú) y palabras técnicas como "NoSQL", "multiplataforma" y "asíncrono".
+
+Si el script de ingesta procesa este documento sin arrojar errores, cuenta las palabras exactas separándolas por espacios y calcula la suma total de los caracteres de forma dinámica, significará que tu entorno local está 100% listo para producción.
