@@ -1,0 +1,26 @@
+{
+  "titulo": "Fuente Ovejuna",
+  "autor": "Vega, Lope de",
+  "idioma": "es",
+  "temas": [
+    "Fuenteovejuna (Spain) -- History -- Drama",
+    "Spanish drama -- Classical period, 1500-1700"
+  ],
+  "capitulos": [
+    {
+      "numero": 1,
+      "titulo": "ACTO PRIMERO",
+      "pagina_inicio": 3
+    },
+    {
+      "numero": 2,
+      "titulo": "ACTO SEGUNDO",
+      "pagina_inicio": 15
+    },
+    {
+      "numero": 3,
+      "titulo": "ACTO TERCERO",
+      "pagina_inicio": 30
+    }
+  ]
+}

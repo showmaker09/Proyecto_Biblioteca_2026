@@ -1,2 +1,29 @@
-
+# Credenciales y variables de entorno (nunca subir)
+.env
+.env.*
 *.env
+!.env.example
+
+# Llaves y archivos de credenciales
+*.pem
+*.key
+credentials*.json
+secrets*
+
+# Entorno virtual de Python
+venv/
+.venv/
+env/
+
+# Archivos generados por Python
+__pycache__/
+*.pyc
+
+# Editores y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Hojas de trabajo del equipo (contienen nombres de los integrantes)
+*.xlsx

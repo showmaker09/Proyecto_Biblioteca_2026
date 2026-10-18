@@ -1,0 +1,25 @@
+{
+  "titulo": "El sí de las niñas",
+  "autor": "Fernández de Moratín, Leandro",
+  "idioma": "es",
+  "temas": [
+    "Spanish drama (Comedy)"
+  ],
+  "capitulos": [
+    {
+      "numero": 1,
+      "titulo": "ACTO PRIMERO",
+      "pagina_inicio": 1
+    },
+    {
+      "numero": 2,
+      "titulo": "ACTO SEGUNDO",
+      "pagina_inicio": 19
+    },
+    {
+      "numero": 3,
+      "titulo": "ACTO TERCERO",
+      "pagina_inicio": 39
+    }
+  ]
+}

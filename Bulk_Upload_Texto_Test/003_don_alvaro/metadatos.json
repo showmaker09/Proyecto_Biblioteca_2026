@@ -1,0 +1,35 @@
+{
+  "titulo": "Don Álvaro, o, La fuerza del Sino",
+  "autor": "Rivas, Angel de Saavedra, duque de",
+  "idioma": "es",
+  "temas": [
+    "Spanish drama -- 19th century"
+  ],
+  "capitulos": [
+    {
+      "numero": 1,
+      "titulo": "JORNADA PRIMERA",
+      "pagina_inicio": 2
+    },
+    {
+      "numero": 2,
+      "titulo": "JORNADA SEGUNDA",
+      "pagina_inicio": 16
+    },
+    {
+      "numero": 3,
+      "titulo": "JORNADA TERCERA",
+      "pagina_inicio": 32
+    },
+    {
+      "numero": 4,
+      "titulo": "JORNADA CUARTA",
+      "pagina_inicio": 44
+    },
+    {
+      "numero": 5,
+      "titulo": "JORNADA QUINTA",
+      "pagina_inicio": 56
+    }
+  ]
+}

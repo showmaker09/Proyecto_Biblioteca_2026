@@ -1,0 +1,22 @@
+{
+  "_id": "001_nombre_del_libro",
+  "titulo": "Titulo del libro",
+  "autor": "Apellido, Nombre",
+  "idioma": "es",
+  "temas": ["Tema 1", "Tema 2"],
+  "capitulos": [
+    {
+      "numero": 1,
+      "titulo": "Titulo o encabezado del capitulo",
+      "pagina_inicio": 1
+    }
+  ],
+  "paginas": [
+    {
+      "numero_pagina": 1,
+      "texto_completo": "Texto completo extraido de esta pagina.",
+      "conteo_palabras": 0
+    }
+  ],
+  "caracteres_totales": 0
+}
