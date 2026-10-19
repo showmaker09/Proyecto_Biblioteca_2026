@@ -60,7 +60,8 @@
 }
 
 .accion :global(.boton) {
-  padding: 0.4rem 0.9rem;
+  height: 2.25rem;
+  padding: 0 0.9rem;
   font-size: 0.9rem;
 }
 

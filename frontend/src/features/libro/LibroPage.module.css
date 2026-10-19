@@ -1,4 +1,9 @@
 .libro {
+  /* Contenedor (no viewport) para que el diseño también responda al abrir el menú lateral */
+  container: libro / inline-size;
+}
+
+.cuerpo {
   max-width: 60rem;
 }
 
@@ -123,6 +128,32 @@
 
 .seccion h2 {
   margin: 0 0 1rem;
+}
+
+/*
+ * Con ancho de sobra, la primera página pasa a una columna propia a la derecha que se queda fija
+ * al hacer scroll y se desplaza por dentro: la ficha y los capítulos quedan a la izquierda.
+ */
+@container libro (min-width: 86rem) {
+  .cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36rem;
+    gap: 3rem;
+    align-items: start;
+    max-width: 100rem;
+  }
+
+  .cuerpo > .hojeo {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100dvh - 4rem);
+    margin-top: 0;
+  }
+
+  /* La primera página ya está a la vista: el atajo sobra */
+  .acciones .verPrimera {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {

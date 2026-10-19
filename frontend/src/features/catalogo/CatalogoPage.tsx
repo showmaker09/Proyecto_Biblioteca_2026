@@ -1,7 +1,7 @@
 import { nombreIdioma } from '@/shared/lib/formatoLibro'
 import { useTituloDocumento } from '@/shared/lib/useTituloDocumento'
 import { Peticion } from '@/shared/ui/EstadoPeticion'
-import { CatalogoEsqueleto } from './components/CatalogoEsqueleto'
+import { CatalogoEsqueleto, SeguirLeyendoEsqueleto } from './components/CatalogoEsqueleto'
 import { LibroEstanteria } from './components/LibroEstanteria'
 import { SeguirLeyendo } from './components/SeguirLeyendo'
 import { SelectorVista } from './components/SelectorVista'
@@ -39,6 +39,7 @@ export function CatalogoPage() {
       </header>
 
       {c.peticion.estado === 'listo' && <SeguirLeyendo libros={c.enCurso} progresos={c.progresos} />}
+      {c.peticion.estado === 'cargando' && <SeguirLeyendoEsqueleto cantidad={c.enCursoPrevistos} />}
 
       <div className={estilos.controles} role="search">
         <div className={estilos.buscador}>

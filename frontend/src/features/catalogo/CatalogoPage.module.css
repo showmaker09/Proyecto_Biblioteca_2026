@@ -95,10 +95,17 @@
   font-size: 0.9rem;
 }
 
+/*
+ * Cada libro ocupa 5 filas de esta rejilla (portada, título, autor, datos, pie) y las comparte con sus
+ * vecinos mediante subgrid: así títulos, autores y botones quedan alineados en toda la fila aunque
+ * unos textos ocupen dos renglones y otros uno. La separación vertical entre libros la pone cada tarjeta.
+ * Columnas de ancho fijo (no 1fr): si el ancho cambia, p. ej. al abrir el menú lateral, las portadas no
+ * se estiran ni se alargan; solo cambia cuántas caben por fila.
+ */
 .estanteria {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-  gap: 2.25rem 1.5rem;
+  grid-template-columns: repeat(auto-fill, 11rem);
+  gap: 0 2.25rem;
   margin: 0;
   padding: 0;
 }
@@ -132,7 +139,7 @@
 @media (max-width: 480px) {
   .estanteria {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.75rem 1rem;
+    column-gap: 1.25rem;
   }
 
   .buscador {

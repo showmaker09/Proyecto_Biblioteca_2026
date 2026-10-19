@@ -1,4 +1,7 @@
 .seccion {
+  /* Si quien la usa le pone una altura máxima, el título queda fijo y la hoja se desplaza por dentro */
+  display: flex;
+  flex-direction: column;
   margin-top: 3rem;
 }
 
@@ -12,6 +15,9 @@
   --l-texto: #111111;
   --l-borde: #d9d9d9;
   max-width: 44rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 2rem clamp(1rem, 5vw, 3rem) 2.5rem;
   border: 1px solid var(--borde);
   border-radius: 10px;

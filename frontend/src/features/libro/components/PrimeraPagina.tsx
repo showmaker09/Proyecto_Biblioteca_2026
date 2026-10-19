@@ -11,6 +11,8 @@ interface Props {
   libroId: string
   /** Si la obra empieza más adelante (tras portada y notas), se ofrece saltar a ella. */
   primerCapitulo: Capitulo | undefined
+  /** Para colocarla en el diseño de quien la usa (p. ej. columna fija con altura máxima). */
+  className?: string
 }
 
 /** "ACTO PRIMERO" -> "Acto primero". */
@@ -32,11 +34,11 @@ function Esqueleto() {
 }
 
 /** La página 1 del libro, ya formateada, para hojearla antes de abrir el lector. */
-export function PrimeraPagina({ libroId, primerCapitulo }: Props) {
+export function PrimeraPagina({ libroId, primerCapitulo, className }: Props) {
   const peticion = usePeticion(() => obtenerPagina(libroId, 1), [libroId])
 
   return (
-    <section className={estilos.seccion} aria-labelledby="primera-pagina">
+    <section className={className ? `${estilos.seccion} ${className}` : estilos.seccion} aria-labelledby="primera-pagina">
       <h2 id="primera-pagina">Primera página</h2>
       <div className={estilos.hoja}>
         <Peticion peticion={peticion} cargando={<Esqueleto />}>

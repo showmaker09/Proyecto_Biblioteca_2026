@@ -7,9 +7,10 @@
   font-size: 1.3rem;
 }
 
+/* Ancho fijo (no 1fr), como la estantería: al abrir o cerrar el menú las tarjetas no se estiran. */
 .lista {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  grid-template-columns: repeat(auto-fill, min(100%, 24rem));
   gap: 1rem;
   margin: 0;
   padding: 0;
@@ -56,13 +57,21 @@
   font-size: 0.82rem;
 }
 
+/* Un solo renglón: todas las tarjetas miden lo mismo de alto. */
+.autor {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .medidor {
   margin-top: 0.4rem;
 }
 
 .continuar {
   flex-shrink: 0;
-  padding: 0.45rem 0.9rem;
+  height: 2.25rem;
+  padding: 0 0.9rem;
   font-size: 0.9rem;
 }
 
@@ -73,6 +82,5 @@
 
   .continuar {
     width: 100%;
-    text-align: center;
   }
 }

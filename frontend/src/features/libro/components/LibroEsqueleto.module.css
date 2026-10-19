@@ -1,7 +1,16 @@
 /* Mismas medidas que LibroPage.module.css para que nada salte al terminar de cargar */
 .libro {
   display: block;
+  container: libro / inline-size;
+}
+
+.cuerpo {
   max-width: 60rem;
+}
+
+/* La columna de la primera página solo existe en pantallas anchas; en las demás tiene su propio esqueleto */
+.hojeo {
+  display: none;
 }
 
 .migas {
@@ -47,6 +56,21 @@
   gap: 1rem;
   padding: 1rem 0.5rem;
   border-bottom: 1px solid var(--borde);
+}
+
+@container libro (min-width: 86rem) {
+  .cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36rem;
+    gap: 3rem;
+    align-items: start;
+    max-width: 100rem;
+  }
+
+  .hojeo {
+    display: grid;
+    gap: 1rem;
+  }
 }
 
 @media (max-width: 760px) {

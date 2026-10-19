@@ -83,6 +83,9 @@ export function useCatalogo() {
     [todos, progresos],
   )
 
+  /** Antes de que lleguen los libros: cuántas tarjetas tendrá «Continuar leyendo» (máximo 3, para el esqueleto). */
+  const enCursoPrevistos = useMemo(() => Math.min(3, Object.values(progresos).filter((p) => p.pagina < p.total).length), [progresos])
+
   function cambiar(cambio: Partial<{ vista: Vista; orden: Orden }>) {
     setPreferencias((actual) => {
       const siguiente = { ...actual, ...cambio }
@@ -95,6 +98,7 @@ export function useCatalogo() {
     peticion,
     libros,
     enCurso,
+    enCursoPrevistos,
     progresos,
     total: todos?.length ?? 0,
     busqueda,

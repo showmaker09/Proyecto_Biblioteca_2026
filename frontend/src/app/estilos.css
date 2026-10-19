@@ -37,16 +37,23 @@ a {
 }
 
 .boton {
-  display: inline-block;
-  padding: 0.55rem 1rem;
+  /* Altura fija: el botón mide lo mismo en cualquier tarjeta, tenga el texto que tenga. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  padding: 0 1.1rem;
   border: 1px solid var(--acento);
   border-radius: 6px;
   background: var(--acento);
   color: var(--acento-texto);
   font: inherit;
   font-weight: 600;
+  line-height: 1;
   text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
+  transition: opacity 0.15s ease;
 }
 
 .boton-secundario {

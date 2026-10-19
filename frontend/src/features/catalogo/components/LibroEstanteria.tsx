@@ -24,20 +24,22 @@ export function LibroEstanteria({ libro, progreso }: { libro: LibroResumen; prog
         </span>
       </Link>
 
-      {progreso && (
-        <span className={estilos.progreso}>
-          <MedidorProgreso porcentaje={porcentaje} etiqueta={`${libro.titulo}: ${porcentaje}% leído`} />
-          <span className={estilos.porcentaje}>{terminado ? 'Terminado' : `${porcentaje}%`}</span>
-        </span>
-      )}
+      <span className={estilos.pie}>
+        {progreso && (
+          <span className={estilos.progreso}>
+            <MedidorProgreso porcentaje={porcentaje} etiqueta={`${libro.titulo}: ${porcentaje}% leído`} />
+            <span className={estilos.porcentaje}>{terminado ? 'Terminado' : `${porcentaje}%`}</span>
+          </span>
+        )}
 
-      <Link
-        to={`/libros/${libro._id}/leer/${progreso && !terminado ? progreso.pagina : 1}`}
-        className={`boton ${progreso && !terminado ? '' : 'boton-secundario'} ${estilos.accion}`}
-        aria-label={`${progreso && !terminado ? 'Continuar' : 'Leer'} ${libro.titulo}`}
-      >
-        {progreso && !terminado ? 'Continuar' : terminado ? 'Leer de nuevo' : 'Leer'}
-      </Link>
+        <Link
+          to={`/libros/${libro._id}/leer/${progreso && !terminado ? progreso.pagina : 1}`}
+          className={`boton ${progreso && !terminado ? '' : 'boton-secundario'} ${estilos.accion}`}
+          aria-label={`${progreso && !terminado ? 'Continuar' : 'Leer'} ${libro.titulo}`}
+        >
+          {progreso && !terminado ? 'Continuar' : terminado ? 'Leer de nuevo' : 'Leer'}
+        </Link>
+      </span>
     </li>
   )
 }

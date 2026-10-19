@@ -24,7 +24,9 @@ export function SeguirLeyendo({ libros, progresos }: { libros: LibroResumen[]; p
                 <Link to={`/libros/${libro._id}`} className={estilos.titulo}>
                   {libro.titulo}
                 </Link>
-                <span className={estilos.autor}>{libro.autor}</span>
+                <span className={estilos.autor} title={libro.autor}>
+                  {libro.autor}
+                </span>
                 <MedidorProgreso porcentaje={porcentaje} etiqueta={`${libro.titulo}: ${porcentaje}% leído`} className={estilos.medidor} />
                 <span className={estilos.pagina}>
                   Página {p.pagina} de {p.total} · {porcentaje}%
