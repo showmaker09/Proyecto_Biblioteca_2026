@@ -1,0 +1,42 @@
+.nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  max-width: var(--l-medida, 42rem);
+  margin: 0 auto;
+  padding: 1rem 1rem 0;
+}
+
+.boton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--l-borde);
+  border-radius: 8px;
+  color: inherit;
+  font-family: system-ui, sans-serif;
+  text-decoration: none;
+}
+
+a.boton:hover {
+  border-color: var(--l-texto);
+}
+
+.boton small {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.siguiente {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.apagado {
+  opacity: 0.4;
+}

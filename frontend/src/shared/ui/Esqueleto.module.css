@@ -1,0 +1,73 @@
+/*
+ * Las piezas usan --l-borde (tema del lector) y, si no existe, --borde (global):
+ * así el mismo esqueleto se ve bien en claro, en oscuro y fuera del lector.
+ */
+.pieza {
+  display: block;
+  max-width: 100%;
+  background: var(--l-borde, var(--borde));
+  animation: pulso 1.6s ease-in-out infinite;
+}
+
+.linea {
+  border-radius: 4px;
+}
+
+.bloque {
+  border-radius: 6px;
+}
+
+.circulo {
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+/* Si la carga es instantánea el esqueleto nunca llega a verse: aparece tras una breve espera. */
+.carga {
+  animation: aparecer 0.2s ease-out 0.12s both;
+}
+
+/* display: contents para que el maquetado (className del contenedor) afecte directo a los hijos */
+.contenido {
+  display: contents;
+}
+
+.soloLectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes pulso {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pieza,
+  .carga {
+    animation: none;
+  }
+}

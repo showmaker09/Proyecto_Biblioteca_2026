@@ -1,0 +1,47 @@
+.fin {
+  max-width: var(--l-medida, 42rem);
+  margin: 3rem auto 0;
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--l-borde);
+  border-radius: 10px;
+  font-family: system-ui, sans-serif;
+  text-align: center;
+}
+
+.fin h2 {
+  margin: 0 0 0.5rem;
+  font-family: var(--fuente-titulo);
+  font-size: 1.5rem;
+}
+
+.fin p {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.primario,
+.secundario {
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--l-texto);
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.primario {
+  background: var(--l-texto);
+  color: var(--l-fondo);
+}
+
+.secundario {
+  color: inherit;
+  border-color: var(--l-borde);
+}

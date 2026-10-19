@@ -1,0 +1,65 @@
+/* Los colores usan las variables del lector (--l-*) cuando existen, para verse bien también en oscuro. */
+.generico {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 42rem;
+}
+
+.tituloGenerico {
+  margin-bottom: 0.6rem;
+}
+
+.error {
+  max-width: 30rem;
+  margin: 3rem auto;
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--l-borde, var(--borde));
+  border-radius: 10px;
+  text-align: center;
+}
+
+.titulo {
+  margin: 0 0 0.6rem;
+  font-size: 1.35rem;
+}
+
+.detalle {
+  margin: 0 0 1.5rem;
+  opacity: 0.75;
+}
+
+.reintentar {
+  padding: 0.55rem 1.25rem;
+  border: 1px solid var(--l-texto, var(--acento));
+  border-radius: 6px;
+  background: var(--l-texto, var(--acento));
+  color: var(--l-fondo, var(--acento-texto));
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reintentar:hover {
+  opacity: 0.85;
+}
+
+.reintentar:focus-visible,
+.tecnico summary:focus-visible {
+  outline: 2px solid var(--l-texto, var(--acento));
+  outline-offset: 2px;
+}
+
+.tecnico {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.tecnico summary {
+  cursor: pointer;
+}
+
+.tecnico p {
+  margin: 0.5rem 0 0;
+  overflow-wrap: anywhere;
+}

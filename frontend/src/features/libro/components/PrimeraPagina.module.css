@@ -1,0 +1,40 @@
+.seccion {
+  margin-top: 3rem;
+}
+
+.seccion h2 {
+  margin: 0 0 1rem;
+}
+
+/* La hoja usa el tema claro del lector, así TextoPagina se ve igual que al leer */
+.hoja {
+  --l-fondo: #ffffff;
+  --l-texto: #111111;
+  --l-borde: #d9d9d9;
+  max-width: 44rem;
+  padding: 2rem clamp(1rem, 5vw, 3rem) 2.5rem;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--l-fondo);
+  color: var(--l-texto);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borde);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.esqueleto {
+  display: grid;
+  gap: 1.1rem;
+}

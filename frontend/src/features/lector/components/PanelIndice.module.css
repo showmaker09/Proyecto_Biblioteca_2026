@@ -1,0 +1,90 @@
+.seccion {
+  margin-top: 2rem;
+}
+
+.subtitulo {
+  margin: 0 0 0.75rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.lista {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.enlace {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.enlace:hover {
+  background: var(--l-borde);
+}
+
+.enlace[aria-current] {
+  outline: 1px solid var(--l-texto);
+  outline-offset: -1px;
+  font-weight: 600;
+}
+
+.titulo {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pagina {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+
+.marcador {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.quitar {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--l-borde);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.quitar:hover {
+  border-color: var(--l-texto);
+}
+
+.vacio {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  opacity: 0.7;
+}
+
+.esqueleto {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.5rem 0.75rem;
+}

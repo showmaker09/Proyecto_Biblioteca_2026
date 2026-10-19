@@ -1,0 +1,142 @@
+.cabecera {
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.cabecera h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.cabecera p {
+  margin: 0.3rem 0 0;
+  color: var(--texto-suave);
+}
+
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.buscador {
+  position: relative;
+  flex: 1 1 16rem;
+  max-width: 26rem;
+}
+
+.buscador input {
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 2.4rem 0 0.9rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+}
+
+.buscador input:focus {
+  border-color: var(--texto);
+  outline: none;
+}
+
+.buscador input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.limpiar {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--texto-suave);
+  font-size: 1.3rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.limpiar:hover {
+  background: var(--superficie-alt);
+  color: var(--texto);
+}
+
+.selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.selector select {
+  height: 2.5rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+}
+
+.resultados {
+  margin: 0 0 1rem;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.estanteria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 2.25rem 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.vacio {
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--borde);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.vacio h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+}
+
+.vacio p {
+  margin: 0 0 1.25rem;
+  color: var(--texto-suave);
+}
+
+.soloLectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .estanteria {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.75rem 1rem;
+  }
+
+  .buscador {
+    flex-basis: 100%;
+    max-width: none;
+  }
+}

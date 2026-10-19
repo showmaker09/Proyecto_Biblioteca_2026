@@ -1,0 +1,48 @@
+.lector {
+  min-height: 100vh;
+  background: var(--l-fondo);
+  color: var(--l-texto);
+}
+
+.claro {
+  --l-fondo: #ffffff;
+  --l-texto: #111111;
+  --l-borde: #d9d9d9;
+  color-scheme: light;
+}
+
+.oscuro {
+  --l-fondo: #000000;
+  --l-texto: #ffffff;
+  --l-borde: #3a3a3a;
+  color-scheme: dark;
+}
+
+/* Espacio para que la barra inferior fija no tape el final */
+.contenido {
+  padding-bottom: 7rem;
+}
+
+.texto {
+  max-width: var(--l-medida, 42rem);
+  margin: 0 auto;
+  padding: 2.5rem 1rem 1rem;
+  transition: opacity 0.15s ease;
+}
+
+/* Mientras llega una página que no estaba descargada se sigue viendo la anterior, atenuada */
+.cambiando {
+  opacity: 0.45;
+}
+
+.error {
+  max-width: 42rem;
+  margin: 3rem auto;
+  padding: 0 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .texto {
+    transition: none;
+  }
+}

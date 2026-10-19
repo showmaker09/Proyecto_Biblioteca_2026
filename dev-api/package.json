@@ -1,0 +1,13 @@
+{
+  "name": "dev-api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Servidor puente TEMPORAL y de solo lectura entre el frontend y MongoDB Atlas. Se descarta cuando exista el backend real.",
+  "scripts": {
+    "start": "node --env-file=../.env server.mjs"
+  },
+  "dependencies": {
+    "mongodb": "^6.20.0"
+  }
+}

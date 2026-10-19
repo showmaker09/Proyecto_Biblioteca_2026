@@ -1,0 +1,60 @@
+:root {
+  --fondo: #ffffff;
+  --superficie: #ffffff;
+  --superficie-alt: #f4f4f4;
+  --borde: #d9d9d9;
+  --texto: #111111;
+  --texto-suave: #6b6b6b;
+  --acento: #111111;
+  --acento-texto: #ffffff;
+  --fuente-titulo: Georgia, 'Times New Roman', serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+}
+
+h1,
+h2 {
+  font-family: var(--fuente-titulo);
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.boton {
+  display: inline-block;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--acento);
+  border-radius: 6px;
+  background: var(--acento);
+  color: var(--acento-texto);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.boton-secundario {
+  background: var(--superficie);
+  color: var(--texto);
+  border-color: var(--borde);
+}
+
+.boton:hover {
+  opacity: 0.85;
+}

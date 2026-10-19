@@ -1,0 +1,78 @@
+.seccion {
+  margin-bottom: 2.5rem;
+}
+
+.seccion h2 {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+}
+
+.lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tarjeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--superficie);
+}
+
+.tarjeta > :first-child {
+  --portada-ancho: 3.75rem;
+}
+
+.cuerpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.titulo {
+  overflow: hidden;
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.titulo:hover {
+  text-decoration: underline;
+}
+
+.autor,
+.pagina {
+  color: var(--texto-suave);
+  font-size: 0.82rem;
+}
+
+.medidor {
+  margin-top: 0.4rem;
+}
+
+.continuar {
+  flex-shrink: 0;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 420px) {
+  .tarjeta {
+    flex-wrap: wrap;
+  }
+
+  .continuar {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -1,0 +1,154 @@
+/*
+ * Portada plana (sin degradados). El tamaño de letra y los espacios se miden en cqw, es decir, como
+ * porcentaje del ancho de la propia portada, para que se vea igual de bien entre 80px y 260px.
+ * Para que ocupe el ancho de su contenedor: --portada-ancho: 100%.
+ */
+.portada {
+  display: block;
+  flex: none;
+  width: var(--portada-ancho, var(--ancho-base));
+  max-width: 100%;
+  aspect-ratio: 2 / 3;
+  container-type: inline-size;
+
+  --ancho-base: 10rem;
+  --lineas: 5;
+  --p-fondo: #ffffff;
+  --p-texto: #111111;
+  --p-trazo: #111111;
+  --p-lomo: #111111;
+  --p-lomo-ancho: 9cqw;
+}
+
+.portada[data-tamano='sm'] {
+  --ancho-base: 5rem;
+  --lineas: 4;
+}
+
+.portada[data-tamano='lg'] {
+  --ancho-base: 16.25rem;
+  --lineas: 6;
+}
+
+/* Blanca con lomo negro */
+.portada[data-variante='0'] {
+  --p-fondo: #ffffff;
+  --p-texto: #111111;
+  --p-trazo: #111111;
+  --p-lomo: #111111;
+}
+
+/* Negra con letra blanca */
+.portada[data-variante='1'] {
+  --p-fondo: #111111;
+  --p-texto: #ffffff;
+  --p-trazo: #111111;
+  --p-lomo: #4d4d4d;
+}
+
+/* Gris claro con doble filete */
+.portada[data-variante='2'] {
+  --p-fondo: #e8e8e8;
+  --p-texto: #111111;
+  --p-trazo: #111111;
+  --p-lomo: transparent;
+  --p-lomo-ancho: 1cqw;
+}
+
+/* Gris oscuro con letra blanca */
+.portada[data-variante='3'] {
+  --p-fondo: #3b3b3b;
+  --p-texto: #ffffff;
+  --p-trazo: #111111;
+  --p-lomo: #1f1f1f;
+}
+
+.cara {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4cqw;
+  width: 100%;
+  height: 100%;
+  padding: 11cqw 8cqw 9cqw calc(var(--p-lomo-ancho) + 7cqw);
+  overflow: hidden;
+  border: 1px solid var(--p-trazo);
+  border-radius: min(4px, 2.5cqw);
+  background: var(--p-fondo);
+  color: var(--p-texto);
+  text-align: center;
+}
+
+.cara::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--p-lomo-ancho);
+  background: var(--p-lomo);
+}
+
+.portada[data-variante='2'] .cara::after {
+  content: '';
+  position: absolute;
+  inset: 4cqw;
+  border: 1px solid var(--p-trazo);
+  pointer-events: none;
+}
+
+.cuerpo {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.titulo {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lineas);
+  line-clamp: var(--lineas);
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  font-family: var(--fuente-titulo, Georgia, serif);
+  font-size: clamp(0.5rem, 11cqw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.pie {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 3cqw;
+  width: 100%;
+}
+
+.regla {
+  width: 22cqw;
+  border-top: 1px solid currentColor;
+}
+
+.autor {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(0.5rem, 6.5cqw, 0.95rem);
+  letter-spacing: 0.03em;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/* En miniatura el autor no se lee: solo queda el título, centrado. */
+.portada[data-tamano='sm'] .pie {
+  display: none;
+}

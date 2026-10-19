@@ -1,0 +1,40 @@
+/* Mismas medidas que CatalogoPage.module.css y LibroEstanteria.module.css para que al llegar los datos no haya saltos */
+.estanteria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 2.25rem 1.5rem;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.portada {
+  margin-bottom: 0.6rem;
+}
+
+.boton {
+  margin-top: 0.4rem;
+}
+
+.tabla {
+  display: grid;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+@media (max-width: 480px) {
+  .estanteria {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.75rem 1rem;
+  }
+}

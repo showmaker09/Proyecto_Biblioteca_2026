@@ -1,0 +1,92 @@
+.contenedor {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  min-height: 100vh;
+}
+
+.lateral {
+  padding: 1.5rem 1rem;
+  border-right: 1px solid var(--borde);
+  background: var(--superficie-alt);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.marca strong,
+.marca small {
+  display: block;
+}
+
+.marca small {
+  color: var(--texto-suave);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 8px;
+  background: var(--acento);
+  color: var(--acento-texto);
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.menu a {
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--texto-suave);
+}
+
+.menu a:hover {
+  background: var(--borde);
+}
+
+.menu a.activo {
+  background: var(--acento);
+  color: var(--acento-texto);
+}
+
+.contenido {
+  min-width: 0;
+  padding: 2rem;
+}
+
+@media (max-width: 700px) {
+  .contenedor {
+    grid-template-columns: 1fr;
+  }
+
+  .lateral {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .marca {
+    margin-bottom: 0;
+  }
+
+  .contenido {
+    padding: 1rem;
+  }
+}

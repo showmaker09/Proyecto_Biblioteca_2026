@@ -1,0 +1,22 @@
+.grupo {
+  display: inline-flex;
+  padding: 0.2rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+}
+
+.grupo button {
+  padding: 0.4rem 0.9rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  cursor: pointer;
+}
+
+.grupo button.activo {
+  background: var(--acento);
+  color: var(--acento-texto);
+  font-weight: 600;
+}

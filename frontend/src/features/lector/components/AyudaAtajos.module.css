@@ -1,0 +1,38 @@
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.tabla th {
+  padding-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.tabla td {
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--l-borde);
+}
+
+.tabla td:first-child {
+  width: 6.5rem;
+  white-space: nowrap;
+}
+
+.tabla kbd {
+  display: inline-block;
+  min-width: 1.8rem;
+  margin-right: 0.3rem;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--l-borde);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  text-align: center;
+}

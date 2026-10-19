@@ -1,0 +1,95 @@
+.panel {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.grupo {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.grupo legend {
+  margin-bottom: 0.6rem;
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.opciones {
+  display: flex;
+  padding: 0.2rem;
+  border: 1px solid var(--l-borde);
+  border-radius: 8px;
+}
+
+.opcion {
+  flex: 1;
+  position: relative;
+}
+
+/* El radio real sigue en el DOM (teclado y lectores de pantalla); se ve la pastilla */
+.opcion input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.opcion span {
+  display: block;
+  padding: 0.5rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.opcion input:checked + span {
+  background: var(--l-texto);
+  color: var(--l-fondo);
+  font-weight: 600;
+}
+
+.opcion input:focus-visible + span {
+  outline: 2px solid var(--l-texto);
+  outline-offset: 2px;
+}
+
+.tamano {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.2rem;
+  border: 1px solid var(--l-borde);
+  border-radius: 8px;
+}
+
+.tamano button {
+  min-width: 3rem;
+  padding: 0.45rem 0.8rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tamano button:hover:not(:disabled) {
+  background: var(--l-borde);
+}
+
+.tamano button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tamano output {
+  font-variant-numeric: tabular-nums;
+}

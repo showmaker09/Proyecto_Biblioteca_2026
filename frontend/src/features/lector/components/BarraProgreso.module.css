@@ -1,0 +1,141 @@
+.barra {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  border-top: 1px solid var(--l-borde);
+  background: var(--l-fondo);
+  font-size: 0.85rem;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.oculta:not(:focus-within) {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.pista {
+  height: 3px;
+  background: var(--l-borde);
+}
+
+.relleno {
+  display: block;
+  height: 100%;
+  background: var(--l-texto);
+  transition: width 0.2s ease;
+}
+
+.contenido {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0.55rem 1rem;
+}
+
+.estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.porcentaje {
+  font-weight: 600;
+}
+
+.secundario {
+  opacity: 0.65;
+}
+
+.irA {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.irA label {
+  opacity: 0.75;
+}
+
+.irA input {
+  width: 5.5rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--l-borde);
+  border-radius: 6px;
+  background: var(--l-fondo);
+  color: inherit;
+  font: inherit;
+}
+
+.irA input[aria-invalid='true'] {
+  border-color: var(--l-texto);
+  border-style: dashed;
+}
+
+.irA button {
+  height: 2rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--l-texto);
+  border-radius: 6px;
+  background: var(--l-texto);
+  color: var(--l-fondo);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.irA button:disabled {
+  border-color: var(--l-borde);
+  background: transparent;
+  color: inherit;
+  opacity: 0.45;
+  cursor: default;
+}
+
+.error {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.4rem);
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--l-texto);
+  border-radius: 5px;
+  background: var(--l-fondo);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .secundario {
+    display: none;
+  }
+
+  .irA label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .irA input {
+    width: 4.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra,
+  .relleno {
+    transition: none;
+  }
+}
