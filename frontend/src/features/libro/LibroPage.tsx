@@ -4,7 +4,7 @@ import { porcentajeLeido, useProgresos } from '@/shared/lib/progresoLectura'
 import { useTituloDocumento } from '@/shared/lib/useTituloDocumento'
 import { Peticion } from '@/shared/ui/EstadoPeticion'
 import { MedidorProgreso } from '@/shared/ui/MedidorProgreso'
-import { Portada } from '@/shared/ui/Portada'
+import { LibroAbrible } from '@/shared/ui/LibroAbrible'
 import { LibroEsqueleto } from './components/LibroEsqueleto'
 import { ListaCapitulos } from './components/ListaCapitulos'
 import { PrimeraPagina } from './components/PrimeraPagina'
@@ -42,7 +42,7 @@ function Ficha({ libro }: { libro: LibroDetalle }) {
         <div>
           <div className={estilos.ficha}>
             <div className={estilos.portada}>
-              <Portada id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="lg" />
+              <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="lg" className={estilos.libroAbrible} />
             </div>
 
             <div className={estilos.datos}>

@@ -110,6 +110,23 @@
   padding: 0;
 }
 
+.vista {
+  animation: aparecer 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.masLibros {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0 1rem;
+}
+
 .vacio {
   padding: 3rem 1.5rem;
   border: 1px dashed var(--borde);
@@ -145,5 +162,11 @@
   .buscador {
     flex-basis: 100%;
     max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vista {
+    animation: none;
   }
 }

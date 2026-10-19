@@ -47,6 +47,9 @@
 
 .capitulos {
   display: grid;
+  overflow: hidden;
+  border: 1px solid var(--pizarra-200);
+  border-radius: 10px;
 }
 
 .capitulo {
@@ -54,8 +57,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 0.5rem;
-  border-bottom: 1px solid var(--borde);
+  padding: 1rem;
+}
+
+.capitulo + .capitulo {
+  border-top: 1px solid var(--pizarra-100);
 }
 
 @container libro (min-width: 86rem) {

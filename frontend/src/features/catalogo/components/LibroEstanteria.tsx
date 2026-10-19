@@ -1,22 +1,23 @@
+import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { minutosDeLectura, textoTiempoLectura } from '@/shared/lib/formatoLibro'
 import type { Progreso } from '@/shared/lib/progresoLectura'
 import { porcentajeLeido } from '@/shared/lib/progresoLectura'
 import { MedidorProgreso } from '@/shared/ui/MedidorProgreso'
-import { Portada } from '@/shared/ui/Portada'
+import { LibroAbrible } from '@/shared/ui/LibroAbrible'
 import type { LibroResumen } from '../types'
 import estilos from './LibroEstanteria.module.css'
 
-export function LibroEstanteria({ libro, progreso }: { libro: LibroResumen; progreso: Progreso | undefined }) {
+// memo: al llegar una tanda nueva solo se pintan los libros añadidos, no los que ya estaban.
+export const LibroEstanteria = memo(function LibroEstanteria({ libro, progreso }: { libro: LibroResumen; progreso: Progreso | undefined }) {
   const porcentaje = porcentajeLeido(progreso)
   const terminado = porcentaje === 100
 
   return (
     <li className={estilos.item}>
       <Link to={`/libros/${libro._id}`} className={estilos.enlace}>
-        <span className={estilos.portada}>
-          <Portada id={libro._id} titulo={libro.titulo} autor={libro.autor} />
-        </span>
+        {/* Al pasar el ratón la tapa gira sobre el lomo y las hojas se abren en abanico. */}
+        <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} className={estilos.libro} />
         <span className={estilos.titulo}>{libro.titulo}</span>
         <span className={estilos.autor}>{libro.autor}</span>
         <span className={estilos.meta}>
@@ -42,4 +43,4 @@ export function LibroEstanteria({ libro, progreso }: { libro: LibroResumen; prog
       </span>
     </li>
   )
-}
+})

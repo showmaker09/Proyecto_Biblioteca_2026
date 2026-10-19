@@ -13,7 +13,7 @@ interface Props {
 
 export function SelectorVista({ vista, onCambio }: Props) {
   return (
-    <div className={estilos.grupo} role="group" aria-label="Tipo de vista">
+    <div className={estilos.grupo} role="group" aria-label="Tipo de vista" data-vista={vista}>
       {OPCIONES.map((o) => (
         <button
           key={o.valor}

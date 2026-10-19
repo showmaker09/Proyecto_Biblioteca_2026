@@ -7,6 +7,7 @@ import { SeguirLeyendo } from './components/SeguirLeyendo'
 import { SelectorVista } from './components/SelectorVista'
 import { TablaLibros } from './components/TablaLibros'
 import { useCatalogo } from './hooks/useCatalogo'
+import { useListaIncremental } from './hooks/useListaIncremental'
 import type { Orden } from './hooks/useCatalogo'
 import estilos from './CatalogoPage.module.css'
 
@@ -20,6 +21,8 @@ const ORDENES: { valor: Orden; texto: string }[] = [
 export function CatalogoPage() {
   const c = useCatalogo()
   useTituloDocumento('Biblioteca')
+  const lista = useListaIncremental(c.libros.length, [c.libros, c.vista])
+  const visibles = c.libros.slice(0, lista.cantidad)
 
   const filtrando = c.busqueda.trim() !== '' || c.idioma !== 'todos'
   const limpiar = () => {
@@ -118,14 +121,24 @@ export function CatalogoPage() {
                   {c.libros.length} de {c.total} libros
                 </p>
               )}
-              {c.vista === 'tabla' ? (
-                <TablaLibros libros={c.libros} progresos={c.progresos} />
-              ) : (
-                <ul className={estilos.estanteria}>
-                  {c.libros.map((libro) => (
-                    <LibroEstanteria key={libro._id} libro={libro} progreso={c.progresos[libro._id]} />
-                  ))}
-                </ul>
+              {/* key: al cambiar de vista el contenido nuevo entra con una animación en lugar de aparecer de golpe. */}
+              <div key={c.vista} className={estilos.vista}>
+                {c.vista === 'tabla' ? (
+                  <TablaLibros libros={visibles} progresos={c.progresos} />
+                ) : (
+                  <ul className={estilos.estanteria}>
+                    {visibles.map((libro) => (
+                      <LibroEstanteria key={libro._id} libro={libro} progreso={c.progresos[libro._id]} />
+                    ))}
+                  </ul>
+                )}
+              </div>
+              {lista.quedan > 0 && (
+                <div className={estilos.masLibros}>
+                  <button type="button" ref={lista.marcador} className="boton boton-secundario" onClick={lista.mostrarMas}>
+                    Mostrar más libros ({lista.quedan} restantes)
+                  </button>
+                </div>
               )}
             </>
           )

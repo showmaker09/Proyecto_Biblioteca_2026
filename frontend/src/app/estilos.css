@@ -7,6 +7,20 @@
   --texto-suave: #6b6b6b;
   --acento: #111111;
   --acento-texto: #ffffff;
+  /* Azul muy claro: solo para lo que marca tu lectura (Continuar leyendo, capítulo en curso, vista elegida). */
+  --azul-rgb: 37 99 235;
+  --azul-50: #f5f8ff;
+  --azul-200: #dde6fb;
+  /* Grises pizarra (gris con un toque mínimo de azul) para superficies, bordes y etiquetas. */
+  --pizarra-50: #f8fafc;
+  --pizarra-100: #f1f5f9;
+  --pizarra-200: #e2e8f0;
+  --pizarra-500: #64748b;
+  --pizarra-600: #475569;
+  /* Profundidad: sombras suaves en dos capas con tinte pizarra (tarjeta en reposo, al pasar el cursor, hoja de papel). */
+  --sombra-tarjeta: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 12px -2px rgb(15 23 42 / 0.06);
+  --sombra-alzada: 0 2px 4px rgb(15 23 42 / 0.05), 0 12px 24px -6px rgb(15 23 42 / 0.12);
+  --sombra-papel: 0 1px 3px rgb(15 23 42 / 0.05), 0 20px 40px -18px rgb(15 23 42 / 0.22);
   --fuente-titulo: Georgia, 'Times New Roman', serif;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--texto);

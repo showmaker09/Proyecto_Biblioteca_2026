@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import type { MapaProgresos } from '@/shared/lib/progresoLectura'
 import { porcentajeLeido } from '@/shared/lib/progresoLectura'
 import { MedidorProgreso } from '@/shared/ui/MedidorProgreso'
-import { Portada } from '@/shared/ui/Portada'
+import { LibroAbrible } from '@/shared/ui/LibroAbrible'
 import type { LibroResumen } from '../types'
 import estilos from './SeguirLeyendo.module.css'
 
@@ -19,7 +19,7 @@ export function SeguirLeyendo({ libros, progresos }: { libros: LibroResumen[]; p
           const porcentaje = porcentajeLeido(p)
           return (
             <li key={libro._id} className={estilos.tarjeta}>
-              <Portada id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="sm" />
+              <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="sm" className={estilos.libro} />
               <div className={estilos.cuerpo}>
                 <Link to={`/libros/${libro._id}`} className={estilos.titulo}>
                   {libro.titulo}

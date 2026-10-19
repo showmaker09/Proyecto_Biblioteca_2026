@@ -19,9 +19,11 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 2rem clamp(1rem, 5vw, 3rem) 2.5rem;
-  border: 1px solid var(--borde);
+  /* La hoja se queda blanca como el papel; la sombra más honda la levanta sobre la ficha. */
+  border: 1px solid var(--pizarra-200);
   border-radius: 10px;
   background: var(--l-fondo);
+  box-shadow: var(--sombra-papel);
   color: var(--l-texto);
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 18px;

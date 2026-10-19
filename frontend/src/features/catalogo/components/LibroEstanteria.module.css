@@ -17,17 +17,22 @@
   text-decoration: none;
 }
 
-.portada {
+.libro {
   --portada-ancho: 100%;
-  display: block;
   margin-bottom: 0.85rem;
-  border-radius: 4px;
   transition: transform 0.2s ease;
 }
 
-.enlace:hover .portada,
-.enlace:focus-visible .portada {
+.enlace:hover .libro,
+.enlace:focus-visible .libro {
   transform: translateY(-3px);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .enlace:hover .libro,
+  .enlace:focus-visible .libro {
+    --apertura: 1;
+  }
 }
 
 .enlace:focus-visible {
@@ -108,7 +113,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .portada {
+  .libro {
     transition: none;
   }
 }

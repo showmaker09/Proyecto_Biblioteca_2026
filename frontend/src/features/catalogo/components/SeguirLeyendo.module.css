@@ -22,13 +22,33 @@
   align-items: center;
   gap: 1rem;
   padding: 0.9rem;
-  border: 1px solid var(--borde);
+  /* Azul muy claro (mismo tono que el selector de vista): destaca «Continuar leyendo» sobre el catálogo blanco. */
+  border: 1px solid var(--azul-200);
   border-radius: 10px;
-  background: var(--superficie);
+  background: var(--azul-50);
+  box-shadow: var(--sombra-tarjeta);
+  transition: box-shadow 0.25s ease;
 }
 
-.tarjeta > :first-child {
+/* Libro ya entreabierto y un poco ladeado: se está leyendo. Al pasar por la tarjeta se abre algo más. */
+.libro {
   --portada-ancho: 3.75rem;
+  --apertura: 0.7;
+  flex: none;
+  margin-right: 0.35rem;
+  transform: rotate(-5deg);
+  transition: transform 0.35s cubic-bezier(0.3, 0.7, 0.3, 1.15);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .tarjeta:hover {
+    box-shadow: var(--sombra-alzada);
+  }
+
+  .tarjeta:hover .libro {
+    --apertura: 1;
+    transform: rotate(-2deg);
+  }
 }
 
 .cuerpo {

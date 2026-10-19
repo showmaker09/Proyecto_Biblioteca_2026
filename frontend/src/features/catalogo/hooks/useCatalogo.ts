@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 import type { MapaProgresos } from '@/shared/lib/progresoLectura'
 import { useProgresos } from '@/shared/lib/progresoLectura'
 import { usePeticion } from '@/shared/lib/usePeticion'
@@ -55,6 +55,8 @@ export function useCatalogo() {
   const peticion = usePeticion(obtenerLibros, [])
   const progresos = useProgresos()
   const [busqueda, setBusqueda] = useState('')
+  // Con miles de libros, filtrar en cada tecla puede trabarse: el campo responde al momento y la lista llega después.
+  const busquedaDiferida = useDeferredValue(busqueda)
   const [idioma, setIdioma] = useState('todos')
   const [preferencias, setPreferencias] = useState(leerPreferencias)
 
@@ -62,14 +64,17 @@ export function useCatalogo() {
 
   const idiomas = useMemo(() => [...new Set((todos ?? []).map((l) => l.idioma))].sort(), [todos])
 
+  // Título y autor ya normalizados, una sola vez por carga y no en cada búsqueda.
+  const textoBuscable = useMemo(() => (todos ?? []).map((l) => normalizar(`${l.titulo} ${l.autor}`)), [todos])
+
   const libros = useMemo(() => {
     if (!todos) return []
-    const termino = normalizar(busqueda.trim())
+    const termino = normalizar(busquedaDiferida.trim())
     const filtrados = todos.filter(
-      (l) => (idioma === 'todos' || l.idioma === idioma) && (!termino || normalizar(`${l.titulo} ${l.autor}`).includes(termino)),
+      (l, i) => (idioma === 'todos' || l.idioma === idioma) && (!termino || textoBuscable[i].includes(termino)),
     )
     return ordenarLibros(filtrados, preferencias.orden, progresos)
-  }, [todos, busqueda, idioma, preferencias.orden, progresos])
+  }, [todos, textoBuscable, busquedaDiferida, idioma, preferencias.orden, progresos])
 
   /** Libros empezados y no terminados, del más reciente al más antiguo. */
   const enCurso = useMemo(

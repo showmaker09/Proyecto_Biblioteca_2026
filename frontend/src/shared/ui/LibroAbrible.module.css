@@ -1,0 +1,75 @@
+/*
+ * Sin --apertura definida se queda cerrado (el valor por defecto va en cada var(), no aquí: así la clase de
+ * quien lo usa no compite con esta por el orden de las hojas de estilo).
+ * El ancho sale de --portada-ancho (como en Portada); por dentro la portada ocupa el 100% de la tapa.
+ * Todas las capas giran sobre el lomo (borde izquierdo). Ángulos con --apertura = 1:
+ * tapa -34°, hojas -6° a -24° (la 4 es la más cercana a la tapa).
+ */
+.libro {
+  --ancho-base: 10rem;
+  position: relative;
+  display: block;
+  width: var(--portada-ancho, var(--ancho-base));
+  max-width: 100%;
+  perspective: 1100px;
+  perspective-origin: 20% 50%;
+}
+
+.libro[data-tamano='sm'] {
+  --ancho-base: 5rem;
+  perspective: 420px;
+}
+
+.libro[data-tamano='lg'] {
+  --ancho-base: 16.25rem;
+  perspective: 1600px;
+}
+
+/* Bloque de páginas: a la derecha, el canto de muchas hojas apretadas. */
+.paginas,
+.hoja {
+  position: absolute;
+  border-radius: 0 3px 3px 0;
+  background: #ffffff;
+}
+
+.paginas {
+  inset: 1.5% 0 1.5% 2%;
+  border: 1px solid #111111;
+  background:
+    repeating-linear-gradient(90deg, #ffffff 0 1.5px, #c4c4c4 1.5px 2.5px) right / 12% 100% no-repeat,
+    #ffffff;
+}
+
+/* Hojas sueltas con renglones grises, para que parezcan páginas con texto. */
+.hoja {
+  inset: 1% 1% 1% 2%;
+  border: 1px solid #9a9a9a;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 5px, #e2e2e2 5px 6px) 62% 52% / 62% 66% no-repeat,
+    #ffffff;
+  transform: rotateY(calc(var(--apertura, 0) * var(--n) * -6deg));
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.3, 0.7, 0.3, 1.15);
+  transition-delay: calc((4 - var(--n)) * 30ms + 30ms);
+}
+
+.tapa {
+  --portada-ancho: 100%;
+  position: relative;
+  display: block;
+  border-radius: 4px;
+  box-shadow: 8px 6px 18px -8px rgb(0 0 0 / calc(var(--apertura, 0) * 0.45));
+  transform: rotateY(calc(var(--apertura, 0) * -34deg));
+  transform-origin: left center;
+  transition:
+    transform 0.45s cubic-bezier(0.3, 0.7, 0.3, 1.15),
+    box-shadow 0.45s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hoja,
+  .tapa {
+    transition: none;
+  }
+}
