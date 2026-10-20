@@ -4,6 +4,7 @@
  * Para que ocupe el ancho de su contenedor: --portada-ancho: 100%.
  */
 .portada {
+  position: relative;
   display: block;
   flex: none;
   width: var(--portada-ancho, var(--ancho-base));
@@ -151,4 +152,33 @@
 /* En miniatura el autor no se lee: solo queda el título, centrado. */
 .portada[data-tamano='sm'] .pie {
   display: none;
+}
+
+/*
+ * Imagen real encima de la portada de texto, con el mismo borde. Se recorta para llenar el 2:3 (las
+ * escaneadas suelen ser 3:4) y el fondo blanco tapa el texto si la imagen tiene partes transparentes.
+ * Mientras carga es invisible: se ve la de texto y luego la imagen aparece sin saltos de tamaño.
+ */
+.imagen {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--p-trazo);
+  border-radius: min(4px, 2.5cqw);
+  background: #ffffff;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.portada[data-imagen='lista'] .imagen {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .imagen {
+    transition: none;
+  }
 }

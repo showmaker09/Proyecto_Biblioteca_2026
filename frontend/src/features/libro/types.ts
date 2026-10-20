@@ -11,6 +11,8 @@ export interface LibroDetalle {
   autor: string
   idioma: string
   temas: string[]
+  /** Enlace https a la imagen de la portada. Falta si no hay. */
+  portada?: string | null
   capitulos: Capitulo[]
   total_paginas: number
   caracteres_totales: number

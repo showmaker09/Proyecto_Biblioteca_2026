@@ -20,6 +20,7 @@ const RESUMEN = {
   autor: 1,
   idioma: 1,
   temas: 1,
+  portada: 1,
   caracteres_totales: 1,
   total_paginas: { $size: { $ifNull: ['$paginas', []] } },
 }

@@ -134,7 +134,7 @@ Todo es local a cada navegador. Si en el futuro hay cuentas de usuario, esto deb
 * **Tema del lector:** el lector tiene su propio tema con las variables `--l-*` en `LectorPage.module.css`. `TextoPagina` solo usa esas variables y `em`, así que respeta el tema y el tamaño de letra de quien lo contiene. La vista de la primera página en la ficha usa el tema claro.
 * **Carga:** cada pantalla tiene un esqueleto con la forma real del contenido (cabecera incluida). Pulsa con opacidad, sin brillo, y se queda quieto con `prefers-reduced-motion`.
 * **Errores:** los errores de red muestran un mensaje claro y un botón "Reintentar".
-* **Portadas:** se generan con CSS (`shared/ui/Portada.tsx`) porque los datos no traen imagen.
+* **Portadas:** si el libro trae `portada` (enlace https a una imagen externa; no se guarda en la base), `shared/ui/Portada.tsx` la pinta encima de la portada generada con CSS y aparece al cargar. Sin enlace, con uno que no es https o si la imagen no carga, queda la generada con título y autor. La animación de apertura (`LibroAbrible`) es la misma en los dos casos.
 
 ## Contrato de API
 
@@ -142,7 +142,7 @@ El documento de Mongo trae las páginas embebidas y pesa mucho (un libro complet
 
 | Endpoint | Respuesta |
 |---|---|
-| `GET /libros?desde=0&orden=titulo&q=&idioma=` | `{ libros, total, siguiente }`: como mucho **20** resúmenes `{ _id, titulo, autor, idioma, temas, total_paginas, caracteres_totales }` (sin `capitulos` ni `paginas`), cuántos coinciden en total y el `desde` de la siguiente tanda (`null` si no quedan) |
+| `GET /libros?desde=0&orden=titulo&q=&idioma=` | `{ libros, total, siguiente }`: como mucho **20** resúmenes `{ _id, titulo, autor, idioma, temas, portada?, total_paginas, caracteres_totales }` (sin `capitulos` ni `paginas`), cuántos coinciden en total y el `desde` de la siguiente tanda (`null` si no quedan) |
 | `GET /libros?id=a&id=b` | Lo mismo, solo con esos libros (como mucho 20; los que no existen se omiten). Lo usa «Continuar leyendo» |
 | `GET /idiomas` | `["es", …]`: idiomas presentes, para el filtro |
 | `GET /libros/:id` | Resumen + `capitulos: [{ numero, titulo, pagina_inicio }]` (sin `paginas`) |

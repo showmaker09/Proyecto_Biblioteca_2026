@@ -5,6 +5,8 @@ export interface LibroResumen {
   autor: string
   idioma: string
   temas: string[]
+  /** Enlace https a la imagen de la portada (no se guarda la imagen, solo el enlace). Falta si no hay. */
+  portada?: string | null
   total_paginas: number
   caracteres_totales: number
 }

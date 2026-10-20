@@ -17,7 +17,7 @@ export const LibroEstanteria = memo(function LibroEstanteria({ libro, progreso }
     <li className={estilos.item}>
       <Link to={`/libros/${libro._id}`} className={estilos.enlace}>
         {/* Al pasar el ratón la tapa gira sobre el lomo y las hojas se abren en abanico. */}
-        <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} className={estilos.libro} />
+        <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} imagen={libro.portada} className={estilos.libro} />
         <span className={estilos.titulo}>{libro.titulo}</span>
         <span className={estilos.autor}>{libro.autor}</span>
         <span className={estilos.meta}>

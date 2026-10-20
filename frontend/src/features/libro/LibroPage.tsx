@@ -39,7 +39,7 @@ function Ficha({ libro }: { libro: LibroDetalle }) {
         <div>
           <div className={estilos.ficha}>
             <div className={estilos.portada}>
-              <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="lg" className={estilos.libroAbrible} />
+              <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="lg" imagen={libro.portada} className={estilos.libroAbrible} />
             </div>
 
             <div className={estilos.datos}>

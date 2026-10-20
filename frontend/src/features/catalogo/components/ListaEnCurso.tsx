@@ -33,7 +33,7 @@ export function ListaEnCurso({ libros, progresos, esqueletos = 0, unaFila = fals
         const porcentaje = porcentajeLeido(p)
         return (
           <li key={libro._id} className={estilos.tarjeta}>
-            <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="sm" className={estilos.libro} />
+            <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="sm" imagen={libro.portada} className={estilos.libro} />
             <div className={estilos.cuerpo}>
               <Link to={`/libros/${libro._id}`} className={estilos.titulo}>
                 {libro.titulo}

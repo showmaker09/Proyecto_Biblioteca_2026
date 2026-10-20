@@ -55,6 +55,7 @@ Contiene los datos generales del libro y su arreglo de capítulos. Los campos co
   "autor": "Vega, Lope de",
   "idioma": "es",
   "temas": ["Spanish drama -- Classical period, 1500-1700"],
+  "portada": "https://www.gutenberg.org/cache/epub/60198/pg60198.cover.medium.jpg",
   "capitulos": [
     { "numero": 1, "titulo": "ACTO PRIMERO", "pagina_inicio": 3 },
     { "numero": 2, "titulo": "ACTO SEGUNDO", "pagina_inicio": 15 }
@@ -63,6 +64,8 @@ Contiene los datos generales del libro y su arreglo de capítulos. Los campos co
 ```
 
 Si un libro no tiene capítulos identificables, `capitulos` puede ir como arreglo vacío (`[]`).
+
+`portada` es opcional: un enlace `https://` a la imagen de la portada (de Gutenberg o de cualquier otro sitio). Solo se guarda el enlace, no la imagen. Si no hay portada, simplemente no se pone el campo y la web genera una con el título y el autor. El enlace debe apuntar directo a la imagen (que al abrirlo en el navegador se vea solo la imagen), no a una página que la contiene.
 
 ### 2.2 Lo que el script agrega automáticamente
 
@@ -153,6 +156,7 @@ python preparar_libros.py --salida ./Bulk_Upload_Texto_Test 60198:001_fuente_ove
 
 **Qué hace por cada libro:**
 * Consulta la API Gutendex para obtener título, autor, idioma y temas.
+* Guarda el enlace a la portada si el libro tiene una real. Las que Gutenberg genera sola (dibujos geométricos de colores) se descartan y la web dibuja una con el título.
 * Rechaza cualquier libro que tenga derechos de autor (`copyright`).
 * Descarga el texto en UTF-8 y recorta la licencia del inicio y del final.
 * Lo divide en páginas de unas 300 palabras, cortando entre párrafos.
@@ -160,6 +164,17 @@ python preparar_libros.py --salida ./Bulk_Upload_Texto_Test 60198:001_fuente_ove
 * Espera unos segundos entre libros y reintenta si el servidor está ocupado.
 
 Después de preparar los libros, revísalos con `pipeline_local.py` antes de subirlos con `pipeline_mongo.py`.
+
+### Portadas de libros que ya están en Atlas
+
+Los libros subidos antes de que existiera el campo `portada` no lo tienen. `agregar_portadas.py` los busca en el catálogo de Gutenberg por título, autor e idioma y les escribe **solo** `portada` (no vuelve a subir las páginas). Sin `--aplicar` únicamente muestra lo que haría:
+
+```bash
+python agregar_portadas.py            # simulación
+python agregar_portadas.py --aplicar  # escribe en Atlas
+```
+
+Si un título tiene varias ediciones en Gutenberg, el script no adivina: indica cuál es con pares `carpeta:id_gutenberg`, por ejemplo `python agregar_portadas.py --aplicar 027_platero_y_yo:9980`. Solo toca libros sin `portada`, así que se puede repetir sin riesgo.
 
 
 ## create by Octavius

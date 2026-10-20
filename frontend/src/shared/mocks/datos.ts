@@ -7,6 +7,7 @@ export interface DocumentoLibro {
   autor: string
   idioma: string
   temas: string[]
+  portada?: string
   capitulos: { numero: number; titulo: string; pagina_inicio: number }[]
   paginas: { numero_pagina: number; texto_completo: string; conteo_palabras: number }[]
   caracteres_totales: number
@@ -42,6 +43,7 @@ export const LIBROS: DocumentoLibro[] = [
       autor: 'Vega, Lope de',
       idioma: 'es',
       temas: ['Spanish drama -- Classical period, 1500-1700'],
+      portada: 'https://www.gutenberg.org/cache/epub/60198/pg60198.cover.medium.jpg',
       capitulos: [
         { numero: 1, titulo: 'ACTO PRIMERO', pagina_inicio: 1 },
         { numero: 2, titulo: 'ACTO SEGUNDO', pagina_inicio: 4 },
@@ -57,6 +59,7 @@ export const LIBROS: DocumentoLibro[] = [
       autor: 'Fernández de Moratín, Leandro',
       idioma: 'es',
       temas: ['Spanish drama -- 18th century'],
+      portada: 'https://www.gutenberg.org/cache/epub/50027/pg50027.cover.medium.jpg',
       capitulos: [
         { numero: 1, titulo: 'ACTO PRIMERO', pagina_inicio: 1 },
         { numero: 2, titulo: 'ACTO SEGUNDO', pagina_inicio: 3 },
@@ -71,6 +74,7 @@ export const LIBROS: DocumentoLibro[] = [
       autor: 'Saavedra, Ángel de',
       idioma: 'es',
       temas: ['Spanish drama -- Romanticism'],
+      // Sin portada a propósito: así en desarrollo se ve también la portada de texto.
       capitulos: [],
     },
     [1, 2, 3].map(parrafo),

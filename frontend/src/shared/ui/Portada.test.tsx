@@ -72,9 +72,67 @@ describe('Portada', () => {
   })
 
   it('solo usa elementos en línea, para poder ir dentro de enlaces y botones', () => {
+    const etiquetasDe = (portada: HTMLElement | null) => new Set([...(portada?.querySelectorAll('*') ?? [])].map((nodo) => nodo.tagName))
     const portada = pintar({ id: 'x', titulo: 'T', autor: 'A' })
-    const etiquetas = new Set([...(portada?.querySelectorAll('*') ?? [])].map((nodo) => nodo.tagName))
     expect(portada?.tagName).toBe('SPAN')
-    expect([...etiquetas]).toEqual(['SPAN'])
+    expect([...etiquetasDe(portada)]).toEqual(['SPAN'])
+    expect([...etiquetasDe(pintar({ id: 'x', titulo: 'T', autor: 'A', imagen: URL_IMAGEN }))].sort()).toEqual(['IMG', 'SPAN'])
+  })
+
+  describe('con imagen', () => {
+    const imagenDe = (portada: HTMLElement | null) => portada?.querySelector('img') ?? null
+    const disparar = (img: HTMLImageElement | null, evento: 'load' | 'error') => act(() => img?.dispatchEvent(new Event(evento)))
+
+    it('sin imagen no pinta <img> ni marca data-imagen', () => {
+      for (const imagen of [undefined, null, '']) {
+        const portada = pintar({ id: 'x', titulo: 'T', autor: 'A', imagen })
+        expect(imagenDe(portada)).toBeNull()
+        expect(portada?.dataset.imagen).toBeUndefined()
+      }
+    })
+
+    it('pinta la imagen encima de la de texto, decorativa, diferida y sin Referer', () => {
+      const portada = pintar({ id: 'x', titulo: 'Fuente Ovejuna', autor: 'Vega', imagen: URL_IMAGEN })
+      const img = imagenDe(portada)
+      expect(img?.getAttribute('src')).toBe(URL_IMAGEN)
+      expect(img?.getAttribute('alt')).toBe('')
+      expect(img?.getAttribute('loading')).toBe('lazy')
+      expect(img?.getAttribute('referrerpolicy')).toBe('no-referrer')
+      expect(portada?.getAttribute('aria-label')).toBe('Portada de Fuente Ovejuna')
+      expect(portada?.textContent).toContain('Fuente Ovejuna')
+    })
+
+    it('pasa de «cargando» a «lista» cuando la imagen carga', () => {
+      const portada = pintar({ id: 'x', titulo: 'T', autor: 'A', imagen: URL_IMAGEN })
+      expect(portada?.dataset.imagen).toBe('cargando')
+      disparar(imagenDe(portada), 'load')
+      expect(portada?.dataset.imagen).toBe('lista')
+    })
+
+    it('si la imagen falla, la quita y queda la portada de texto', () => {
+      const portada = pintar({ id: 'x', titulo: 'Fuente Ovejuna', autor: 'Vega', imagen: URL_IMAGEN })
+      disparar(imagenDe(portada), 'error')
+      expect(imagenDe(portada)).toBeNull()
+      expect(portada?.dataset.imagen).toBeUndefined()
+      expect(portada?.textContent).toContain('Fuente Ovejuna')
+    })
+
+    it('si cambia el enlace después de un fallo, vuelve a intentarlo', () => {
+      disparar(imagenDe(pintar({ id: 'x', titulo: 'T', autor: 'A', imagen: URL_IMAGEN })), 'error')
+      const otra = 'https://covers.example.org/otra.jpg'
+      const portada = pintar({ id: 'x', titulo: 'T', autor: 'A', imagen: otra })
+      expect(imagenDe(portada)?.getAttribute('src')).toBe(otra)
+      expect(portada?.dataset.imagen).toBe('cargando')
+    })
+
+    it('ignora enlaces que no son https', () => {
+      for (const imagen of ['http://ejemplo.com/a.jpg', 'javascript:alert(1)', 'data:image/png;base64,AAAA', 'no es un enlace', '/relativa.jpg']) {
+        const portada = pintar({ id: 'x', titulo: 'T', autor: 'A', imagen })
+        expect(imagenDe(portada)).toBeNull()
+        expect(portada?.dataset.imagen).toBeUndefined()
+      }
+    })
   })
 })
+
+const URL_IMAGEN = 'https://www.gutenberg.org/cache/epub/60198/pg60198.cover.medium.jpg'

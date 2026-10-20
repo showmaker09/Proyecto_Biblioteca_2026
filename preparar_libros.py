@@ -4,6 +4,7 @@ import sys
 import json
 import time
 import argparse
+import urllib.error
 import urllib.request
 
 # Solo usa la libreria estandar de Python (no hace falta instalar nada extra)
@@ -11,6 +12,9 @@ import urllib.request
 PALABRAS_POR_PAGINA = 300
 PAUSA_SEGUNDOS = 1.5  # pausa entre descargas para no saturar a Gutenberg
 USER_AGENT = "Proyecto_Biblioteca_2026 (practica escolar)"
+URL_PORTADA = "https://www.gutenberg.org/cache/epub/{id}/pg{id}.cover.medium.jpg"
+# Cuando un libro no tiene portada, Gutenberg genera una con dibujos geometricos y siempre mide 200x300.
+MEDIDAS_PORTADA_GENERADA = (200, 300)
 
 # Encabezado de capitulo: palabra clave + una sola palabra, sin numero de pagina al final.
 # Asi se ignoran las lineas del indice ("Acto primero      13") y las de escena.
@@ -32,6 +36,44 @@ def descargar(url, intentos=4):
             time.sleep(3 * intento)  # espera mas en cada reintento
 
 
+def consultar(url, metodo="GET"):
+    """Como descargar(), pero sin reintentos y devuelve None si el archivo no existe (404)."""
+    peticion = urllib.request.Request(url, method=metodo, headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(peticion, timeout=60) as respuesta:
+            return respuesta.read()
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            return None
+        raise
+
+
+def medidas_jpeg(datos):
+    """(ancho, alto) leidos de la cabecera del JPEG, o None si no es un JPEG."""
+    if datos[:2] != b"\xff\xd8":
+        return None
+    i = 2
+    while i + 9 <= len(datos) and datos[i] == 0xFF:
+        marca = datos[i + 1]
+        if 0xC0 <= marca <= 0xCF and marca not in (0xC4, 0xC8, 0xCC):
+            return int.from_bytes(datos[i + 7:i + 9], "big"), int.from_bytes(datos[i + 5:i + 7], "big")
+        i += 2 + int.from_bytes(datos[i + 2:i + 4], "big")
+    return None
+
+
+def portada_real(id_libro):
+    """Enlace a la portada del libro, o None si Gutenberg solo tiene la generada automaticamente."""
+    url = URL_PORTADA.format(id=id_libro)
+    datos = consultar(url)
+    medidas = medidas_jpeg(datos) if datos else None
+    if medidas is None:
+        return None
+    if medidas != MEDIDAS_PORTADA_GENERADA:
+        return url
+    # Una escaneada tambien puede medir 200x300: entonces cuenta si el libro trae su portada en la edicion HTML.
+    return url if consultar(f"https://www.gutenberg.org/cache/epub/{id_libro}/images/cover.jpg", "HEAD") is not None else None
+
+
 def obtener_metadatos(id_libro):
     datos = json.loads(descargar(f"https://gutendex.com/books/{id_libro}/").decode("utf-8"))
     if datos.get("copyright"):
@@ -45,6 +87,15 @@ def obtener_metadatos(id_libro):
         "idioma": datos["languages"][0],
         "temas": datos.get("subjects", [])[:5],
     }
+    # Solo se guarda el enlace a la portada (unos 70 bytes), no la imagen: no ocupa espacio en la base.
+    # Las portadas generadas por Gutenberg no se guardan: para esos libros la web dibuja una con el titulo.
+    try:
+        url_portada = portada_real(id_libro)
+    except Exception as error:
+        url_portada = None
+        print(f"Aviso: no se pudo comprobar la portada del libro {id_libro} ({error}); se deja sin portada.")
+    if url_portada:
+        metadatos["portada"] = url_portada
     return metadatos, url_texto
 
 
