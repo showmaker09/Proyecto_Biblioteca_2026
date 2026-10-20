@@ -8,12 +8,13 @@ interface Props {
   /** Minutos de esta página y del resto del libro; null si aún no se sabe. */
   minutosPagina: number | null
   restante: string | null
+  enfoque: boolean
   oculta: boolean
   onIr: (pagina: number) => void
   refIrA: Ref<HTMLInputElement>
 }
 
-export function BarraProgreso({ actual, total, minutosPagina, restante, oculta, onIr, refIrA }: Props) {
+export function BarraProgreso({ actual, total, minutosPagina, restante, enfoque, oculta, onIr, refIrA }: Props) {
   const [valor, setValor] = useState('')
   const porcentaje = total > 0 ? Math.round((actual / total) * 100) : 0
   const destino = Number(valor)
@@ -27,7 +28,7 @@ export function BarraProgreso({ actual, total, minutosPagina, restante, oculta, 
   }
 
   return (
-    <footer className={`${estilos.barra} ${oculta ? estilos.oculta : ''}`}>
+    <footer className={`${estilos.barra} ${enfoque ? estilos.cristal : ''} ${oculta ? estilos.oculta : ''}`}>
       <div
         className={estilos.pista}
         role="progressbar"

@@ -8,3 +8,14 @@ export interface LibroResumen {
   total_paginas: number
   caracteres_totales: number
 }
+
+/** GET /libros: una tanda de como mucho 20 libros, cuántos coinciden en total y desde dónde pedir la siguiente. */
+export interface PaginaLibros {
+  libros: LibroResumen[]
+  total: number
+  /** Valor de `?desde=` para la siguiente tanda, o `null` si ya no quedan. */
+  siguiente: number | null
+}
+
+/** Órdenes que entiende la API. */
+export type Orden = 'titulo' | 'autor' | 'largos'

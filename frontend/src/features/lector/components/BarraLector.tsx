@@ -29,7 +29,7 @@ function Boton({ icono, texto, tecla, onClick, presionado, relleno }: { icono: N
 
 export function BarraLector(p: Props) {
   return (
-    <header className={`${estilos.barra} ${p.oculta ? estilos.oculta : ''}`}>
+    <header className={`${estilos.barra} ${p.enfoque ? estilos.cristal : ''} ${p.oculta ? estilos.oculta : ''}`}>
       <div className={estilos.izquierda}>
         <Link to={`/libros/${p.libroId}`} className={estilos.volver} aria-label="Volver a la ficha del libro">
           <Icono nombre="izquierda" />

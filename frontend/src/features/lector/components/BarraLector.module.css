@@ -12,8 +12,17 @@
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-/* En modo enfoque se va hacia arriba; vuelve si algo de dentro recibe el foco con el teclado */
-.oculta:not(:focus-within) {
+/* En modo enfoque flota sobre el texto como un vidrio esmerilado */
+.cristal {
+  border-bottom-color: color-mix(in srgb, var(--l-borde) 60%, transparent);
+  background: color-mix(in srgb, var(--l-fondo) 65%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+}
+
+/* En modo enfoque se va hacia arriba. Se queda mientras el ratón está encima o si algo de dentro
+   recibe el foco con el teclado (no con un clic: pulsar «Enfoque» no debe dejarla fija). */
+.oculta:not(:hover, :has(:focus-visible)) {
   transform: translateY(-100%);
   opacity: 0;
 }

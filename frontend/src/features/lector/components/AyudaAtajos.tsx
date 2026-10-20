@@ -7,7 +7,7 @@ const ATAJOS: { teclas: string[]; accion: string }[] = [
   { teclas: ['M'], accion: 'Marcar o desmarcar esta página' },
   { teclas: ['A'], accion: 'Apariencia' },
   { teclas: ['T'], accion: 'Cambiar tema claro / oscuro' },
-  { teclas: ['F'], accion: 'Modo enfoque' },
+  { teclas: ['F'], accion: 'Modo enfoque: difumina todo menos el párrafo que lees' },
   { teclas: ['?'], accion: 'Esta ayuda' },
   { teclas: ['Esc'], accion: 'Cerrar panel o salir del modo enfoque' },
 ]

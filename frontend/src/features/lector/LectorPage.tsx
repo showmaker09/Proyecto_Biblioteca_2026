@@ -16,12 +16,14 @@ import { Panel } from './components/Panel'
 import { PanelApariencia } from './components/PanelApariencia'
 import { PanelIndice } from './components/PanelIndice'
 import { useAtajos } from './hooks/useAtajos'
+import { useBloqueEnfocado } from './hooks/useBloqueEnfocado'
 import { useInfoLibro } from './hooks/useInfoLibro'
 import { useModoEnfoque } from './hooks/useModoEnfoque'
 import { usePagina } from './hooks/usePagina'
 import { usePreferenciasLector } from './hooks/usePreferenciasLector'
 import type { Preferencias } from './hooks/usePreferenciasLector'
 import { precargarPagina } from './lib/cachePaginas'
+import { LINEA_LECTURA } from './lib/enfoque'
 import { alternarMarcador, useMarcadores } from './lib/marcadores'
 import estilos from './LectorPage.module.css'
 
@@ -58,12 +60,15 @@ function Lector({ libroId, numero }: { libroId: string; numero: number }) {
   const { enfoque, alternarEnfoque, barrasOcultas } = useModoEnfoque()
   const [panel, setPanel] = useState<PanelAbierto>(null)
   const refIrA = useRef<HTMLInputElement>(null)
+  const refTexto = useRef<HTMLElement>(null)
 
   const libro = info.estado === 'listo' ? info.datos : null
   const datos = peticion.estado === 'listo' ? peticion.datos : null
+  const mostrada = datos ?? anterior
   const total = datos?.total_paginas ?? libro?.total_paginas ?? anterior?.total_paginas ?? 0
   const marcada = marcadores.includes(numero)
 
+  useBloqueEnfocado(refTexto, enfoque, mostrada?.texto_completo)
   useTituloDocumento(libro ? `${libro.titulo} · pág. ${numero}` : null)
 
   useEffect(() => {
@@ -113,7 +118,6 @@ function Lector({ libroId, numero }: { libroId: string; numero: number }) {
   // Una página más allá del final (p. ej. un enlace viejo) lleva a la última
   if (libro && numero > libro.total_paginas) return <Navigate to={`/libros/${libroId}/leer/${libro.total_paginas}`} replace />
 
-  const mostrada = datos ?? anterior
   const cerrar = () => setPanel(null)
   const tipografia: CSSProperties = {
     fontSize: `${preferencias.tamano}px`,
@@ -123,7 +127,10 @@ function Lector({ libroId, numero }: { libroId: string; numero: number }) {
   const restante = libro && total > 0 ? textoTiempoLectura(Math.round(minutosDeLectura(libro.caracteres_totales) * ((total - numero) / total))) : null
 
   return (
-    <div className={`${estilos.lector} ${preferencias.tema === 'oscuro' ? estilos.oscuro : estilos.claro}`}>
+    <div
+      className={`${estilos.lector} ${preferencias.tema === 'oscuro' ? estilos.oscuro : estilos.claro} ${enfoque ? estilos.enfoque : ''}`}
+      style={{ '--l-linea': `${LINEA_LECTURA * 100}dvh` } as CSSProperties}
+    >
       <BarraLector
         libroId={libroId}
         info={libro}
@@ -144,6 +151,7 @@ function Lector({ libroId, numero }: { libroId: string; numero: number }) {
           </div>
         ) : mostrada ? (
           <article
+            ref={refTexto}
             className={`${estilos.texto} ${datos ? '' : estilos.cambiando}`}
             style={tipografia}
             aria-busy={!datos}
@@ -155,8 +163,10 @@ function Lector({ libroId, numero }: { libroId: string; numero: number }) {
           <LectorEsqueleto conBarra={false} />
         )}
 
-        {datos && numero === total && <FinDelLibro libroId={libroId} titulo={libro?.titulo ?? null} />}
-        {total > 0 && <NavegadorPaginas libroId={libroId} actual={numero} total={total} />}
+        <div className={estilos.pie}>
+          {datos && numero === total && <FinDelLibro libroId={libroId} titulo={libro?.titulo ?? null} />}
+          {total > 0 && <NavegadorPaginas libroId={libroId} actual={numero} total={total} />}
+        </div>
       </main>
 
       <BarraProgreso
@@ -164,6 +174,7 @@ function Lector({ libroId, numero }: { libroId: string; numero: number }) {
         total={total}
         minutosPagina={datos ? Math.max(1, Math.round(datos.conteo_palabras / PALABRAS_POR_MINUTO)) : null}
         restante={restante}
+        enfoque={enfoque}
         oculta={barrasOcultas}
         onIr={irA}
         refIrA={refIrA}

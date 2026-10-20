@@ -43,13 +43,13 @@ Cada **feature** es una rebanada vertical: contiene todo lo que necesita (págin
 src/
 ├── app/                    # Rutas, layout con menú lateral, estilos globales y paleta
 ├── features/
-│   ├── catalogo/           # Biblioteca: continuar leyendo, búsqueda, orden, estantería y tabla
+│   ├── catalogo/           # Biblioteca (búsqueda, orden, estantería y tabla por tandas) y vista «Continuar leyendo»
 │   ├── libro/              # Ficha: portada, datos, capítulos y vista de la primera página
 │   └── lector/             # Lectura a pantalla completa
 │       ├── api/            #   llamadas HTTP de la feature
 │       ├── components/     #   barras, paneles (índice, apariencia, atajos), esqueleto
 │       ├── hooks/          #   página actual, preferencias, atajos, modo enfoque
-│       ├── lib/            #   lógica pura: caché de páginas, marcadores, capítulos
+│       ├── lib/            #   lógica pura: caché de páginas, marcadores, capítulos, línea de lectura
 │       ├── types.ts        #   tipos de lo que la feature recibe de la API
 │       ├── LectorPage.tsx
 │       └── index.ts        #   API pública (lo único que se importa desde fuera)
@@ -63,7 +63,7 @@ src/
     │   ├── usePeticion.ts  #   estado de una petición con reintento
     │   └── useTituloDocumento.ts
     ├── mocks/              #   servidor falso con el mismo contrato que la API
-    └── ui/                 #   TextoPagina, Portada, Esqueleto, EstadoPeticion, MedidorProgreso
+    └── ui/                 #   TextoPagina, Portada, Esqueleto, EstadoPeticion, MedidorProgreso, Migas
 ```
 
 ### Reglas
@@ -102,7 +102,7 @@ La prueba `formatoTexto.test.ts` recorre las 173 páginas reales y exige que no 
 * **Navegación:** botones grandes de página anterior y siguiente, barra de progreso, "Ir a la página" y tiempo estimado de la página y del resto del libro. Pasar de página es instantáneo porque precarga la siguiente y la anterior.
 * **Índice:** capítulos con el actual resaltado, y marcadores por página.
 * **Apariencia:** tema claro u oscuro (negro puro con letra blanca), tamaño de letra, tipografía con o sin serifa, interlineado y ancho de columna.
-* **Modo enfoque:** oculta las barras. Vuelven al mover el ratón o tocar la pantalla.
+* **Modo enfoque:** solo queda nítido el párrafo que se lee; el resto del texto y la navegación se difuminan como tras un vidrio esmerilado. El párrafo activo es el que cruza la línea de lectura (al 38 % de la altura) y cambia al desplazarse; un clic en otro párrafo lo trae a la línea. Las barras se esconden y asoman, también esmeriladas, al acercar el ratón al borde de arriba o de abajo, o con un toque en pantallas táctiles. Al entrar o salir el texto no salta.
 * **Fin del libro:** cierre con enlaces de vuelta.
 
 | Tecla | Acción |
@@ -142,13 +142,27 @@ El documento de Mongo trae las páginas embebidas y pesa mucho (un libro complet
 
 | Endpoint | Respuesta |
 |---|---|
-| `GET /libros` | `[{ _id, titulo, autor, idioma, temas, total_paginas, caracteres_totales }]` (sin `capitulos` ni `paginas`) |
-| `GET /libros/:id` | Lo anterior + `capitulos: [{ numero, titulo, pagina_inicio }]` (sin `paginas`) |
+| `GET /libros?desde=0&orden=titulo&q=&idioma=` | `{ libros, total, siguiente }`: como mucho **20** resúmenes `{ _id, titulo, autor, idioma, temas, total_paginas, caracteres_totales }` (sin `capitulos` ni `paginas`), cuántos coinciden en total y el `desde` de la siguiente tanda (`null` si no quedan) |
+| `GET /libros?id=a&id=b` | Lo mismo, solo con esos libros (como mucho 20; los que no existen se omiten). Lo usa «Continuar leyendo» |
+| `GET /idiomas` | `["es", …]`: idiomas presentes, para el filtro |
+| `GET /libros/:id` | Resumen + `capitulos: [{ numero, titulo, pagina_inicio }]` (sin `paginas`) |
 | `GET /libros/:id/paginas/:numero` | `{ numero_pagina, texto_completo, conteo_palabras, total_paginas }` |
 
-`total_paginas` no existe en el modelo de Mongo: el backend lo calcula (`dev-api` usa `$size` sobre `paginas`). `dev-api/server.mjs` y `shared/mocks/servidor-falso.ts` implementan este mismo contrato. Cuando llegue la API real basta con cambiar `VITE_API_URL` (y habilitar CORS para el origen del front si no se usa el proxy).
+Parámetros de `GET /libros`, todos opcionales:
+
+| Parámetro | Qué hace |
+|---|---|
+| `desde` | Posición de la tanda (0, 20, 40…). La respuesta trae la siguiente en `siguiente` |
+| `orden` | `titulo` (por defecto), `autor` o `largos` (más páginas primero). Orden alfabético español: sin distinguir mayúsculas ni acentos |
+| `q` | Busca en título y autor, sin importar acentos ni mayúsculas (`alvaro` encuentra «Don Álvaro») |
+| `idioma` | Código de idioma (`es`) |
+
+La búsqueda, el filtro y el orden los hace el servidor: el navegador solo tiene las tandas que ya pidió. La biblioteca pide la siguiente tanda al acercarse al final de la lista (con un botón «Mostrar más» como alternativa) y la búsqueda se envía 300 ms después de dejar de escribir.
+
+`total_paginas` no existe en el modelo de Mongo: el backend lo calcula (`dev-api` usa `$size` sobre `paginas`). Para que paginar sea barato también en la base, conviene que la API real lo guarde en el documento y cree índices en `titulo` y `autor` con collation `es`: `dev-api` todavía lee cada documento completo (con sus páginas) en cada consulta para calcularlo. `dev-api/server.mjs` y `shared/mocks/servidor-falso.ts` implementan este mismo contrato. Cuando llegue la API real basta con cambiar `VITE_API_URL` (y habilitar CORS para el origen del front si no se usa el proxy).
 
 ## Pendiente
 
 * Búsqueda de texto completo dentro de las páginas (necesita un endpoint del backend).
+* Subrayar texto y guardar marcadores, progreso y subrayados por usuario en la base: diseño en [`../subrayados_por_usuario.md`](../subrayados_por_usuario.md).
 * Sustituir `dev-api` por la API real del equipo de backend.

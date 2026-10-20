@@ -88,6 +88,9 @@ export function Layout() {
             <NavLink to="/" className={({ isActive }) => (isActive ? estilos.activo : undefined)}>
               Biblioteca
             </NavLink>
+            <NavLink to="/continuar-leyendo" className={({ isActive }) => (isActive ? estilos.activo : undefined)}>
+              Continuar leyendo
+            </NavLink>
           </nav>
         </div>
       </aside>

@@ -1,44 +1,34 @@
 import { Link } from 'react-router-dom'
-import type { MapaProgresos } from '@/shared/lib/progresoLectura'
-import { porcentajeLeido } from '@/shared/lib/progresoLectura'
-import { MedidorProgreso } from '@/shared/ui/MedidorProgreso'
-import { LibroAbrible } from '@/shared/ui/LibroAbrible'
-import type { LibroResumen } from '../types'
+import { useSeguirLeyendo } from '../hooks/useEnCurso'
+import { ListaEnCurso, ListaEnCursoEsqueleto } from './ListaEnCurso'
 import estilos from './SeguirLeyendo.module.css'
 
-/** Libros empezados, para retomarlos con un clic. */
-export function SeguirLeyendo({ libros, progresos }: { libros: LibroResumen[]; progresos: MapaProgresos }) {
-  if (libros.length === 0) return null
+/** En el inicio cabe una sola fila: como mucho 4 tarjetas, y el CSS oculta las que no quepan a lo ancho. */
+const MAXIMO_INICIO = 4
+
+/**
+ * «Continuar leyendo» en el inicio: los últimos libros abiertos en una fila y un enlace a la vista completa.
+ * Cuántos hay se sabe al momento (el progreso vive en este navegador), así que mientras llegan sus datos el
+ * título y el enlace ya son los reales y solo las tarjetas son de relleno. Si la petición falla la sección
+ * no se muestra: el catálogo de debajo ya avisa del error.
+ */
+export function SeguirLeyendo() {
+  const { peticion, progresos, total } = useSeguirLeyendo(MAXIMO_INICIO)
+  if (total === 0 || peticion.estado === 'error' || (peticion.estado === 'listo' && peticion.datos.length === 0)) return null
 
   return (
     <section className={estilos.seccion} aria-labelledby="seguir-leyendo">
-      <h2 id="seguir-leyendo">Continuar leyendo</h2>
-      <ul className={estilos.lista}>
-        {libros.map((libro) => {
-          const p = progresos[libro._id]
-          const porcentaje = porcentajeLeido(p)
-          return (
-            <li key={libro._id} className={estilos.tarjeta}>
-              <LibroAbrible id={libro._id} titulo={libro.titulo} autor={libro.autor} tamano="sm" className={estilos.libro} />
-              <div className={estilos.cuerpo}>
-                <Link to={`/libros/${libro._id}`} className={estilos.titulo}>
-                  {libro.titulo}
-                </Link>
-                <span className={estilos.autor} title={libro.autor}>
-                  {libro.autor}
-                </span>
-                <MedidorProgreso porcentaje={porcentaje} etiqueta={`${libro.titulo}: ${porcentaje}% leído`} className={estilos.medidor} />
-                <span className={estilos.pagina}>
-                  Página {p.pagina} de {p.total} · {porcentaje}%
-                </span>
-              </div>
-              <Link to={`/libros/${libro._id}/leer/${p.pagina}`} className={`boton ${estilos.continuar}`} aria-label={`Continuar ${libro.titulo} en la página ${p.pagina}`}>
-                Continuar
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
+      <div className={estilos.cabecera}>
+        <h2 id="seguir-leyendo">Continuar leyendo</h2>
+        <Link to="/continuar-leyendo" className={estilos.verTodos} aria-label={`Ver todos los libros empezados (${total})`}>
+          Ver todos ({total})
+        </Link>
+      </div>
+      {peticion.estado === 'cargando' ? (
+        <ListaEnCursoEsqueleto cantidad={Math.min(MAXIMO_INICIO, total)} unaFila />
+      ) : (
+        <ListaEnCurso libros={peticion.datos} progresos={progresos} unaFila />
+      )}
     </section>
   )
 }

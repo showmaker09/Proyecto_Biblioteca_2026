@@ -2,11 +2,19 @@ import { Link } from 'react-router-dom'
 import { minutosDeLectura, textoTiempoLectura } from '@/shared/lib/formatoLibro'
 import type { MapaProgresos } from '@/shared/lib/progresoLectura'
 import { porcentajeLeido } from '@/shared/lib/progresoLectura'
+import { EsqueletoBloque, EsqueletoLinea } from '@/shared/ui/Esqueleto'
 import { MedidorProgreso } from '@/shared/ui/MedidorProgreso'
 import type { LibroResumen } from '../types'
 import estilos from './TablaLibros.module.css'
 
-export function TablaLibros({ libros, progresos }: { libros: LibroResumen[]; progresos: MapaProgresos }) {
+interface Props {
+  libros: LibroResumen[]
+  progresos: MapaProgresos
+  /** Filas de relleno al final mientras llega la siguiente tanda. */
+  esqueletos?: number
+}
+
+export function TablaLibros({ libros, progresos, esqueletos = 0 }: Props) {
   return (
     <table className={estilos.tabla}>
       <thead>
@@ -60,6 +68,28 @@ export function TablaLibros({ libros, progresos }: { libros: LibroResumen[]; pro
             </tr>
           )
         })}
+        {Array.from({ length: esqueletos }, (_, i) => (
+          <tr key={`esqueleto-${i}`} aria-hidden="true">
+            <td>
+              <EsqueletoLinea ancho={i % 2 ? '58%' : '72%'} />
+            </td>
+            <td>
+              <EsqueletoLinea ancho={i % 2 ? '40%' : '54%'} />
+            </td>
+            <td>
+              <EsqueletoLinea ancho="2rem" />
+            </td>
+            <td>
+              <EsqueletoLinea ancho="4rem" />
+            </td>
+            <td>
+              <EsqueletoLinea ancho="5rem" />
+            </td>
+            <td className={estilos.accion}>
+              <EsqueletoBloque ancho="5.5rem" alto="2.25rem" />
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   )

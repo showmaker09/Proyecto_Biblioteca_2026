@@ -4,6 +4,7 @@ import { porcentajeLeido, useProgresos } from '@/shared/lib/progresoLectura'
 import { useTituloDocumento } from '@/shared/lib/useTituloDocumento'
 import { Peticion } from '@/shared/ui/EstadoPeticion'
 import { MedidorProgreso } from '@/shared/ui/MedidorProgreso'
+import { Migas } from '@/shared/ui/Migas'
 import { LibroAbrible } from '@/shared/ui/LibroAbrible'
 import { LibroEsqueleto } from './components/LibroEsqueleto'
 import { ListaCapitulos } from './components/ListaCapitulos'
@@ -32,11 +33,7 @@ function Ficha({ libro }: { libro: LibroDetalle }) {
 
   return (
     <article className={estilos.libro}>
-      <nav aria-label="Ruta de navegación" className={estilos.migas}>
-        <Link to="/">Biblioteca</Link>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{libro.titulo}</span>
-      </nav>
+      <Migas actual={libro.titulo} />
 
       <div className={estilos.cuerpo}>
         <div>

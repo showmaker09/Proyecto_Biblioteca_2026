@@ -1,3 +1,8 @@
+/* Contenedor: estantería y «Continuar leyendo» se adaptan al ancho de la página (cambia al abrir el menú), no al de la ventana. */
+.pagina {
+  container-type: inline-size;
+}
+
 .cabecera {
   margin-bottom: 2rem;
   padding-bottom: 1.25rem;
@@ -12,6 +17,12 @@
 .cabecera p {
   margin: 0.3rem 0 0;
   color: var(--texto-suave);
+}
+
+/* Mientras llega el total: en línea con el texto, así el renglón mide lo mismo antes y después. */
+.cabecera .subtituloEsqueleto {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .controles {
@@ -110,14 +121,31 @@
  * vecinos mediante subgrid: así títulos, autores y botones quedan alineados en toda la fila aunque
  * unos textos ocupen dos renglones y otros uno. La separación vertical entre libros la pone cada tarjeta.
  * Columnas de ancho fijo (no 1fr): si el ancho cambia, p. ej. al abrir el menú lateral, las portadas no
- * se estiran ni se alargan; solo cambia cuántas caben por fila.
+ * se estiran ni se alargan; solo cambia cuántas caben por fila. El ancho que sobra se reparte entre los
+ * huecos (space-between), así la fila llega de borde a borde y no queda un espacio suelto a la derecha.
  */
 .estanteria {
   display: grid;
   grid-template-columns: repeat(auto-fill, 11rem);
+  justify-content: space-between;
   gap: 0 2.25rem;
   margin: 0;
   padding: 0;
+}
+
+/* Donde no caben 3 portadas fijas los huecos se harían enormes: columnas fluidas, 3 y luego 2. */
+@container (width < 37.5rem) {
+  .estanteria {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+}
+
+@container (width < 30rem) {
+  .estanteria {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.25rem;
+  }
 }
 
 .vista {
@@ -129,12 +157,6 @@
     opacity: 0;
     transform: translateY(10px);
   }
-}
-
-.masLibros {
-  display: flex;
-  justify-content: center;
-  margin: 0.5rem 0 1rem;
 }
 
 .vacio {
@@ -164,11 +186,6 @@
 }
 
 @media (max-width: 480px) {
-  .estanteria {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1.25rem;
-  }
-
   .buscador {
     flex-basis: 100%;
     max-width: none;

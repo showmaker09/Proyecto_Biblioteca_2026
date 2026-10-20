@@ -18,6 +18,7 @@ Pipeline de carga masiva de libros en texto plano (.txt) hacia una base de datos
 | `preparar_libros.py` | Descarga libros de dominio público y arma las carpetas con la estructura que esperan los pipelines |
 | `Bulk_Upload_Texto_Test/` | Carpeta de prueba con 3 libros completos |
 | `gu_a_de_uso_del_pipeline.md` | Guía detallada de operación |
+| `subrayados_por_usuario.md` | Diseño pendiente: subrayados, marcadores y progreso de lectura por usuario en la base |
 
 ## Modelo de datos
 

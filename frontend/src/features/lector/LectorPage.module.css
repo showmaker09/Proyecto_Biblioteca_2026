@@ -41,8 +41,42 @@
   padding: 0 1rem;
 }
 
+/*
+ * ---- Modo enfoque ----
+ * Solo queda nítido el bloque que cruza la línea de lectura (--l-linea, ver useBloqueEnfocado); el
+ * resto del texto y la navegación se ven como tras un vidrio esmerilado. Los huecos de arriba y abajo
+ * dejan que el primer y el último bloque lleguen también a la línea.
+ */
+.enfoque .texto {
+  padding-top: max(2.5rem, calc(var(--l-linea) - 3.5rem));
+}
+
+.enfoque .contenido {
+  padding-bottom: calc(100dvh - var(--l-linea));
+}
+
+.texto [data-foco],
+.pie {
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+
+.texto [data-foco=''],
+.enfoque .pie:not(:hover, :focus-within) {
+  filter: blur(2px);
+  opacity: 0.35;
+}
+
+/* Una nota o un plegable al que se llega con el teclado o desde su referencia se lee entero */
+.texto [data-foco='']:focus-within,
+.texto [data-foco='']:focus {
+  filter: none;
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .texto {
+  .texto,
+  .texto [data-foco],
+  .pie {
     transition: none;
   }
 }

@@ -10,7 +10,15 @@
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-.oculta:not(:focus-within) {
+/* Modo enfoque: mismo vidrio y mismas reglas para esconderse que la barra de arriba */
+.cristal {
+  border-top-color: color-mix(in srgb, var(--l-borde) 60%, transparent);
+  background: color-mix(in srgb, var(--l-fondo) 65%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+}
+
+.oculta:not(:hover, :has(:focus-visible)) {
   transform: translateY(100%);
   opacity: 0;
 }
