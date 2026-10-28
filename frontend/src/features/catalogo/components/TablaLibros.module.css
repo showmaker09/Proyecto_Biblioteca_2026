@@ -1,0 +1,127 @@
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td {
+  padding: 0.8rem 0.75rem;
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabla th {
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tabla tbody tr:hover {
+  background: var(--superficie-alt);
+}
+
+.titulo a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.titulo a:hover {
+  text-decoration: underline;
+}
+
+.numero {
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+}
+
+.progreso {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 7rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.progreso > :first-child {
+  flex: 1;
+}
+
+.sinEmpezar {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.accion {
+  text-align: right !important;
+}
+
+.accion :global(.boton) {
+  height: 2.25rem;
+  padding: 0 0.9rem;
+  font-size: 0.9rem;
+}
+
+.soloLectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* En pantallas estrechas cada libro es una ficha con sus datos etiquetados */
+@media (max-width: 700px) {
+  .tabla thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .tabla,
+  .tabla tbody,
+  .tabla tr,
+  .tabla td {
+    display: block;
+  }
+
+  .tabla tr {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--borde);
+  }
+
+  .tabla td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.25rem 0;
+    border: 0;
+    text-align: right !important;
+  }
+
+  .tabla td[data-columna]::before {
+    content: attr(data-columna);
+    color: var(--texto-suave);
+    font-size: 0.8rem;
+    text-align: left;
+  }
+
+  .tabla td.titulo {
+    font-size: 1.05rem;
+  }
+
+  .tabla td.titulo::before {
+    content: none;
+  }
+
+  .accion {
+    justify-content: flex-start !important;
+    padding-top: 0.5rem !important;
+  }
+}

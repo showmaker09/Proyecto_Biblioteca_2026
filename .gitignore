@@ -27,3 +27,7 @@ Thumbs.db
 
 # Hojas de trabajo del equipo (contienen nombres de los integrantes)
 *.xlsx
+
+# Dependencias de Node (frontend y dev-api)
+node_modules/
+dist/

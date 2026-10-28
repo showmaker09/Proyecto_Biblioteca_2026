@@ -1,0 +1,199 @@
+/* Contenedor: estantería y «Continuar leyendo» se adaptan al ancho de la página (cambia al abrir el menú), no al de la ventana. */
+.pagina {
+  container-type: inline-size;
+}
+
+.cabecera {
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.cabecera h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.cabecera p {
+  margin: 0.3rem 0 0;
+  color: var(--texto-suave);
+}
+
+/* Mientras llega el total: en línea con el texto, así el renglón mide lo mismo antes y después. */
+.cabecera .subtituloEsqueleto {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.buscador {
+  position: relative;
+  flex: 1 1 16rem;
+  max-width: 26rem;
+}
+
+.buscador input {
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 2.4rem 0 0.9rem;
+  border: 1px solid var(--pizarra-200);
+  border-radius: 8px;
+  /* Degradado casi imperceptible de blanco a pizarra y sombra suave: el buscador se despega del fondo. */
+  background: linear-gradient(to bottom, var(--superficie), var(--pizarra-50));
+  box-shadow: var(--sombra-tarjeta);
+  color: var(--texto);
+  font: inherit;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+.buscador input:hover {
+  box-shadow: var(--sombra-alzada);
+}
+
+.buscador input:focus {
+  border-color: var(--texto);
+  box-shadow: var(--sombra-alzada);
+  outline: none;
+}
+
+.buscador input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.limpiar {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--texto-suave);
+  font-size: 1.3rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.limpiar:hover {
+  background: var(--superficie-alt);
+  color: var(--texto);
+}
+
+.selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.selector select {
+  height: 2.5rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+}
+
+.resultados {
+  margin: 0 0 1rem;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+/*
+ * Cada libro ocupa 5 filas de esta rejilla (portada, título, autor, datos, pie) y las comparte con sus
+ * vecinos mediante subgrid: así títulos, autores y botones quedan alineados en toda la fila aunque
+ * unos textos ocupen dos renglones y otros uno. La separación vertical entre libros la pone cada tarjeta.
+ * Columnas de ancho fijo (no 1fr): si el ancho cambia, p. ej. al abrir el menú lateral, las portadas no
+ * se estiran ni se alargan; solo cambia cuántas caben por fila. El ancho que sobra se reparte entre los
+ * huecos (space-between), así la fila llega de borde a borde y no queda un espacio suelto a la derecha.
+ */
+.estanteria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 11rem);
+  justify-content: space-between;
+  gap: 0 2.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* Donde no caben 3 portadas fijas los huecos se harían enormes: columnas fluidas, 3 y luego 2. */
+@container (width < 37.5rem) {
+  .estanteria {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+}
+
+@container (width < 30rem) {
+  .estanteria {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.25rem;
+  }
+}
+
+.vista {
+  animation: aparecer 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.vacio {
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--borde);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.vacio h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+}
+
+.vacio p {
+  margin: 0 0 1.25rem;
+  color: var(--texto-suave);
+}
+
+.soloLectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .buscador {
+    flex-basis: 100%;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vista {
+    animation: none;
+  }
+}

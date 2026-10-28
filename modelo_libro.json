@@ -4,6 +4,7 @@
   "autor": "Apellido, Nombre",
   "idioma": "es",
   "temas": ["Tema 1", "Tema 2"],
+  "portada": "https://www.gutenberg.org/cache/epub/00000/pg00000.cover.medium.jpg",
   "capitulos": [
     {
       "numero": 1,

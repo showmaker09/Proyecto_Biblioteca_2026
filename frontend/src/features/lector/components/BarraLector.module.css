@@ -1,0 +1,149 @@
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--l-borde);
+  background: var(--l-fondo);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* En modo enfoque flota sobre el texto como un vidrio esmerilado */
+.cristal {
+  border-bottom-color: color-mix(in srgb, var(--l-borde) 60%, transparent);
+  background: color-mix(in srgb, var(--l-fondo) 65%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+}
+
+/* En modo enfoque se va hacia arriba. Se queda mientras el ratón está encima o si algo de dentro
+   recibe el foco con el teclado (no con un clic: pulsar «Enfoque» no debe dejarla fija). */
+.oculta:not(:hover, :has(:focus-visible)) {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.izquierda {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.volver {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--l-borde);
+  border-radius: 6px;
+  color: inherit;
+}
+
+.volver:hover {
+  border-color: var(--l-texto);
+}
+
+.libro {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.titulo,
+.autor {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.titulo {
+  font-family: var(--fuente-titulo);
+  font-size: 0.98rem;
+}
+
+.autor {
+  font-size: 0.78rem;
+  opacity: 0.65;
+}
+
+.esqueleto {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.controles {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.35rem;
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.7rem;
+  border: 1px solid var(--l-borde);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.boton:hover {
+  border-color: var(--l-texto);
+}
+
+.boton[aria-pressed='true'] {
+  background: var(--l-texto);
+  border-color: var(--l-texto);
+  color: var(--l-fondo);
+}
+
+@media (max-width: 960px) {
+  .etiqueta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .boton {
+    width: 2.25rem;
+    justify-content: center;
+    padding: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .barra {
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .controles {
+    gap: 0.25rem;
+  }
+
+  .boton,
+  .volver {
+    width: 2.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra {
+    transition: none;
+  }
+}

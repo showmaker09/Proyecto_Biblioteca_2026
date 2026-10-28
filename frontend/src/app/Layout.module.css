@@ -1,0 +1,274 @@
+.contenedor {
+  --ancho-menu: 15rem;
+  --ancho-borde: 14px;
+  --curva: cubic-bezier(0.32, 0.72, 0, 1);
+  --curva-salida: cubic-bezier(0.4, 0, 1, 1);
+  min-height: 100vh;
+  /* En móvil el contenido se desliza a la derecha: que no aparezca scroll horizontal. */
+  overflow-x: clip;
+}
+
+/* Franja invisible pegada al borde izquierdo que despliega el menú; el asa es la pista visual. */
+.borde {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  width: var(--ancho-borde);
+  cursor: e-resize;
+}
+
+.asa {
+  width: 4px;
+  height: 3.5rem;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: var(--borde);
+  transition:
+    height 0.25s var(--curva),
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.borde:hover .asa {
+  height: 5rem;
+  background: var(--texto-suave);
+}
+
+.contenedor[data-menu='abierto'] .asa {
+  opacity: 0;
+}
+
+/* El menú entra desde la izquierda y el contenido se aparta lo mismo: nada queda tapado. */
+.lateral {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 40;
+  width: var(--ancho-menu);
+  overflow: hidden;
+  border-right: 1px solid var(--borde);
+  background: var(--superficie-alt);
+  transform: none;
+  transition: transform 0.42s var(--curva);
+}
+
+.contenedor[data-menu='cerrado'] .lateral {
+  transform: translateX(-100%);
+  transition: transform 0.3s var(--curva-salida);
+}
+
+.interior {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.perfil {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borde);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.perfilUsuario {
+  font-size: 0.85rem;
+}
+
+.perfilNombre {
+  font-weight: 600;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfilRol {
+  font-size: 0.72rem;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.botonSalir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--texto);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.botonSalir:hover {
+  background: var(--superficie-alt);
+  border-color: var(--acento);
+}
+
+/* Al abrir, el contenido entra un instante después que el panel; al cerrar, sale primero. */
+.contenedor[data-menu='abierto'] .interior {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.3s ease 0.1s,
+    transform 0.42s var(--curva) 0.05s;
+}
+
+.contenedor[data-menu='cerrado'] .interior {
+  opacity: 0;
+  transform: translateX(-0.75rem);
+  transition:
+    opacity 0.15s ease,
+    transform 0.25s ease-in;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.marca strong,
+.marca small {
+  display: block;
+}
+
+.marca small {
+  color: var(--texto-suave);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 8px;
+  background: var(--acento);
+  color: var(--acento-texto);
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.menu a {
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--texto-suave);
+}
+
+.menu a:hover {
+  background: var(--borde);
+}
+
+.menu a.activo {
+  background: var(--acento);
+  color: var(--acento-texto);
+}
+
+/* Solo en móvil: capa sobre el contenido desplazado para cerrar el menú tocando fuera. */
+.fondo {
+  display: none;
+}
+
+/* Solo para teclado: aparece con el primer Tab. */
+.saltar {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 50;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transform: translateY(-200%);
+}
+
+.saltar:focus-visible {
+  transform: none;
+}
+
+/*
+ * Escritorio: el contenido se estrecha para dejar sitio al menú (y la estantería se reacomoda).
+ * Mismas duraciones y curvas que el menú para que ambos se muevan como una sola pieza.
+ */
+.contenido {
+  min-width: 0;
+  padding: 2rem 2rem 2rem calc(2rem + var(--ancho-borde) / 2);
+  transition: margin-left 0.3s var(--curva-salida);
+}
+
+.contenedor[data-menu='abierto'] .contenido {
+  margin-left: var(--ancho-menu);
+  transition: margin-left 0.42s var(--curva);
+}
+
+/*
+ * Móvil: no hay ancho para estrechar el contenido, así que se desliza entero hacia la derecha
+ * junto al menú (sin reacomodarse) y una capa encima permite cerrarlo tocando.
+ */
+@media (max-width: 700px) {
+  .contenedor {
+    --ancho-borde: 12px;
+    --ancho-menu: min(15rem, 85vw);
+  }
+
+  .contenido {
+    padding: 1rem 1rem 1rem calc(1rem + var(--ancho-borde) / 2);
+    transition: transform 0.3s var(--curva-salida);
+  }
+
+  .contenedor[data-menu='abierto'] .contenido {
+    margin-left: 0;
+    transform: translateX(var(--ancho-menu));
+    transition: transform 0.42s var(--curva);
+  }
+
+  .fondo {
+    position: fixed;
+    inset: 0 0 0 var(--ancho-menu);
+    z-index: 35;
+    display: block;
+    background: rgb(0 0 0 / 0.25);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  .contenedor[data-menu='cerrado'] .fondo {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asa,
+  .lateral,
+  .contenedor .lateral,
+  .contenedor .interior,
+  .contenedor .contenido,
+  .fondo {
+    transition: none !important;
+  }
+}

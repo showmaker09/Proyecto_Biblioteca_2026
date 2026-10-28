@@ -1,0 +1,443 @@
+/*
+ * Todo en em: el tamaño de letra lo fija el contenedor del lector.
+ * Colores: solo currentColor y las variables del tema del lector; lo secundario se atenúa con opacity.
+ */
+
+.texto {
+  /* el contenedor del lector puede traer pre-wrap: aquí los espacios entre bloques no deben verse */
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.texto :where(p, ul, h2, h3) {
+  margin: 0;
+  padding: 0;
+}
+
+.vacia {
+  margin: 3em 0;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* ---- Estructura de la obra ---- */
+
+.acto {
+  margin: 2.4em 0 1em;
+  font-family: var(--fuente-titulo, Georgia, 'Times New Roman', serif);
+  font-size: 1.55em;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* Filete corto bajo el acto */
+.acto::after {
+  content: '';
+  display: block;
+  width: 2.5em;
+  margin: 0.6em auto 0;
+  border-top: 1px solid currentColor;
+  opacity: 0.4;
+}
+
+.escena {
+  margin: 2.2em 0 0.7em;
+  font-size: 0.92em;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-align: center;
+  text-transform: uppercase;
+  break-after: avoid;
+}
+
+.rotulo {
+  margin: 2em 0 0.8em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.75;
+  break-after: avoid;
+}
+
+.repartoEscena {
+  margin: -0.3em 0 1.4em;
+  font-size: 0.8em;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-align: center;
+  opacity: 0.72;
+}
+
+.fin {
+  margin: 2.6em 0 1.6em;
+  font-size: 0.95em;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-align: center;
+}
+
+.separador {
+  width: 5em;
+  height: 0;
+  margin: 2.2em auto;
+  border: 0;
+  border-top: 1px solid var(--l-borde, currentColor);
+}
+
+/* ---- Personajes y diálogo ---- */
+
+.personaje {
+  margin: 1.5em 0 0.2em;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  break-after: avoid;
+}
+
+.dialogo,
+.parrafo {
+  margin: 0 0 0.9em;
+}
+
+/* El nombre en línea de El sí de las niñas: igual de claro que la etiqueta de Lope */
+.nombre {
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.versos {
+  margin: 0 0 1em;
+}
+
+.linea {
+  display: block;
+  /* sangría francesa: si un verso se parte por el ancho, la 2.ª línea queda bajo la 1.ª */
+  padding-left: 1.5em;
+  text-indent: -1.5em;
+}
+
+.nivel0 {
+  padding-left: 1.5em;
+}
+
+.nivel1 {
+  padding-left: 2.6em;
+}
+
+.nivel2 {
+  padding-left: 4.2em;
+}
+
+.nivel3 {
+  padding-left: 5.6em;
+}
+
+.lineaAcotacion {
+  font-size: 0.92em;
+  opacity: 0.78;
+}
+
+.acotacion {
+  margin: 0.5em 0 1em;
+  padding-left: 0.8em;
+  border-left: 2px solid var(--l-borde, currentColor);
+  font-size: 0.92em;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+/* ---- Portada y paratexto ---- */
+
+.tituloLibro {
+  margin: 1.2em 0 0.9em;
+  font-family: var(--fuente-titulo, Georgia, 'Times New Roman', serif);
+  font-size: 2em;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.portada {
+  margin: 0.7em 0;
+  font-size: 0.85em;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-align: center;
+  opacity: 0.8;
+}
+
+.paratexto,
+.listaParatexto {
+  margin: 0.8em 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.78em;
+  line-height: 1.55;
+  opacity: 0.65;
+}
+
+.listaParatexto {
+  padding-left: 1.4em;
+}
+
+.listaParatexto li {
+  margin: 0.35em 0;
+}
+
+/* Créditos y notas del transcriptor: plegados, hablan de la edición digital y no de la obra */
+.notaEdicion {
+  margin: 0 0 1.6em;
+  border: 1px solid var(--l-borde, currentColor);
+  border-radius: 6px;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.78em;
+}
+
+.notaEdicion summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.6em 0.9em;
+  cursor: pointer;
+  list-style: none;
+  opacity: 0.75;
+}
+
+.notaEdicion summary::-webkit-details-marker {
+  display: none;
+}
+
+.notaEdicion summary::before {
+  content: '';
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+
+.notaEdicion[open] summary::before {
+  transform: rotate(45deg);
+}
+
+.notaEdicion summary:hover {
+  opacity: 1;
+}
+
+.notaEdicion summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.notaEdicionCuerpo {
+  padding: 0 0.9em 0.4em;
+  border-top: 1px solid var(--l-borde, currentColor);
+}
+
+/* dentro de la nota el tamaño ya está reducido */
+.notaEdicionCuerpo .paratexto,
+.notaEdicionCuerpo .listaParatexto {
+  font-size: 1em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notaEdicion summary::before {
+    transition: none;
+  }
+}
+
+/* ---- Reparto del estreno ---- */
+
+.reparto {
+  width: 100%;
+  margin: 0.6em 0 1.8em;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  line-height: 1.45;
+}
+
+.reparto th {
+  padding: 0 0 0.5em;
+  border-bottom: 1px solid var(--l-borde, currentColor);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.reparto td {
+  padding: 0.45em 0;
+  border-bottom: 1px solid var(--l-borde, currentColor);
+  vertical-align: top;
+}
+
+.reparto td + td,
+.reparto th + th {
+  padding-left: 1.2em;
+}
+
+.papel {
+  display: block;
+}
+
+.tratamiento {
+  opacity: 0.7;
+}
+
+.personas {
+  margin: 0.6em 0 1.6em;
+  font-size: 0.9em;
+  line-height: 1.5;
+  list-style: none;
+}
+
+.personas li {
+  padding-left: 1.5em;
+  text-indent: -1.5em;
+}
+
+/* ---- Índice ---- */
+
+.tabla {
+  margin: 0.8em 0 1.8em;
+  font-size: 0.88em;
+  list-style: none;
+}
+
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.5em;
+  padding: 0.2em 0;
+}
+
+.izq {
+  min-width: 0;
+}
+
+/* Puntos guía entre el texto y el número de página */
+.relleno {
+  flex: 1;
+  min-width: 1em;
+  align-self: flex-end;
+  margin-bottom: 0.3em;
+  border-bottom: 1px dotted currentColor;
+  opacity: 0.35;
+}
+
+.der {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.fuerte {
+  margin-top: 0.7em;
+  font-weight: 700;
+}
+
+.separado {
+  margin-top: 0.8em;
+}
+
+.soloDerecha {
+  justify-content: flex-end;
+  font-size: 0.85em;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+/* ---- Notas al pie ---- */
+
+.refNota {
+  font-size: 0.72em;
+  font-weight: 600;
+  line-height: 0;
+}
+
+.refNota a {
+  padding: 0 0.12em;
+  border-radius: 2px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.refNota a:hover {
+  text-decoration: underline;
+}
+
+.refNota a:focus-visible,
+.nota:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.notas {
+  margin-top: 2.6em;
+  padding-top: 0.9em;
+  border-top: 1px solid var(--l-borde, currentColor);
+  font-size: 0.82em;
+  line-height: 1.55;
+  opacity: 0.88;
+}
+
+.notas ul {
+  list-style: none;
+}
+
+.nota {
+  margin: 0.35em 0;
+  padding-left: 1.8em;
+  text-indent: -1.8em;
+}
+
+/* Al llegar desde la referencia, la nota se subraya con el filete del tema */
+.nota:focus {
+  outline: 1px solid var(--l-borde, currentColor);
+  outline-offset: 3px;
+}
+
+.numeroNota {
+  display: inline-block;
+  width: 1.5em;
+  font-weight: 700;
+  text-indent: 0;
+}
+
+@media (max-width: 30em) {
+  .nivel1 {
+    padding-left: 2.3em;
+  }
+
+  .nivel2 {
+    padding-left: 3.2em;
+  }
+
+  .nivel3 {
+    padding-left: 4em;
+  }
+
+  .acto {
+    font-size: 1.4em;
+    letter-spacing: 0.04em;
+  }
+
+  .tituloLibro {
+    font-size: 1.7em;
+  }
+}

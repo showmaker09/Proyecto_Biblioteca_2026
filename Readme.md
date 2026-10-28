@@ -16,8 +16,12 @@ Pipeline de carga masiva de libros en texto plano (.txt) hacia una base de datos
 | `pipeline_mongo.py` | Lee las carpetas de libros y las sube a Atlas con `upsert=True` (no duplica registros) |
 | `pipeline_local.py` | Hace lo mismo pero solo imprime el JSON resultante, sin conectarse a Atlas |
 | `preparar_libros.py` | Descarga libros de dominio público y arma las carpetas con la estructura que esperan los pipelines |
+| `agregar_portadas.py` | Agrega el enlace a la portada de Gutenberg a los libros que ya están en Atlas y no lo tienen (sin `--aplicar` solo simula) |
 | `Bulk_Upload_Texto_Test/` | Carpeta de prueba con 3 libros completos |
 | `gu_a_de_uso_del_pipeline.md` | Guía detallada de operación |
+| `backend/` | API REST completa en .NET 10 (Vertical Slice Architecture), autenticación JWT/cookies, roles y CRUD |
+| `frontend/` | Aplicación web en React 19 + TypeScript + Vite |
+| `subrayados_por_usuario.md` | Diseño pendiente: subrayados, marcadores y progreso de lectura por usuario en la base |
 
 ## Modelo de datos
 
@@ -30,6 +34,7 @@ Cada libro es un documento con esta forma (ver `modelo_libro.json`):
   "autor": "Apellido, Nombre",
   "idioma": "es",
   "temas": ["Tema 1"],
+  "portada": "https://www.gutenberg.org/cache/epub/00000/pg00000.cover.medium.jpg",
   "capitulos": [
     { "numero": 1, "titulo": "Encabezado del capitulo", "pagina_inicio": 1 }
   ],
@@ -42,6 +47,8 @@ Cada libro es un documento con esta forma (ver `modelo_libro.json`):
 
 `conteo_palabras` y `caracteres_totales` se calculan automáticamente al leer los archivos.
 
+`portada` es opcional: es solo el **enlace** (https) a la imagen, que sigue alojada en su sitio de origen. La imagen no se sube a Atlas, así que cada portada ocupa unos 70 bytes en la base. Si el libro no tiene portada o el enlace deja de funcionar, la web muestra una portada generada con el título y el autor. Las portadas que Gutenberg genera sola para libros sin portada (dibujos geométricos de colores, siempre de 200×300) no se guardan.
+
 ## Estructura de cada libro en disco
 
 ```text
@@ -53,9 +60,35 @@ Bulk_Upload_Texto_Test/
            └── 002.txt
 ```
 
-El nombre de la carpeta es el `_id` del libro en la base de datos. Las páginas se leen en orden alfabético, por eso llevan ceros a la izquierda. Todos los archivos se leen en UTF-8.
+## Puesta en marcha de la aplicación web (Backend + Frontend)
 
-## Puesta en marcha
+Para levantar el sistema completo se necesitan dos terminales:
+
+### Terminal 1: Backend (.NET 10)
+```bash
+cd backend/Biblioteca.Api
+dotnet run
+```
+* Escucha en `http://127.0.0.1:8000`.
+* Lee `MONGO_URI` y `JWT_CLAVE` automáticamente del archivo `.env` de la raíz.
+* *(Opcional)* Si necesitas dar permisos de administrador a una cuenta ya registrada:
+  ```bash
+  dotnet run -- asignar-rol tu_correo@correo.com admin
+  ```
+
+### Terminal 2: Frontend (React + Vite)
+```bash
+cd frontend
+npm install   # solo la primera vez si no se han instalado dependencias
+npm run dev
+```
+* Abre `http://localhost:5173` en tu navegador.
+* El proxy de Vite reenvía las peticiones `/api/*` al backend en el puerto 8000.
+* Regístrate en `/registro` o inicia sesión en `/entrar`.
+
+---
+
+## Puesta en marcha del pipeline de libros (Python)
 
 1. Crear y activar el entorno virtual (en Windows: `python -m venv venv` y luego `.\venv\Scripts\activate`).
 2. Instalar las dependencias con versiones fijas:

@@ -1,0 +1,91 @@
+/* Mismas medidas que LibroPage.module.css para que nada salte al terminar de cargar */
+.libro {
+  display: block;
+  container: libro / inline-size;
+}
+
+.cuerpo {
+  max-width: 60rem;
+}
+
+/* La columna de la primera página solo existe en pantallas anchas; en las demás tiene su propio esqueleto */
+.hojeo {
+  display: none;
+}
+
+.migas {
+  margin-bottom: 1.75rem;
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: 16.25rem 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.datos {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.cifras {
+  margin-top: 0.75rem;
+}
+
+.temas,
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.subtitulo {
+  margin: 3rem 0 1rem;
+}
+
+.capitulos {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--pizarra-200);
+  border-radius: 10px;
+}
+
+.capitulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.capitulo + .capitulo {
+  border-top: 1px solid var(--pizarra-100);
+}
+
+@container libro (min-width: 86rem) {
+  .cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36rem;
+    gap: 3rem;
+    align-items: start;
+    max-width: 100rem;
+  }
+
+  .hojeo {
+    display: grid;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .ficha {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .portada {
+    width: 10rem !important;
+  }
+}

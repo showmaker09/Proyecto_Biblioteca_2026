@@ -1,0 +1,74 @@
+/* Mismos valores que LectorPage.module.css; solo se usan si se pide un tema propio */
+.claro,
+.oscuro {
+  min-height: 100vh;
+  background: var(--l-fondo);
+  color: var(--l-texto);
+}
+
+.claro {
+  --l-fondo: #ffffff;
+  --l-texto: #111111;
+  --l-borde: #d9d9d9;
+}
+
+.oscuro {
+  --l-fondo: #000000;
+  --l-texto: #ffffff;
+  --l-borde: #3a3a3a;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--l-borde, var(--borde));
+}
+
+.izquierda {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.controles {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.texto {
+  display: grid;
+  gap: 1.75rem;
+  max-width: 42rem;
+  margin: 0 auto;
+  /* padding y no margin: así el margen superior no se escapa del contenedor y deja ver el fondo de la página */
+  padding: 2rem 1rem;
+}
+
+/* Paso de línea parecido al del texto real (interlineado 1.75), para que no salte al cargar */
+.parrafo {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.paginas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+}
+
+@media (max-width: 520px) {
+  .barra {
+    padding: 0.75rem 1rem;
+  }
+
+  .titulo {
+    display: none;
+  }
+}

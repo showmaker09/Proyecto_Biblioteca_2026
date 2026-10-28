@@ -1,0 +1,59 @@
+/* Mismas medidas que CatalogoPage.module.css y LibroEstanteria.module.css para que al llegar los datos no haya saltos */
+.estanteria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 11rem);
+  justify-content: space-between;
+  column-gap: 2.25rem;
+}
+
+@container (width < 37.5rem) {
+  .estanteria {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+}
+
+@container (width < 30rem) {
+  .estanteria {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.25rem;
+  }
+
+  .item {
+    margin-bottom: 2rem;
+  }
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 2.75rem;
+}
+
+/* Dentro de la estantería real (ver .estanteria en CatalogoPage.module.css) cada libro ocupa sus 5 filas. */
+.enEstanteria {
+  grid-row: span 5;
+  list-style: none;
+}
+
+.portada {
+  margin-bottom: 0.4rem;
+}
+
+.boton {
+  margin-top: 0.75rem;
+}
+
+.tabla {
+  display: grid;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--borde);
+}

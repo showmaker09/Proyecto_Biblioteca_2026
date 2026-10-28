@@ -1,0 +1,74 @@
+/* Los capítulos van dentro de una tarjeta con sombra suave; overflow recorta las franjas a sus esquinas. */
+.lista {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--pizarra-200);
+  border-radius: 10px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-tarjeta);
+  list-style: none;
+}
+
+.lista li + li {
+  border-top: 1px solid var(--pizarra-100);
+}
+
+.capitulo {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+}
+
+/* El contorno de foco va por dentro: por fuera lo cortaría el overflow de la tarjeta. */
+.capitulo:focus-visible {
+  outline-offset: -2px;
+}
+
+.capitulo:hover {
+  background: var(--pizarra-50);
+}
+
+/* Capítulo en curso: franja azul muy clara con un filete a la izquierda. */
+.capitulo[aria-current] {
+  background: var(--azul-50);
+  box-shadow: inset 3px 0 0 var(--acento);
+  font-weight: 600;
+}
+
+.numero {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+}
+
+.aqui {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--acento);
+  color: var(--acento-texto);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.pagina {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.vacio {
+  margin: 0;
+  color: var(--texto-suave);
+}
