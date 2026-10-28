@@ -15,7 +15,7 @@
   --l-texto: #111111;
   --l-borde: #d9d9d9;
   max-width: 44rem;
-  min-height: 0;
+  min-height: 28rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 2rem clamp(1rem, 5vw, 3rem) 2.5rem;
