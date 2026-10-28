@@ -2,17 +2,23 @@ using System.Buffers.Text;
 using System.Security.Cryptography;
 using System.Text;
 using Biblioteca.Api.Comun.Datos;
-using Biblioteca.Api.Comun.Seguridad;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Biblioteca.Api.Features.Auth;
+namespace Biblioteca.Api.Comun.Seguridad;
 
-public sealed record DatosUsuario(string Id, string Correo, string Nombre, string Rol)
+/// <summary>
+/// Quien tiene la sesión. Permisos se deduce del rol (ver Permisos.PorRol) y sirve al front para mostrar
+/// u ocultar opciones; quien decide es siempre el servidor.
+/// </summary>
+public sealed record DatosUsuario(string Id, string Correo, string Nombre, string Rol, IReadOnlyList<string> Permisos)
 {
+    public DatosUsuario(string id, string correo, string nombre, string rol)
+        : this(id, correo, nombre, rol, Seguridad.Permisos.De(rol)) { }
+
     public static DatosUsuario De(Usuario usuario) => new(usuario.Id.ToString(), usuario.Correo, usuario.Nombre, usuario.Rol);
 }
 
@@ -60,7 +66,7 @@ public sealed class GestorSesiones(BaseDatos bd, IOptions<OpcionesSesion> opcion
 
         // El usuario se vuelve a leer: si le cambiaron el rol, el JWT nuevo ya lo trae.
         var usuario = await bd.Usuarios.Find(u => u.Id == sesion.UsuarioId).FirstOrDefaultAsync(ct);
-        if (usuario is null)
+        if (usuario is null || usuario.DesactivadoEn is not null)
         {
             BorrarCookie(http);
             return null;
@@ -79,6 +85,16 @@ public sealed class GestorSesiones(BaseDatos bd, IOptions<OpcionesSesion> opcion
         }
         BorrarCookie(http);
     }
+
+    /// <summary>
+    /// Cierra todas las sesiones de una persona en todos sus dispositivos: al cambiarle el rol, desactivarla,
+    /// borrarla o cambiar su contraseña. Su JWT actual sigue valiendo hasta que vence (como mucho MinutosToken).
+    /// </summary>
+    public Task RevocarUsuarioAsync(ObjectId usuarioId, CancellationToken ct) =>
+        bd.Sesiones.UpdateManyAsync(
+            s => s.UsuarioId == usuarioId && s.RevocadoEn == null,
+            Builders<SesionRefresco>.Update.Set(s => s.RevocadoEn, reloj.GetUtcNow().UtcDateTime),
+            cancellationToken: ct);
 
     /// <summary>
     /// true si el token se usó hace un instante (otra pestaña). Si se usó hace más, alguien lo copió:

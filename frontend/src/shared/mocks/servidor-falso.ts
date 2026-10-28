@@ -15,13 +15,89 @@ const normalizar = (texto: string) => texto.normalize('NFD').replace(/\p{Diacrit
  *   GET /libros/:id                       -> detalle del libro (con capítulos, sin páginas)
  *   GET /libros/:id/paginas/:numero       -> una página + total_paginas
  */
-export async function responder<T>(ruta: string): Promise<T> {
-  await new Promise((resolver) => setTimeout(resolver, RETARDO_MS))
-  return resolverRuta(ruta) as T
+const USUARIO_MOCK = {
+  id: '000000000000000000000001',
+  correo: 'lector@ejemplo.com',
+  nombre: 'Lector Demo',
+  rol: 'lector',
+  permisos: [],
 }
 
-export function resolverRuta(ruta: string): unknown {
+const SESION_MOCK = {
+  token_acceso: 'mock-jwt-token',
+  expira_en: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+  usuario: USUARIO_MOCK,
+}
+
+export async function responder<T>(ruta: string, metodo = 'GET', cuerpo?: unknown): Promise<T> {
+  await new Promise((resolver) => setTimeout(resolver, RETARDO_MS))
+  return resolverRuta(ruta, metodo, cuerpo) as T
+}
+
+export function resolverRuta(ruta: string, metodo = 'GET', cuerpo?: unknown): unknown {
   const { pathname, searchParams } = new URL(ruta, 'http://mock')
+
+  if (pathname === '/auth/login' || pathname === '/auth/registro' || pathname === '/auth/refrescar') return SESION_MOCK
+  if (pathname === '/auth/yo') return USUARIO_MOCK
+  if (pathname === '/auth/cerrar-sesion') return undefined
+
+  if (metodo === 'POST' && pathname === '/libros') {
+    const c = cuerpo as { id?: string; titulo?: string; autor?: string } | undefined
+    return {
+      _id: c?.id || 'mock_creado',
+      titulo: c?.titulo || 'Libro Creado',
+      autor: c?.autor || 'Autor Mock',
+      idioma: 'es',
+      temas: [],
+      portada: null,
+      total_paginas: 1,
+      caracteres_totales: 100,
+    }
+  }
+
+  if (metodo === 'DELETE' && pathname.startsWith('/libros/')) {
+    return { mensaje: 'Libro eliminado' }
+  }
+
+  if (metodo === 'PATCH') {
+    const match = pathname.match(/^\/libros\/([^/]+)$/)
+    if (match) {
+      const libro = buscar(match[1]) as any
+      const c = (cuerpo ?? {}) as any
+      if (c.titulo !== undefined) libro.titulo = String(c.titulo).trim()
+      if (c.autor !== undefined) libro.autor = String(c.autor).trim()
+      if (c.idioma !== undefined) libro.idioma = String(c.idioma)
+      if (c.temas !== undefined) libro.temas = c.temas ?? []
+      if (c.portada !== undefined) libro.portada = c.portada || null
+      if (c.capitulos !== undefined) libro.capitulos = c.capitulos ?? []
+      const { paginas, ...resto } = libro
+      return { ...resto, total_paginas: paginas.length }
+    }
+  }
+
+  if (metodo === 'PUT') {
+    const match = pathname.match(/^\/libros\/([^/]+)$/)
+    if (match) {
+      const libro = buscar(match[1]) as any
+      const c = (cuerpo ?? {}) as any
+      if (c.titulo) libro.titulo = String(c.titulo).trim()
+      if (c.autor) libro.autor = String(c.autor).trim()
+      if (c.idioma) libro.idioma = String(c.idioma)
+      if (c.temas !== undefined) libro.temas = c.temas ?? []
+      if (c.portada !== undefined) libro.portada = c.portada || null
+      if (c.capitulos !== undefined) libro.capitulos = c.capitulos ?? []
+      if (c.paginas && Array.isArray(c.paginas)) {
+        libro.paginas = c.paginas.map((texto: string, idx: number) => ({
+          numero_pagina: idx + 1,
+          texto_completo: texto,
+          conteo_palabras: texto.split(/\s+/).filter(Boolean).length,
+        }))
+        libro.caracteres_totales = c.paginas.reduce((acc: number, p: string) => acc + p.length, 0)
+      }
+      const { paginas, ...resto } = libro
+      return { ...resto, total_paginas: paginas.length }
+    }
+  }
 
   if (pathname === '/libros') return listar(searchParams)
   if (pathname === '/idiomas') return [...new Set(LIBROS.map((l) => l.idioma))].sort()

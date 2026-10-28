@@ -1,10 +1,11 @@
 namespace Biblioteca.Api.Features.Auth;
 
-/// <summary>Registro, login y sesión. Son las únicas rutas que no piden token.</summary>
+/// <summary>
+/// Registro, login, sesión y la cuenta propia. Registro, login, refrescar y cerrar sesión son las únicas rutas
+/// de toda la API que no piden token; /auth/yo y el cambio de contraseña son de quien tiene la sesión.
+/// </summary>
 public static class AuthEndpoints
 {
-    public static IServiceCollection AddAuth(this IServiceCollection servicios) => servicios.AddSingleton<GestorSesiones>();
-
     public static IEndpointRouteBuilder MapAuth(this IEndpointRouteBuilder app)
     {
         var auth = app.MapGroup("/auth");
@@ -13,6 +14,8 @@ public static class AuthEndpoints
         RefrescarSesion.Mapear(auth);
         CerrarSesion.Mapear(auth);
         UsuarioActual.Mapear(auth);
+        ActualizarPerfil.Mapear(auth);
+        CambiarContrasena.Mapear(auth);
         return app;
     }
 }

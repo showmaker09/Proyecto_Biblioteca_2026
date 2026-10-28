@@ -58,12 +58,15 @@ public static class ServiciosSeguridad
                 };
             });
 
-        servicios.AddAuthorizationBuilder()
+        var autorizacion = servicios.AddAuthorizationBuilder()
             // Seguro por defecto: toda ruta exige token salvo las marcadas con AllowAnonymous.
-            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
-            .AddPolicy(Politicas.SoloAdmin, politica => politica.RequireRole(Roles.Admin));
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+        // Una política por permiso, con los roles que lo tienen. El JWT solo lleva el rol.
+        foreach (var permiso in Permisos.Todos)
+            autorizacion.AddPolicy(permiso, politica => politica.RequireRole(Permisos.RolesCon(permiso)));
 
         servicios.AddSingleton<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
+        servicios.AddSingleton<GestorSesiones>();
         servicios.AddSingleton(TimeProvider.System);
         return servicios;
     }

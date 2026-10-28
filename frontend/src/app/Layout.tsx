@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '@/features/auth'
 import estilos from './Layout.module.css'
 
 // Pequeña espera al entrar al borde para que no se abra al pasar el ratón de largo,
@@ -13,6 +14,7 @@ const ESPERA_CERRAR_MS = 280
  * (o al tocarlo) y se recoge al salir de él. Con teclado: Ctrl/⌘ + B o el enlace "Mostrar menú" del primer Tab.
  */
 export function Layout() {
+  const { usuario, cerrarSesion } = useAuth()
   const [abierto, setAbierto] = useState(false)
   const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined)
   const menu = useRef<HTMLElement>(null)
@@ -91,7 +93,36 @@ export function Layout() {
             <NavLink to="/continuar-leyendo" className={({ isActive }) => (isActive ? estilos.activo : undefined)}>
               Continuar leyendo
             </NavLink>
+            {usuario?.rol === 'admin' && (
+              <>
+                <NavLink to="/libros/nuevo" className={({ isActive }) => (isActive ? estilos.activo : undefined)}>
+                  Nuevo libro
+                </NavLink>
+                <a href="/scalar/v1" target="_blank" rel="noreferrer">
+                  Documentación API
+                </a>
+              </>
+            )}
           </nav>
+
+          {usuario && (
+            <div className={estilos.perfil}>
+              <div className={estilos.perfilUsuario}>
+                <span className={estilos.perfilNombre}>{usuario.nombre}</span>
+                <span className={estilos.perfilRol}>{usuario.rol}</span>
+              </div>
+              <button
+                type="button"
+                className={estilos.botonSalir}
+                onClick={async () => {
+                  cambiar(false)
+                  await cerrarSesion()
+                }}
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 

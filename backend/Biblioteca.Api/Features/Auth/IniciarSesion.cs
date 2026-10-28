@@ -1,5 +1,6 @@
 using Biblioteca.Api.Comun;
 using Biblioteca.Api.Comun.Datos;
+using Biblioteca.Api.Comun.Seguridad;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using MongoDB.Driver;
@@ -9,7 +10,7 @@ namespace Biblioteca.Api.Features.Auth;
 /// <summary>
 /// POST /auth/login { correo, contrasena } -> 200 con la sesión.
 /// Tras 5 intentos fallidos la cuenta se bloquea 15 minutos. La respuesta de error es siempre la misma,
-/// exista o no la cuenta, para no revelar qué correos están registrados.
+/// exista o no la cuenta y esté o no desactivada, para no revelar qué correos están registrados.
 /// </summary>
 public static class IniciarSesion
 {
@@ -55,6 +56,7 @@ public static class IniciarSesion
             await RegistrarFalloAsync(bd, usuario, ahora, ct);
             return Rechazo();
         }
+        if (usuario.DesactivadoEn is not null) return Rechazo();
 
         var cambios = new List<UpdateDefinition<Usuario>>();
         if (usuario.IntentosFallidos > 0 || usuario.BloqueadoHasta is not null)

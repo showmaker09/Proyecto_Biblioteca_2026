@@ -1,18 +1,17 @@
 # Frontend – Biblioteca de Ingeniería
 
-React 19 + TypeScript + Vite + React Router. Lee los libros de la base `Biblioteca_Ingenieria` (colección `Libros`, ver `../modelo_libro.json`) a través de una API. Mientras el equipo de backend entrega la suya, se usa el puente temporal `../dev-api`.
+React 19 + TypeScript + Vite + React Router. Consume la API de backend en .NET (`backend/Biblioteca.Api`) conectada a MongoDB Atlas.
 
 ## Arranque
 
 Se necesitan dos terminales, desde la raíz del proyecto:
 
 ```bash
-# Terminal 1: puente de solo lectura hacia Atlas (lee MONGO_URI del .env de la raíz)
-cd dev-api
-npm install   # solo la primera vez
-npm start     # http://127.0.0.1:8000
+# Terminal 1: backend real en .NET (lee MONGO_URI y JWT_CLAVE del .env de la raíz)
+cd backend/Biblioteca.Api
+dotnet run   # http://127.0.0.1:8000
 
-# Terminal 2: la app
+# Terminal 2: la app frontend
 cd frontend
 npm install   # solo la primera vez
 cp .env.example .env.local
@@ -159,10 +158,9 @@ Parámetros de `GET /libros`, todos opcionales:
 
 La búsqueda, el filtro y el orden los hace el servidor: el navegador solo tiene las tandas que ya pidió. La biblioteca pide la siguiente tanda al acercarse al final de la lista (con un botón «Mostrar más» como alternativa) y la búsqueda se envía 300 ms después de dejar de escribir.
 
-`total_paginas` no existe en el modelo de Mongo: el backend lo calcula (`dev-api` usa `$size` sobre `paginas`). Para que paginar sea barato también en la base, conviene que la API real lo guarde en el documento y cree índices en `titulo` y `autor` con collation `es`: `dev-api` todavía lee cada documento completo (con sus páginas) en cada consulta para calcularlo. `dev-api/server.mjs` y `shared/mocks/servidor-falso.ts` implementan este mismo contrato. Cuando llegue la API real basta con cambiar `VITE_API_URL` (y habilitar CORS para el origen del front si no se usa el proxy).
+`total_paginas` lo calcula el backend al consultar o lo almacena al crear/reemplazar un libro, y la API real crea índices en `titulo` y `autor` con colación `es`.
 
 ## Pendiente
 
 * Búsqueda de texto completo dentro de las páginas (necesita un endpoint del backend).
 * Subrayar texto y guardar marcadores, progreso y subrayados por usuario en la base: diseño en [`../subrayados_por_usuario.md`](../subrayados_por_usuario.md).
-* Sustituir `dev-api` por la API real del equipo de backend.

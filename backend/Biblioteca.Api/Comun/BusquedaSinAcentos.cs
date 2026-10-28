@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Text;
 
-namespace Biblioteca.Api.Features.Libros;
+namespace Biblioteca.Api.Comun;
 
 /// <summary>
 /// "alvaro" -> "[aáàâäãAÁÀÂÄÃ]lv[aá…]r[oó…]": una expresión regular que encuentra el texto con o sin acentos.
-/// Se usa con la opción "i" de Mongo para no distinguir mayúsculas.
+/// Se usa con la opción "i" de Mongo para no distinguir mayúsculas. La usan el catálogo y la lista de usuarios.
 /// </summary>
 public static class BusquedaSinAcentos
 {

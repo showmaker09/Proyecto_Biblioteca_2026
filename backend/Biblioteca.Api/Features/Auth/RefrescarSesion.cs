@@ -1,4 +1,5 @@
 using Biblioteca.Api.Comun;
+using Biblioteca.Api.Comun.Seguridad;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Biblioteca.Api.Features.Auth;

@@ -41,4 +41,20 @@ describe('servidor falso: GET /libros', () => {
     expect(libro).not.toHaveProperty('capitulos')
     expect(libro).toHaveProperty('total_paginas', 3)
   })
+
+  it('permite actualizar metadatos con PATCH /libros/:id', () => {
+    const res = resolverRuta('/libros/001_fuente_ovejuna', 'PATCH', { titulo: 'Fuenteovejuna Actualizado' }) as any
+    expect(res.titulo).toBe('Fuenteovejuna Actualizado')
+  })
+
+  it('permite reemplazar libro con PUT /libros/:id', () => {
+    const res = resolverRuta('/libros/001_fuente_ovejuna', 'PUT', {
+      titulo: 'Fuenteovejuna Reemplazado',
+      autor: 'Lope de Vega',
+      idioma: 'es',
+      paginas: ['Página uno nueva', 'Página dos nueva'],
+    }) as any
+    expect(res.titulo).toBe('Fuenteovejuna Reemplazado')
+    expect(res.total_paginas).toBe(2)
+  })
 })

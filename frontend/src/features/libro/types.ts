@@ -24,3 +24,24 @@ export interface PaginaMuestra {
   texto_completo: string
   total_paginas: number
 }
+
+/** Lo que envía PATCH /libros/:id para actualizar metadatos o capítulos sin modificar páginas. */
+export interface SolicitudActualizarLibro {
+  titulo?: string
+  autor?: string
+  idioma?: string
+  temas?: string[]
+  portada?: string | null
+  capitulos?: Capitulo[]
+}
+
+/** Lo que envía PUT /libros/:id para reemplazar el libro por completo (incluyendo páginas). */
+export interface SolicitudReemplazarLibro {
+  titulo: string
+  autor: string
+  idioma: string
+  temas?: string[]
+  portada?: string | null
+  capitulos?: Capitulo[]
+  paginas: string[]
+}

@@ -19,8 +19,19 @@ public sealed class InicializadorIndices(BaseDatos bd) : IHostedService
             {
                 new CreateIndexModel<SesionRefresco>(Builders<SesionRefresco>.IndexKeys.Ascending(s => s.HashToken), new CreateIndexOptions { Unique = true }),
                 new CreateIndexModel<SesionRefresco>(Builders<SesionRefresco>.IndexKeys.Ascending(s => s.Familia)),
+                // Para cerrar todas las sesiones de una persona (cambio de rol, desactivar, borrar, cambio de contraseña).
+                new CreateIndexModel<SesionRefresco>(Builders<SesionRefresco>.IndexKeys.Ascending(s => s.UsuarioId)),
                 // TTL: Mongo borra solas las sesiones vencidas.
                 new CreateIndexModel<SesionRefresco>(Builders<SesionRefresco>.IndexKeys.Ascending(s => s.ExpiraEn), new CreateIndexOptions { ExpireAfter = TimeSpan.Zero }),
+            },
+            ct);
+
+        var colacionEs = new Collation("es", strength: CollationStrength.Primary);
+        await bd.Libros.Indexes.CreateManyAsync(
+            new[]
+            {
+                new CreateIndexModel<Libro>(Builders<Libro>.IndexKeys.Ascending(l => l.Titulo), new CreateIndexOptions { Collation = colacionEs }),
+                new CreateIndexModel<Libro>(Builders<Libro>.IndexKeys.Ascending(l => l.Autor), new CreateIndexOptions { Collation = colacionEs }),
             },
             ct);
     }

@@ -1,0 +1,137 @@
+.pagina {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.cabecera {
+  margin-bottom: 2rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background: var(--acento);
+  color: var(--acento-texto);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.titulo {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.subtitulo {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 1rem;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: var(--sombra-alzada);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .rejilla {
+    grid-template-columns: 1fr;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.etiqueta {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.pista {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.entrada,
+.textarea {
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.textarea {
+  min-height: 180px;
+  resize: vertical;
+  line-height: 1.5;
+  font-family: monospace;
+}
+
+.entrada:focus,
+.textarea:focus {
+  border-color: var(--acento);
+  outline: none;
+}
+
+.error {
+  padding: 0.85rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borde);
+}
+
+.btnSecundario {
+  background: transparent;
+  border: 1px solid var(--borde);
+  color: var(--texto);
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btnSecundario:hover {
+  background: var(--borde);
+}
