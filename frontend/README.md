@@ -25,7 +25,7 @@ Para trabajar sin base de datos, poner `VITE_USAR_MOCKS=true` en `.env.local` (3
 | `npm run dev` | Servidor de desarrollo |
 | `npm run build` | Revisa tipos y genera `dist/` |
 | `npm run lint` | Linter (oxlint) |
-| `npm test` | Pruebas (Vitest). Incluye una prueba sobre las 173 páginas reales de `../Bulk_Upload_Texto_Test` |
+| `npm test` | Pruebas (Vitest). Incluye una prueba sobre las páginas reales que haya en `../Bulk_Upload_Texto_Test`; si esa carpeta está vacía, se salta |
 
 ### Variables de entorno
 
@@ -93,7 +93,7 @@ Los libros vienen de Project Gutenberg en texto plano. `shared/lib/formatoTexto.
 | Créditos de Gutenberg y "Nota de transcripción" | plegados en "Notas de la edición digital" (no se borran) |
 | Reparto del estreno con `»` (ídem) y `}` | tabla Personaje / Intérprete, con los papeles agrupados |
 
-La prueba `formatoTexto.test.ts` recorre las 173 páginas reales y exige que no se pierda ni una palabra del original y que no quede ningún `_`, `=x=`, `»` o `}` visible. Las reglas están pensadas para estos tres libros de teatro: un libro con otra estructura no pierde texto, pero puede quedar con menos jerarquía.
+La prueba `formatoTexto.test.ts` recorre las páginas reales que haya en `Bulk_Upload_Texto_Test` (si la carpeta está vacía, se salta) y exige que no se pierda ni una palabra del original y que no quede ningún `_`, `=x=`, `»` o `}` visible. Las reglas se diseñaron con tres libros de teatro: un libro con otra estructura no pierde texto, pero puede quedar con menos jerarquía.
 
 ## Funciones del lector
 

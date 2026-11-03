@@ -463,7 +463,8 @@ describe('parsearPagina: entradas raras', () => {
 })
 
 // ---------------------------------------------------------------------------------------------
-// Corpus real: las 173 páginas de los tres libros de prueba
+// Corpus real: las páginas de los libros que haya en Bulk_Upload_Texto_Test.
+// Esa carpeta es una zona de trabajo local y su contenido no se versiona: si está vacía, esta suite se salta.
 // ---------------------------------------------------------------------------------------------
 
 const RAIZ = fileURLToPath(new URL('../../../../Bulk_Upload_Texto_Test/', import.meta.url))
@@ -476,6 +477,7 @@ interface PaginaCorpus {
 
 function leerCorpus(): PaginaCorpus[] {
   const paginas: PaginaCorpus[] = []
+  if (!existsSync(RAIZ)) return paginas
   for (const libro of readdirSync(RAIZ).sort()) {
     const dir = `${RAIZ}${libro}/paginas`
     if (!existsSync(dir)) continue
@@ -498,12 +500,14 @@ function bloqueVacio(b: Bloque): boolean {
   return b.tipo !== 'separador' && textoPlano([b]).trim() === ''
 }
 
-describe.skipIf(!existsSync(RAIZ))('corpus real de Bulk_Upload_Texto_Test', () => {
-  const paginas = leerCorpus()
+const CORPUS = leerCorpus()
+
+describe.skipIf(CORPUS.length === 0)('corpus real de Bulk_Upload_Texto_Test', () => {
+  const paginas = CORPUS
   const resultados = paginas.map((p) => ({ ...p, bloques: parsearPagina(p.texto) }))
 
-  it('trae las 173 páginas de los tres libros', () => {
-    expect(paginas).toHaveLength(173)
+  it('encuentra páginas de libros en la carpeta', () => {
+    expect(paginas.length).toBeGreaterThan(0)
   })
 
   it('(c) no lanza excepciones en ninguna página', () => {

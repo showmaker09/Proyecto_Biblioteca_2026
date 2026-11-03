@@ -31,3 +31,8 @@ Thumbs.db
 # Dependencias de Node (frontend y dev-api)
 node_modules/
 dist/
+
+# Libros de trabajo local: su contenido no se versiona (los libros viven en MongoDB Atlas
+# y se regeneran con preparar_libros.py). Solo se conserva el LEEME.md de la carpeta.
+Bulk_Upload_Texto_Test/*
+!Bulk_Upload_Texto_Test/LEEME.md

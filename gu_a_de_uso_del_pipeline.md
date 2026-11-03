@@ -43,6 +43,8 @@ Proyecto_Raiz/
                 └── 002.txt                   para garantizar el orden de lectura.
 ```
 
+Esta carpeta es una zona de trabajo local: el `.gitignore` ignora todo su contenido (solo se conserva su `LEEME.md`), porque los libros viven en MongoDB Atlas y se regeneran con `preparar_libros.py`. Los libros que armes aquí no se suben al repositorio.
+
 Nota sobre Windows: asegúrate de que tus archivos `.txt` y `.json` no tengan extensiones ocultas repetidas (ej. `001.txt.txt`). Si el script omite una página, suele ser por este motivo.
 
 ### 2.1 Contenido de `metadatos.json`

@@ -17,7 +17,7 @@ Pipeline de carga masiva de libros en texto plano (.txt) hacia una base de datos
 | `pipeline_local.py` | Hace lo mismo pero solo imprime el JSON resultante, sin conectarse a Atlas |
 | `preparar_libros.py` | Descarga libros de dominio público y arma las carpetas con la estructura que esperan los pipelines |
 | `agregar_portadas.py` | Agrega el enlace a la portada de Gutenberg a los libros que ya están en Atlas y no lo tienen (sin `--aplicar` solo simula) |
-| `Bulk_Upload_Texto_Test/` | Carpeta de prueba con 3 libros completos |
+| `Bulk_Upload_Texto_Test/` | Zona de trabajo local para los libros. Su contenido no se versiona (ver el `LEEME.md` de la carpeta) |
 | `gu_a_de_uso_del_pipeline.md` | Guía detallada de operación |
 | `backend/` | API REST completa en .NET 10 (Vertical Slice Architecture), autenticación JWT/cookies, roles y CRUD |
 | `frontend/` | Aplicación web en React 19 + TypeScript + Vite |
@@ -124,5 +124,5 @@ Los textos de este proyecto son libros en español de dominio público, obtenido
 
 * Modelo de datos definido en `modelo_libro.json`.
 * Base de datos en MongoDB Atlas activa.
-* Pipeline de carga probado con 3 libros completos.
+* Pipeline de carga probado y en uso: los libros se cargan en Atlas y la aplicación los lee de ahí.
 * Meta de carga: 125 libros por semana hasta llegar a 1000. El reparto entre los integrantes está en el plan logístico del equipo.
