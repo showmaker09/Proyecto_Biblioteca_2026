@@ -1,0 +1,601 @@
+/* ═════════════════════════════════════════════════════════════════════════════
+   Hero narrativo — «Lee. Vive. Recuerda.»
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.contenedorScroll {
+  position: relative;
+  width: 100%;
+  /* Distancia de scroll del recorrido completo (190 fotogramas + 4 actos de texto). */
+  height: 650vh;
+  background: #ffffff;
+  color: var(--tinta);
+}
+
+.escenaFija {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.lienzoFondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  background-color: #ffffff;
+}
+
+/* Velo blanco en la base: legibilidad del texto sobre el suelo de la galería. */
+.velo {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0) 55%, rgb(255 255 255 / 0.55) 100%),
+    radial-gradient(120% 70% at 50% 110%, rgb(255 255 255 / 0.5), transparent 60%);
+}
+
+/* Grano de papel: quita el aspecto de render digital. */
+.grano {
+  position: absolute;
+  inset: -50%;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: granoVivo 0.9s steps(6) infinite;
+}
+
+@keyframes granoVivo {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ─── Navegación Flotante ─── */
+.barraFlotante {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.75rem 3rem;
+  background: transparent;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .barraFlotante {
+    padding: 1.15rem 1.25rem;
+  }
+}
+
+/* ─── Glassmorphism: Pastilla de Marca ─── */
+.pildoraMarca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: #111111;
+  pointer-events: auto;
+  padding: 0.38rem 1.1rem 0.38rem 0.45rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.32) 100%);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 16px 36px -6px rgba(15, 23, 42, 0.08),
+    0 4px 12px -2px rgba(15, 23, 42, 0.04),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pildoraMarca:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.45) 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    0 20px 40px -6px rgba(15, 23, 42, 0.12),
+    0 6px 16px -2px rgba(15, 23, 42, 0.06),
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 1);
+}
+
+.contenedorLogo {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(235, 238, 242, 0.6) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1.5px rgba(255, 255, 255, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.imagenLogo {
+  height: 88%;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12));
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pildoraMarca:hover .imagenLogo {
+  transform: scale(1.08) translateY(-0.5px);
+}
+
+.nombreMarca {
+  font-family: var(--fuente-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: #111111;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+/* ─── Glassmorphism: Pastilla de Acceso ─── */
+.pildoraAcciones {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: auto;
+  padding: 0.32rem 0.35rem 0.32rem 0.65rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.32) 100%);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 16px 36px -6px rgba(15, 23, 42, 0.08),
+    0 4px 12px -2px rgba(15, 23, 42, 0.04),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.04);
+}
+
+.botonEntrar {
+  background: transparent;
+  border: none;
+  color: #1e293b;
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  font-family: var(--fuente-grotesca);
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.botonEntrar:hover {
+  color: #000000;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.botonRegistro {
+  background: #111111;
+  color: #ffffff;
+  padding: 0.45rem 1.15rem;
+  border-radius: 9999px;
+  font-family: var(--fuente-grotesca);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.botonRegistro:hover {
+  opacity: 0.92;
+  transform: translateY(-0.5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   Manifiesto
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.soloLectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.bloque {
+  position: absolute;
+  z-index: 10;
+  margin: 0;
+  color: var(--tinta);
+  will-change: transform;
+}
+
+.bloque p {
+  margin: 0;
+}
+
+/* Los actos que aún no tocan arrancan ocultos (GSAP los muestra con autoAlpha). */
+.bloqueVive,
+.bloqueRecuerda,
+.bloqueCita,
+.bloqueFinal {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.antetitulo {
+  font-family: var(--fuente-grotesca);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgb(20 20 20 / 0.6);
+  margin-bottom: 0.9rem !important;
+}
+
+.titular {
+  font-family: var(--fuente-display);
+  font-weight: 400;
+  font-size: clamp(5.5rem, 21vw, 21rem);
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+  color: var(--tinta);
+}
+
+.titularCursiva {
+  font-style: italic;
+  letter-spacing: -0.03em;
+}
+
+/* Aire para las máscaras de SplitText: que no se corten cursivas, acentos ni el punto final. */
+.titular :global(.letra-mask) {
+  padding: 0.06em 0.05em 0.04em;
+  margin: -0.06em -0.05em -0.04em;
+}
+
+.bajada {
+  font-family: var(--fuente-grotesca);
+  font-size: clamp(0.98rem, 1.25vw, 1.15rem);
+  line-height: 1.5;
+  max-width: 30ch;
+  margin-top: 1.4rem !important;
+  color: rgb(20 20 20 / 0.72);
+}
+
+.bloqueLee {
+  left: clamp(1.25rem, 4vw, 3.5rem);
+  bottom: clamp(5.5rem, 13vh, 9rem);
+}
+
+.bloqueVive {
+  right: clamp(1.25rem, 4vw, 3.5rem);
+  bottom: clamp(5.5rem, 13vh, 9rem);
+  text-align: right;
+}
+
+.bloqueVive .bajada {
+  margin-left: auto;
+}
+
+.bloqueRecuerda {
+  left: clamp(1.25rem, 4vw, 3.5rem);
+  top: 50%;
+  translate: 0 -45%;
+}
+
+.bloqueRecuerda .titular {
+  font-size: clamp(4rem, 15vw, 15rem);
+}
+
+/* Telón: la cita sobre el muro blanco. */
+.bloqueCita {
+  left: clamp(1.25rem, 7vw, 6rem);
+  top: 50%;
+  translate: 0 -50%;
+  max-width: min(17ch, 86vw);
+}
+
+.cita {
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-size: clamp(2.4rem, 5.6vw, 5.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--tinta);
+}
+
+.autor {
+  margin-top: 2rem;
+  font-family: var(--fuente-grotesca);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(20 20 20 / 0.62);
+}
+
+.autor cite {
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-family: var(--fuente-display);
+  font-size: 1.1rem;
+}
+
+/* Final: la biblioteca iluminada. */
+.bloqueFinal {
+  left: 50%;
+  bottom: clamp(5.5rem, 12vh, 8rem);
+  translate: -50% 0;
+  width: min(92vw, 60rem);
+  text-align: center;
+}
+
+.titularFinal {
+  margin: 0;
+  font-family: var(--fuente-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 8.5vw, 8.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  color: var(--tinta);
+}
+
+.titularFinal em {
+  font-style: italic;
+}
+
+.titularFinal :global(.palabra-mask) {
+  padding: 0.04em 0.06em 0.08em;
+  margin: -0.04em -0.06em -0.08em;
+}
+
+.accionesFinal {
+  margin-top: 2.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.ctaPrincipal,
+.ctaSecundario {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 3.25rem;
+  padding: 0 1.6rem;
+  border-radius: 9999px;
+  font-family: var(--fuente-grotesca);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.25s ease,
+    box-shadow 0.35s ease;
+}
+
+.ctaPrincipal {
+  background: var(--tinta);
+  color: #ffffff;
+  box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.45);
+}
+
+.ctaPrincipal span {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ctaPrincipal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -12px rgb(0 0 0 / 0.5);
+}
+
+.ctaPrincipal:hover span {
+  transform: translateX(4px);
+}
+
+.ctaSecundario {
+  color: var(--tinta);
+  background: rgb(255 255 255 / 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgb(20 20 20 / 0.12);
+}
+
+.ctaSecundario:hover {
+  background: rgb(255 255 255 / 0.9);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   HUD inferior
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  padding: 0 clamp(1.25rem, 4vw, 3.5rem) 1.6rem;
+  pointer-events: none;
+  font-family: var(--fuente-grotesca);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(20 20 20 / 0.62);
+}
+
+.capituloMascara {
+  display: inline-block;
+  overflow: hidden;
+  justify-self: start;
+}
+
+.capitulo {
+  display: inline-block;
+}
+
+.marcaHud {
+  justify-self: end;
+}
+
+.indicadorExplorar {
+  display: flex;
+  justify-content: center;
+}
+
+.explorarInterior {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.textoExplorar {
+  color: rgb(20 20 20 / 0.58);
+}
+
+.lineaExplorar {
+  position: relative;
+  width: 1px;
+  height: 36px;
+  overflow: hidden;
+  background: rgb(0 0 0 / 0.12);
+}
+
+.trazoExplorar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  background: var(--tinta);
+  animation: pulsoExplorar 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes pulsoExplorar {
+  0% { transform: translateY(-100%); opacity: 0; }
+  30% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateY(260%); opacity: 0; }
+}
+
+.progreso {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 21;
+  width: 100%;
+  height: 2px;
+  background: var(--tinta);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+@media (max-width: 640px) {
+  .marcaHud {
+    display: none;
+  }
+
+  .hud {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   Preloader
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--marfil);
+  color: var(--tinta);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  will-change: transform;
+}
+
+.preloaderMarca {
+  font-family: var(--fuente-display);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.preloaderFrase {
+  justify-self: end;
+  font-family: var(--fuente-grotesca);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgb(20 20 20 / 0.6);
+}
+
+.preloaderContadorMascara {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  justify-self: end;
+  overflow: hidden;
+  line-height: 0.8;
+}
+
+.preloaderContador {
+  display: inline-block;
+  font-family: var(--fuente-display);
+  font-size: clamp(6rem, 22vw, 20rem);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.preloaderBarra {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgb(20 20 20 / 0.08);
+}
+
+.preloaderBarraRelleno {
+  display: block;
+  height: 100%;
+  background: var(--tinta);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grano,
+  .trazoExplorar {
+    animation: none;
+  }
+}

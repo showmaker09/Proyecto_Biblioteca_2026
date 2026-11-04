@@ -36,3 +36,9 @@ dist/
 # y se regeneran con preparar_libros.py). Solo se conserva el LEEME.md de la carpeta.
 Bulk_Upload_Texto_Test/*
 !Bulk_Upload_Texto_Test/LEEME.md
+
+# Videos crudos o de origen (la app utiliza los fotogramas WebP en public/secuencia_inmersion)
+*.mp4
+
+
+

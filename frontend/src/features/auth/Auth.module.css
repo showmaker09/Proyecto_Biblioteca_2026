@@ -1,51 +1,196 @@
 .contenedor {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem 1rem;
+  padding: 1.5rem;
   background: var(--pizarra-50);
 }
 
-.tarjeta {
+.barraSuperior {
   width: 100%;
-  max-width: 420px;
-  background: var(--superficie);
-  border: 1px solid var(--pizarra-200);
-  border-radius: 8px;
-  padding: 2.5rem 2rem;
-  box-shadow: var(--sombra-alzada);
+  max-width: 860px;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-.cabecera {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.marca {
+.enlaceVolver {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--pizarra-600);
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  background: var(--superficie);
+  border: 1px solid var(--pizarra-200);
+  transition: all 0.15s ease;
 }
 
-.logo {
+.enlaceVolver:hover {
+  color: var(--texto);
+  border-color: var(--borde);
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.tarjetaSplit {
+  width: 100%;
+  max-width: 860px;
+  background: var(--superficie);
+  border: 1px solid var(--pizarra-200);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--sombra-alzada);
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 780px) {
+  .tarjetaSplit {
+    grid-template-columns: 1fr 1.2fr;
+  }
+}
+
+/* ─── Panel Hero lateral en Auth ─── */
+.panelHero {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3rem 2.5rem;
+  background: linear-gradient(155deg, #182234 0%, #0b1120 100%);
+  color: #f8fafc;
+  position: relative;
+}
+
+@media (min-width: 780px) {
+  .panelHero {
+    display: flex;
+  }
+}
+
+.marcaHero {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoHero {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  background: var(--acento);
-  color: var(--acento-texto);
+  background: #ffffff;
+  color: #0b1120;
   font-family: var(--fuente-titulo);
   font-size: 1.35rem;
   font-weight: bold;
   border-radius: 4px;
 }
 
+.marcaTextoHero strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.marcaTextoHero small {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.heroCuerpo {
+  margin: 2.5rem 0;
+}
+
+.citaHero {
+  margin: 0 0 1.75rem;
+  font-family: var(--fuente-titulo);
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #f1f5f9;
+  font-style: italic;
+}
+
+.citaAutor {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-style: normal;
+  color: #94a3b8;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.puntosHero {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.puntosHero li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.puntosHero svg {
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.pieHero {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* ─── Panel del Formulario ─── */
+.panelFormulario {
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (min-width: 480px) {
+  .panelFormulario {
+    padding: 3rem 2.5rem;
+  }
+}
+
+.cabecera {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.marcaMobile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 780px) {
+  .marcaMobile {
+    display: none;
+  }
+}
+
 .titulo {
   margin: 0 0 0.5rem;
-  font-size: 1.6rem;
+  font-size: 1.65rem;
   font-weight: 600;
   color: var(--texto);
 }
@@ -54,6 +199,7 @@
   margin: 0;
   color: var(--texto-suave);
   font-size: 0.95rem;
+  line-height: 1.4;
 }
 
 .formulario {
