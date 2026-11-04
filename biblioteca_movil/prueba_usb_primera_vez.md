@@ -38,7 +38,7 @@ Tiene que responder `10.0.403`.
 
 ## 3. Completa el `.env` de la raíz
 
-El archivo es `C:\Users\octavius\Desktop\INGENIERIA_7D\script_biblioteca\.env`. No lo subas a git.
+
 
 Tiene que tener `MONGO_URI`, la cadena de Atlas de este proyecto, y `JWT_CLAVE`. La clave es la contraseña con la que el servidor firma los tokens. El teléfono no la conoce ni hay que escribirla en la app. Inventa una frase de al menos 32 caracteres:
 

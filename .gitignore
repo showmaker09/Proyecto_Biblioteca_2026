@@ -24,7 +24,7 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
-
+.vs/
 # Hojas de trabajo del equipo (contienen nombres de los integrantes)
 *.xlsx
 
