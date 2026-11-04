@@ -1,11 +1,16 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { EntrarPage, RegistroPage, RutaProtegida } from '@/features/auth'
-import { CatalogoPage, ContinuarLeyendoPage } from '@/features/catalogo'
+import { ContinuarLeyendoPage } from '@/features/catalogo'
 import { LectorPage } from '@/features/lector'
 import { CrearLibroPage, EditarLibroPage, LibroPage } from '@/features/libro'
 import { Layout } from './Layout'
+import { RutaRaiz } from './RutaRaiz'
 
 export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RutaRaiz />,
+  },
   {
     path: '/entrar',
     element: <EntrarPage />,
@@ -20,7 +25,6 @@ export const router = createBrowserRouter([
       {
         element: <Layout />,
         children: [
-          { path: '/', element: <CatalogoPage /> },
           { path: '/continuar-leyendo', element: <ContinuarLeyendoPage /> },
           { path: '/libros/nuevo', element: <CrearLibroPage /> },
           { path: '/libros/:id', element: <LibroPage /> },

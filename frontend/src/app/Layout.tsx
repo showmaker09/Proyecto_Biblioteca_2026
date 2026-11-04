@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { PointerEvent } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
@@ -13,7 +13,7 @@ const ESPERA_CERRAR_MS = 280
  * El menú lateral vive escondido: aparta el contenido y se despliega al llevar el ratón al borde izquierdo
  * (o al tocarlo) y se recoge al salir de él. Con teclado: Ctrl/⌘ + B o el enlace "Mostrar menú" del primer Tab.
  */
-export function Layout() {
+export function Layout({ children }: { children?: ReactNode } = {}) {
   const { usuario, cerrarSesion } = useAuth()
   const [abierto, setAbierto] = useState(false)
   const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -129,7 +129,7 @@ export function Layout() {
       <div className={estilos.fondo} onClick={() => cambiar(false)} aria-hidden="true" />
 
       <main className={estilos.contenido}>
-        <Outlet />
+        {children ?? <Outlet />}
       </main>
     </div>
   )
