@@ -1,0 +1,385 @@
+/* ═════════════════════════════════════════════════════════════════════════════
+   Página de Inicio — Estilo Editorial Awwwards
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  color: var(--tinta, #141414);
+}
+
+/* ─── Cinta Editorial Tipográfica (Marquee) ─── */
+.marquesina {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--tinta, #141414);
+  color: #ffffff;
+  padding: 1.15rem 0;
+  display: flex;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.marquesinaPista {
+  display: flex;
+  white-space: nowrap;
+  animation: desplazarMarquesina 26s linear infinite;
+}
+
+.marquesinaItem {
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  padding: 0 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5rem;
+  opacity: 0.88;
+}
+
+.marquesinaItem em {
+  font-style: normal;
+  opacity: 0.35;
+}
+
+@keyframes desplazarMarquesina {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ─── Sección Colección Destacada ─── */
+.seccionColeccion {
+  padding: 7rem clamp(1.5rem, 6vw, 6rem);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.coleccionCabecera {
+  max-width: 44rem;
+  margin-bottom: 4.5rem;
+}
+
+.coleccionSubtitulo {
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.45);
+  margin: 0 0 1rem 0;
+}
+
+.coleccionTitulo {
+  font-family: var(--fuente-display, serif);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin: 0 0 1.25rem 0;
+  color: var(--tinta, #141414);
+}
+
+.coleccionTitulo em {
+  font-style: italic;
+}
+
+.coleccionDescripcion {
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: rgba(20, 20, 20, 0.65);
+  margin: 0;
+}
+
+.cuadriculaLibros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
+}
+
+.tarjetaLibro {
+  background: #ffffff;
+  border: 1px solid rgba(20, 20, 20, 0.08);
+  border-radius: 12px;
+  padding: 2.5rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+  position: relative;
+}
+
+.tarjetaLibro:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.08);
+}
+
+.portadaContenedor {
+  margin: 0 auto 2rem;
+  display: flex;
+  justify-content: center;
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.12));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tarjetaLibro:hover .portadaContenedor {
+  transform: scale(1.03) translateY(-2px);
+}
+
+.libroDetalles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.45);
+  margin-bottom: 0.75rem;
+}
+
+.libroCategoria {
+  color: var(--tinta, #141414);
+}
+
+.libroSeparador {
+  opacity: 0.3;
+}
+
+.libroTitulo {
+  font-family: var(--fuente-display, serif);
+  font-weight: 400;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.35rem 0;
+  color: var(--tinta, #141414);
+}
+
+.libroAutor {
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.88rem;
+  color: rgba(20, 20, 20, 0.6);
+  margin: 0 0 1.25rem 0;
+}
+
+.libroDescripcion {
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(20, 20, 20, 0.65);
+  margin: 0 0 2rem 0;
+  flex: 1;
+}
+
+.libroBoton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  background: rgba(20, 20, 20, 0.04);
+  color: var(--tinta, #141414);
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid rgba(20, 20, 20, 0.08);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.libroBoton:hover {
+  background: var(--tinta, #141414);
+  color: #ffffff;
+  border-color: var(--tinta, #141414);
+}
+
+.libroBoton:hover span[aria-hidden] {
+  transform: translateX(4px);
+}
+
+.libroBoton span[aria-hidden] {
+  transition: transform 0.25s ease;
+}
+
+/* ─── Sección CTA Monumental ─── */
+.seccionCta {
+  padding: 8rem clamp(1.5rem, 6vw, 6rem);
+  background: var(--marfil, #f6f3ec);
+  text-align: center;
+  border-top: 1px solid rgba(20, 20, 20, 0.08);
+}
+
+.ctaInterior {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.ctaAntetitulo {
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.5);
+  margin: 0 0 1rem 0;
+}
+
+.ctaTitulo {
+  font-family: var(--fuente-display, serif);
+  font-weight: 400;
+  font-size: clamp(2.8rem, 6vw, 5.2rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  margin: 0 0 1.5rem 0;
+  color: var(--tinta, #141414);
+}
+
+.ctaTitulo em {
+  font-style: italic;
+}
+
+.ctaTexto {
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: rgba(20, 20, 20, 0.65);
+  margin: 0 0 2.75rem 0;
+}
+
+.ctaBotones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.botonCtaPrincipal,
+.botonCtaSecundario {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 3.25rem;
+  padding: 0 1.8rem;
+  border-radius: 9999px;
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.botonCtaPrincipal {
+  background: var(--tinta, #141414);
+  color: #ffffff;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.45);
+}
+
+.botonCtaPrincipal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.5);
+}
+
+.botonCtaPrincipal span {
+  transition: transform 0.25s ease;
+}
+
+.botonCtaPrincipal:hover span {
+  transform: translateX(4px);
+}
+
+.botonCtaSecundario {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--tinta, #141414);
+  border: 1px solid rgba(20, 20, 20, 0.12);
+}
+
+.botonCtaSecundario:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.1);
+}
+
+/* ─── Pie de Página Editorial Monumental ─── */
+.pie {
+  position: relative;
+  background: #ffffff;
+  overflow: hidden;
+  padding: 4rem clamp(1.5rem, 6vw, 6rem) 0;
+  border-top: 1px solid rgba(20, 20, 20, 0.08);
+}
+
+.pieInterior {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .pieInterior {
+    flex-direction: row;
+    align-items: baseline;
+  }
+}
+
+.pieMarca {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.86rem;
+  color: rgba(20, 20, 20, 0.6);
+}
+
+.pieMarca strong {
+  font-family: var(--fuente-display, serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--tinta, #141414);
+}
+
+.pieEnlaces {
+  display: flex;
+  gap: 2rem;
+  font-family: var(--fuente-grotesca, sans-serif);
+  font-size: 0.86rem;
+}
+
+.pieEnlaces a {
+  text-decoration: none;
+  color: rgba(20, 20, 20, 0.65);
+  transition: color 0.2s ease;
+}
+
+.pieEnlaces a:hover {
+  color: var(--tinta, #141414);
+}
+
+.pieMarcaAgua {
+  font-family: var(--fuente-display, serif);
+  font-size: clamp(8rem, 26vw, 24rem);
+  line-height: 0.72;
+  letter-spacing: -0.04em;
+  color: rgba(20, 20, 20, 0.04);
+  user-select: none;
+  pointer-events: none;
+  text-align: center;
+  margin-top: 2rem;
+  transform: translateY(12%);
+}

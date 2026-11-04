@@ -1,4 +1,6 @@
-import { Link, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '@/features/auth'
 import { etiquetasTemas, minutosDeLectura, nombreIdioma, textoTiempoLectura } from '@/shared/lib/formatoLibro'
 import { porcentajeLeido, useProgresos } from '@/shared/lib/progresoLectura'
 import { useTituloDocumento } from '@/shared/lib/useTituloDocumento'
@@ -6,6 +8,7 @@ import { Peticion } from '@/shared/ui/EstadoPeticion'
 import { MedidorProgreso } from '@/shared/ui/MedidorProgreso'
 import { Migas } from '@/shared/ui/Migas'
 import { LibroAbrible } from '@/shared/ui/LibroAbrible'
+import { eliminarLibro } from './api/eliminarLibro'
 import { LibroEsqueleto } from './components/LibroEsqueleto'
 import { ListaCapitulos } from './components/ListaCapitulos'
 import { PrimeraPagina } from './components/PrimeraPagina'
@@ -26,10 +29,27 @@ export function LibroPage() {
 }
 
 function Ficha({ libro }: { libro: LibroDetalle }) {
+  const { usuario } = useAuth()
+  const navigate = useNavigate()
+  const [eliminando, setEliminando] = useState(false)
   const progreso = useProgresos()[libro._id]
   const porcentaje = porcentajeLeido(progreso)
   const temas = etiquetasTemas(libro.temas)
   const primerCapitulo = [...libro.capitulos].sort((a, b) => a.pagina_inicio - b.pagina_inicio)[0]
+
+  async function handleEliminar() {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente el libro "${libro.titulo}"? Esta acción no se puede deshacer.`)) {
+      return
+    }
+    try {
+      setEliminando(true)
+      await eliminarLibro(libro._id)
+      navigate('/')
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Error al eliminar el libro')
+      setEliminando(false)
+    }
+  }
 
   return (
     <article className={estilos.libro}>
@@ -98,6 +118,22 @@ function Ficha({ libro }: { libro: LibroDetalle }) {
                 <a href="#primera-pagina" className={`boton boton-secundario ${estilos.verPrimera}`}>
                   Ver la primera página
                 </a>
+                {usuario?.rol === 'admin' && (
+                  <>
+                    <Link to={`/libros/${libro._id}/editar`} className="boton boton-secundario">
+                      Editar libro
+                    </Link>
+                    <button
+                      type="button"
+                      className="boton boton-secundario"
+                      style={{ color: '#dc2626', borderColor: '#fca5a5' }}
+                      onClick={handleEliminar}
+                      disabled={eliminando}
+                    >
+                      {eliminando ? 'Eliminando...' : 'Eliminar libro'}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

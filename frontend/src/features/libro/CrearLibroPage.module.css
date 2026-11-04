@@ -1,0 +1,797 @@
+.pagina {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.paginaAncha {
+  max-width: 1200px;
+}
+
+.cabecera {
+  margin-bottom: 2rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background: var(--acento);
+  color: var(--acento-texto);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.badgeVerde {
+  background: #059669;
+  color: #ffffff;
+}
+
+.titulo {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.subtitulo {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 1rem;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: var(--sombra-alzada);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .rejilla {
+    grid-template-columns: 1fr;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.etiqueta {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.pista {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.entrada,
+.textarea {
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.textarea {
+  min-height: 180px;
+  resize: vertical;
+  line-height: 1.5;
+  font-family: monospace;
+}
+
+.entrada:focus,
+.textarea:focus {
+  border-color: var(--acento);
+  outline: none;
+}
+
+/* Zona de carga y escaneo de PDF */
+.zonaPdf {
+  border: 2px dashed var(--borde);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: var(--fondo);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.zonaPdf:hover,
+.zonaPdfActiva {
+  border-color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 4%, var(--superficie));
+}
+
+.inputOculto {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.iconoPdf {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.textoZonaPdf {
+  margin: 0;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.subtextoZonaPdf {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.archivoSeleccionado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  margin-top: 0.75rem;
+}
+
+.infoArchivo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+
+.nombreArchivo {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tamanoArchivo {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.btnQuitar {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+}
+
+.btnQuitar:hover {
+  background: #fee2e2;
+}
+
+.opcionAlternativa {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.toggleManual {
+  background: none;
+  border: none;
+  color: var(--acento);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+.error {
+  padding: 0.85rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borde);
+}
+
+.btnSecundario {
+  background: transparent;
+  border: 1px solid var(--borde);
+  color: var(--texto);
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btnSecundario:hover {
+  background: var(--borde);
+}
+
+/* Estado de escaneo con animación Skeleton */
+.contenedorEscaneo {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tarjetaProgreso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: var(--sombra-alzada);
+}
+
+.progresoCabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progresoTitulo {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--texto);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progresoPorcentaje {
+  font-weight: 700;
+  color: var(--acento);
+  font-size: 1.1rem;
+}
+
+.barraContenedor {
+  width: 100%;
+  height: 8px;
+  background: var(--borde);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barraRelleno {
+  height: 100%;
+  background: var(--acento);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.progresoDetalle {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  margin: 0;
+}
+
+/* =========================================================================
+   Vista previa del libro (idéntica a LibroPage)
+   ========================================================================= */
+
+.vistaPreviaContenedor {
+  container: libro / inline-size;
+}
+
+.avisoVistaPrevia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.avisoTexto {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.cuerpo {
+  max-width: 60rem;
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: 16.25rem 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.portada {
+  --portada-ancho: 100%;
+}
+
+.libroAbrible {
+  transition: transform 0.4s cubic-bezier(0.3, 0.7, 0.3, 1.15);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .portada:hover .libroAbrible {
+    --apertura: 0.7;
+    transform: rotate(-5deg);
+  }
+}
+
+.datos h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.15;
+  text-wrap: balance;
+  color: var(--texto);
+}
+
+.autor {
+  margin: 0.5rem 0 0;
+  color: var(--texto-suave);
+  font-size: 1.1rem;
+}
+
+.cifras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 1.5rem 0 0;
+  border: 1px solid var(--pizarra-200);
+  border-radius: 10px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.cifras div {
+  flex: 1;
+  min-width: 6.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.cifras div + div {
+  border-left: 1px solid var(--pizarra-100);
+}
+
+.cifras dt {
+  color: var(--pizarra-500);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cifras dd {
+  margin: 0.2rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.temas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.temas li {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--pizarra-100);
+  color: var(--pizarra-600);
+  font-size: 0.82rem;
+}
+
+.accionesVistaPrevia {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.btnPublicar {
+  background: var(--acento);
+  color: var(--acento-texto);
+  border: none;
+  padding: 0.75rem 1.6rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.btnPublicar:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btnPublicar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.seccionCapitulos {
+  margin-top: 2.5rem;
+}
+
+.cabeceraCapitulos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.cabeceraCapitulos h2 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.btnAgregarCapitulo {
+  background: none;
+  border: 1px solid var(--borde);
+  color: var(--acento);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnAgregarCapitulo:hover {
+  background: var(--borde);
+}
+
+.formAgregarCapitulo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--fondo);
+  border: 1px dashed var(--borde);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.formFilaCapitulo {
+  display: grid;
+  grid-template-columns: 1fr 6rem auto;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .formFilaCapitulo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.capituloFila {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.capituloFila .capituloBtn {
+  flex: 1;
+}
+
+.btnEliminarCapitulo {
+  background: none;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnEliminarCapitulo:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.sinCapitulos {
+  background: var(--fondo);
+  border: 1px dashed var(--borde);
+  border-radius: 6px;
+  padding: 1.25rem;
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.sinCapitulos p {
+  margin: 0 0 0.75rem;
+}
+
+.listaCapitulos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.capituloBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.9rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.capituloBtn:hover {
+  background: var(--fondo);
+}
+
+.capituloActivo {
+  border-color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 6%, var(--superficie));
+}
+
+.capituloNum {
+  font-weight: 700;
+  color: var(--texto-suave);
+  margin-right: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.capituloTitulo {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--texto);
+}
+
+.capituloPag {
+  font-size: 0.78rem;
+  color: var(--texto-suave);
+}
+
+/* Columna derecha / hojeo interactivo */
+.hojeo {
+  margin-top: 3rem;
+}
+
+.seccionHoja {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  box-shadow: var(--sombra-alzada);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 32rem;
+}
+
+.hojeoCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--borde);
+  background: var(--fondo);
+}
+
+.hojeoCabecera h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.hojeoControles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btnNav {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  color: var(--texto);
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.btnNav:hover:not(:disabled) {
+  background: var(--borde);
+}
+
+.btnNav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.paginaIndicador {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texto);
+  min-width: 6.5rem;
+  text-align: center;
+}
+
+.btnAlternarModo {
+  background: none;
+  border: 1px solid var(--borde);
+  color: var(--texto);
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.btnAlternarModo:hover {
+  background: var(--superficie);
+}
+
+.btnEliminarPagina {
+  background: none;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btnEliminarPagina:hover {
+  background: #fef2f2;
+}
+
+.hojaContenido {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem clamp(1.5rem, 5vw, 3rem);
+  min-height: 28rem;
+  max-height: calc(100vh - 12rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #ffffff;
+  color: #111111;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.editorPagina {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+}
+
+.textareaEdicion {
+  flex: 1;
+  width: 100%;
+  min-height: 25rem;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--fondo);
+  color: var(--texto);
+  resize: vertical;
+}
+
+.editorPista {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  margin: 0;
+}
+
+/* Diseño a dos columnas en pantalla ancha */
+@container libro (min-width: 86rem) {
+  .cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36rem;
+    gap: 3rem;
+    align-items: start;
+    max-width: 100rem;
+  }
+
+  .hojeo {
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100dvh - 4rem);
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .ficha {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .portada {
+    --portada-ancho: 10rem;
+  }
+
+  .cifras div {
+    min-width: 45%;
+  }
+
+  .cifras div + div {
+    border-left: 0;
+  }
+
+  .cifras div:nth-child(even) {
+    border-left: 1px solid var(--pizarra-100);
+  }
+
+  .cifras div:nth-child(n + 3) {
+    border-top: 1px solid var(--pizarra-100);
+  }
+
+  .hojaContenido {
+    padding: 1.25rem;
+  }
+}

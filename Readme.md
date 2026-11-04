@@ -17,8 +17,10 @@ Pipeline de carga masiva de libros en texto plano (.txt) hacia una base de datos
 | `pipeline_local.py` | Hace lo mismo pero solo imprime el JSON resultante, sin conectarse a Atlas |
 | `preparar_libros.py` | Descarga libros de dominio público y arma las carpetas con la estructura que esperan los pipelines |
 | `agregar_portadas.py` | Agrega el enlace a la portada de Gutenberg a los libros que ya están en Atlas y no lo tienen (sin `--aplicar` solo simula) |
-| `Bulk_Upload_Texto_Test/` | Carpeta de prueba con 3 libros completos |
+| `Bulk_Upload_Texto_Test/` | Zona de trabajo local para los libros. Su contenido no se versiona (ver el `LEEME.md` de la carpeta) |
 | `gu_a_de_uso_del_pipeline.md` | Guía detallada de operación |
+| `backend/` | API REST completa en .NET 10 (Vertical Slice Architecture), autenticación JWT/cookies, roles y CRUD |
+| `frontend/` | Aplicación web en React 19 + TypeScript + Vite |
 | `subrayados_por_usuario.md` | Diseño pendiente: subrayados, marcadores y progreso de lectura por usuario en la base |
 
 ## Modelo de datos
@@ -58,9 +60,35 @@ Bulk_Upload_Texto_Test/
            └── 002.txt
 ```
 
-El nombre de la carpeta es el `_id` del libro en la base de datos. Las páginas se leen en orden alfabético, por eso llevan ceros a la izquierda. Todos los archivos se leen en UTF-8.
+## Puesta en marcha de la aplicación web (Backend + Frontend)
 
-## Puesta en marcha
+Para levantar el sistema completo se necesitan dos terminales:
+
+### Terminal 1: Backend (.NET 10)
+```bash
+cd backend/Biblioteca.Api
+dotnet run
+```
+* Escucha en `http://127.0.0.1:8000`.
+* Lee `MONGO_URI` y `JWT_CLAVE` automáticamente del archivo `.env` de la raíz.
+* *(Opcional)* Si necesitas dar permisos de administrador a una cuenta ya registrada:
+  ```bash
+  dotnet run -- asignar-rol tu_correo@correo.com admin
+  ```
+
+### Terminal 2: Frontend (React + Vite)
+```bash
+cd frontend
+npm install   # solo la primera vez si no se han instalado dependencias
+npm run dev
+```
+* Abre `http://localhost:5173` en tu navegador.
+* El proxy de Vite reenvía las peticiones `/api/*` al backend en el puerto 8000.
+* Regístrate en `/registro` o inicia sesión en `/entrar`.
+
+---
+
+## Puesta en marcha del pipeline de libros (Python)
 
 1. Crear y activar el entorno virtual (en Windows: `python -m venv venv` y luego `.\venv\Scripts\activate`).
 2. Instalar las dependencias con versiones fijas:
@@ -96,5 +124,5 @@ Los textos de este proyecto son libros en español de dominio público, obtenido
 
 * Modelo de datos definido en `modelo_libro.json`.
 * Base de datos en MongoDB Atlas activa.
-* Pipeline de carga probado con 3 libros completos.
+* Pipeline de carga probado y en uso: los libros se cargan en Atlas y la aplicación los lee de ahí.
 * Meta de carga: 125 libros por semana hasta llegar a 1000. El reparto entre los integrantes está en el plan logístico del equipo.

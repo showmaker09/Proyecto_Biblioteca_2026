@@ -2,7 +2,7 @@ namespace Biblioteca.Api.Features.Libros;
 
 /// <summary>
 /// Catálogo y lector. Las lecturas piden sesión con cualquier rol (política por defecto);
-/// las escrituras piden la política SoloAdmin. Mismo contrato que dev-api (ver frontend/README.md).
+/// las escrituras piden el permiso libros:escribir.
 /// </summary>
 public static class LibrosEndpoints
 {
@@ -13,6 +13,9 @@ public static class LibrosEndpoints
         ObtenerLibro.Mapear(app);
         ObtenerPagina.Mapear(app);
         CrearLibro.Mapear(app);
+        ReemplazarLibro.Mapear(app);
+        ActualizarLibro.Mapear(app);
+        EliminarLibro.Mapear(app);
         return app;
     }
 }

@@ -54,17 +54,59 @@ public class AutorizacionTests(FabricaApi fabrica) : IClassFixture<FabricaApi>
     }
 
     [Fact]
-    public async Task Lector_no_puede_crear_libros()
+    public async Task Lector_no_puede_crear_ni_modificar_ni_borrar_libros()
     {
-        var respuesta = await fabrica.ClienteCon(Tokens.Crear("lector")).PostAsJsonAsync("/libros", new { id = "999_prueba" });
-        Assert.Equal(HttpStatusCode.Forbidden, respuesta.StatusCode);
+        var cliente = fabrica.ClienteCon(Tokens.Crear("lector"));
+
+        var resPost = await cliente.PostAsJsonAsync("/libros", new { id = "999_prueba" });
+        Assert.Equal(HttpStatusCode.Forbidden, resPost.StatusCode);
+
+        var resPut = await cliente.PutAsJsonAsync("/libros/001_fuente_ovejuna", new { titulo = "x" });
+        Assert.Equal(HttpStatusCode.Forbidden, resPut.StatusCode);
+
+        var resPatch = await cliente.PatchAsJsonAsync("/libros/001_fuente_ovejuna", new { titulo = "x" });
+        Assert.Equal(HttpStatusCode.Forbidden, resPatch.StatusCode);
+
+        var resDelete = await cliente.DeleteAsync("/libros/001_fuente_ovejuna");
+        Assert.Equal(HttpStatusCode.Forbidden, resDelete.StatusCode);
     }
 
     [Fact]
-    public async Task Un_rol_desconocido_tampoco_puede_crear_libros()
+    public async Task Lector_no_puede_administrar_usuarios()
     {
-        var respuesta = await fabrica.ClienteCon(Tokens.Crear("bibliotecario")).PostAsJsonAsync("/libros", new { id = "999_prueba" });
-        Assert.Equal(HttpStatusCode.Forbidden, respuesta.StatusCode);
+        var cliente = fabrica.ClienteCon(Tokens.Crear("lector"));
+
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.GetAsync("/usuarios")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.GetAsync("/usuarios/6718f0c2a1b2c3d4e5f60718")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.PostAsJsonAsync("/usuarios", new { })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.PutAsJsonAsync("/usuarios/6718f0c2a1b2c3d4e5f60718/rol", new { rol = "admin" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.PutAsJsonAsync("/usuarios/6718f0c2a1b2c3d4e5f60718/estado", new { activo = false })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.PostAsync("/usuarios/6718f0c2a1b2c3d4e5f60718/desbloquear", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.DeleteAsync("/usuarios/6718f0c2a1b2c3d4e5f60718")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Un_rol_desconocido_no_puede_operar_rutas_protegidas()
+    {
+        var cliente = fabrica.ClienteCon(Tokens.Crear("desconocido"));
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.PostAsJsonAsync("/libros", new { id = "999_prueba" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await cliente.GetAsync("/usuarios")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Admin_con_usuario_invalido_recibe_errores_por_campo()
+    {
+        var respuesta = await fabrica.ClienteCon(Tokens.Crear("admin")).PostAsJsonAsync("/usuarios", new
+        {
+            correo = "correo-invalido",
+            nombre = "",
+            contrasena = "corta",
+            rol = "rol_inexistente"
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, respuesta.StatusCode);
+        var errores = (await respuesta.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("errors");
+        Assert.Equal(["contrasena", "correo", "nombre", "rol"], errores.EnumerateObject().Select(p => p.Name).Order());
     }
 
     [Fact]

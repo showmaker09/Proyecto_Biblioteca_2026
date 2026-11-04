@@ -22,6 +22,11 @@
   --sombra-alzada: 0 2px 4px rgb(15 23 42 / 0.05), 0 12px 24px -6px rgb(15 23 42 / 0.12);
   --sombra-papel: 0 1px 3px rgb(15 23 42 / 0.05), 0 20px 40px -18px rgb(15 23 42 / 0.22);
   --fuente-titulo: Georgia, 'Times New Roman', serif;
+  /* Landing pública: serif editorial de exhibición + grotesca limpia. */
+  --fuente-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --fuente-grotesca: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --tinta: #141414;
+  --marfil: #f6f3ec;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--texto);
   background: var(--fondo);

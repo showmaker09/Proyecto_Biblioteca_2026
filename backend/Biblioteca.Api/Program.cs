@@ -5,6 +5,7 @@ using Biblioteca.Api.Comun.Seguridad;
 using Biblioteca.Api.Features.Auth;
 using Biblioteca.Api.Features.Libros;
 using Biblioteca.Api.Features.Usuarios;
+using Scalar.AspNetCore;
 
 ArchivoEnv.Cargar();
 
@@ -21,7 +22,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddBaseDatos();
 builder.Services.AddSeguridad();
 builder.Services.AddLimites();
-builder.Services.AddAuth();
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -37,8 +38,15 @@ app.UseAuthentication();
 app.UseRateLimiter();
 app.UseAuthorization();
 
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+
 app.MapAuth();
 app.MapLibros();
+app.MapUsuarios();
 
 app.Run();
 return 0;

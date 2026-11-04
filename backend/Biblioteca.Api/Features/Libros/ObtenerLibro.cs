@@ -14,7 +14,7 @@ public static class ObtenerLibro
         public List<Capitulo> Capitulos { get; init; } = [];
     }
 
-    static readonly BsonDocument Proyeccion = new BsonDocument(ResumenLibro.Proyeccion)
+    public static readonly BsonDocument Proyeccion = new BsonDocument(ResumenLibro.Proyeccion)
     {
         { "capitulos", new BsonDocument("$ifNull", new BsonArray { "$capitulos", new BsonArray() }) },
     };
