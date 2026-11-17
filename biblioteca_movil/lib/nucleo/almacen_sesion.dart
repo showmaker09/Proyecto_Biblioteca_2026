@@ -11,19 +11,50 @@ abstract class CajaSecreta {
 
 class CajaSecureStorage implements CajaSecreta {
   CajaSecureStorage({FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
+    : _storage =
+          storage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions(resetOnError: true),
+          );
 
   final FlutterSecureStorage _storage;
 
   @override
-  Future<String?> leer(String clave) => _storage.read(key: clave);
+  Future<String?> leer(String clave) async {
+    try {
+      return await _storage.read(key: clave);
+    } catch (_) {
+      // Si el Keystore de Android cambió tras reinstalar (GeneralSecurityException:
+      // decryption failed), se limpia el almacén corrupto para ir al login sin bloquear.
+      try {
+        await _storage.deleteAll();
+      } catch (_) {}
+      return null;
+    }
+  }
 
   @override
-  Future<void> escribir(String clave, String valor) =>
-      _storage.write(key: clave, value: valor);
+  Future<void> escribir(String clave, String valor) async {
+    try {
+      await _storage.write(key: clave, value: valor);
+    } catch (_) {
+      try {
+        await _storage.deleteAll();
+        await _storage.write(key: clave, value: valor);
+      } catch (_) {}
+    }
+  }
 
   @override
-  Future<void> borrar(String clave) => _storage.delete(key: clave);
+  Future<void> borrar(String clave) async {
+    try {
+      await _storage.delete(key: clave);
+    } catch (_) {
+      try {
+        await _storage.deleteAll();
+      } catch (_) {}
+    }
+  }
 }
 
 /// Cajón en memoria para las pruebas del candado de refresco.

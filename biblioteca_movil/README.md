@@ -27,4 +27,4 @@ flutter build apk --dart-define=API_BASE=https://tu-dominio
 
 `dev-api` también usa el puerto 8000. Si ese proceso está levantado, el teléfono no habla con `Biblioteca.Api`.
 
-Los pasos para probarla, en el emulador, por USB o por depuración inalámbrica, están en [instructivo_de_pruebas.md](instructivo_de_pruebas.md). La primera vez con cable, de la instalación del SDK al escáner, está en [prueba_usb_primera_vez.md](prueba_usb_primera_vez.md).
+Los pasos para probarla, en el emulador, por USB o por depuración inalámbrica, están en [instructivo_de_pruebas.md](instructivo_de_pruebas.md).

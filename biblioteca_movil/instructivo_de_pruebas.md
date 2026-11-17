@@ -4,8 +4,6 @@ Pasos para comprobar `biblioteca_movil` contra `Biblioteca.Api` tal como está h
 
 Hay tres caminos. El primero no necesita aparato. El segundo es el cable USB. El tercero es la depuración inalámbrica de Android, que también usa `adb reverse` y deja Kestrel en `127.0.0.1`.
 
-Quien conecta el teléfono por primera vez puede seguir [prueba_usb_primera_vez.md](prueba_usb_primera_vez.md): instala el SDK 10.0.403, arranca la API, abre el túnel y prueba el escáner.
-
 ## 0. Qué tiene que estar listo
 
 En una terminal de PowerShell:
@@ -61,7 +59,7 @@ flutter test
 flutter analyze
 ```
 
-Tienen que pasar los ocho tests: el JSON del contrato (`_id`, `siguiente: null`), la cookie con una fecha que lleva comas, el candado de un solo `POST /auth/refrescar` cuando dos llamadas reciben 401 a la vez, el borrado del almacén si el refresco falla, y el nombre de archivo que no puede salirse del directorio de la app.
+Tienen que pasar todos los tests (`cliente_biblioteca_test.dart`, `modelos_test.dart`, `guardar_texto_test.dart` y `plan_logistico_test.dart`): el JSON del contrato (`_id`, `siguiente: null`), la cookie con una fecha que lleva comas, el candado de un solo `POST /auth/refrescar` cuando dos llamadas reciben 401 a la vez, el borrado del almacén si el refresco falla, el envío de filtros avanzados (`tema`, `paginas_min`, `paginas_max`, `en_contenido`), el nombre de archivo que no puede salirse del directorio de la app, y el cálculo de avance por integrante en `ResumenProgresoLogistico`.
 
 Esto no enciende la cámara ni habla con Atlas.
 
@@ -168,11 +166,13 @@ Apuntar la app a `http://192.168.x.x:8000` exige que Kestrel escuche en `0.0.0.0
 
 Hazlo en el emulador o en el teléfono. En el teléfono, el escáner es el que cuenta.
 
-1. Crear cuenta. Nombre, correo y contraseña de al menos 10 caracteres. La app entra al catálogo sin pedir el login otra vez.
-2. Catálogo. El saludo muestra el nombre. Busca por título o autor, cambia el orden y el idioma, y pulsa «Cargar más» si hay más de 20 libros.
-3. Ficha. Abre un libro. Se ven autor, idioma, páginas y capítulos. «Leer» abre la página 1.
-4. Lector. Avanza y retrocede. Cada pulsación pide una sola página. Al volver a la ficha, el botón ofrece seguir en la página donde te quedaste.
-5. Cerrar sesión. El icono de salir vuelve al login. Entrar de nuevo con la misma cuenta llega otra vez al catálogo.
+1. **Crear cuenta.** Nombre, correo y contraseña de al menos 10 caracteres. La app entra a la pantalla principal con la barra inferior de tres pestañas (**Inicio**, **Biblioteca** y **Ajustes**) sin pedir el login otra vez.
+2. **Inicio.** Muestra los libros recientes («En el estante») y, cuando ya abriste un libro, la tarjeta «Continuar leyendo» en la última página leída.
+3. **Biblioteca (Catálogo).** Muestra las portadas en cuadrícula adaptable. Busca por título o autor, abre el botón de **Filtros** (tipo/tema, idioma, extensión breve/mediano/extenso, interruptor «Palabra exacta en capítulos y páginas» y orden) y pulsa «Cargar más» o desplázate al final si hay más de 20 libros.
+4. **Ficha y Lector.** Abre un libro para ver portada, autor, idioma, páginas, temas y capítulos. «Leer» abre la página 1. En el lector avanza y retrocede página por página, cambia apariencia (`A−` / `A+`, modo Papel/Noche e interlineado) o salta de capítulo. Al volver a la ficha o a Inicio, se ofrece seguir en la página donde te quedaste.
+5. **Progreso logístico (Dashboard).** En la pestaña **Ajustes**, toca «Progreso logístico». Se muestran la meta total (1000 libros), la cuota semanal (125), las tarjetas de avance individual por integrante (Alan, Octavio, Hector y Uziel) y la lista paginada de asignaciones filtrable por responsable y estado (`pendiente`, `subido`, `verificado`). Si una obra está subida o verificada, tocarla abre su ficha.
+6. **Resiliencia de red.** Si apagas temporalmente la API o desconectas el túnel y recargas, las pantallas muestran el aviso de desconexión (`WidgetErrorConexion`) con el botón **Reintentar** sin cerrar ni bloquear la app.
+7. **Cerrar sesión.** En la pestaña **Ajustes**, toca «Cerrar sesión» para volver al login. Entrar de nuevo con la misma cuenta llega otra vez a la pantalla principal.
 
 ### Sesión en frío
 
@@ -203,7 +203,7 @@ En el emulador usa `http://10.0.2.2:8000` en ese comando.
 
 En el teléfono, con luz pareja y la página llenando el marco:
 
-1. En el catálogo, el icono del escáner.
+1. En la pestaña **Ajustes**, toca «Escanear una página».
 2. Acepta el permiso de cámara cuando Android lo pida.
 3. Encuadra una página en español y pulsa «Capturar página».
 4. La pantalla de corrección dice que la foto ya se borró. Corrige nombres y versos cortos.
@@ -224,16 +224,16 @@ Si el permiso se negó, la pantalla lo dice y el catálogo sigue disponible. Se 
 
 ## 7. Publicar, solo admin
 
-Un lector no ve el icono de publicar. Si abre la ruta, la pantalla explica que un lector recibe 403 y no envía el libro.
+Un lector no ve la opción de publicar en **Ajustes**. Si abre la ruta, la pantalla explica que un lector recibe 403 y no envía el libro.
 
-Para ver el icono, en otra terminal (el servidor puede seguir corriendo):
+Para ver la opción, en otra terminal (el servidor puede seguir corriendo):
 
 ```powershell
 cd C:\Users\octavius\Desktop\INGENIERIA_7D\script_biblioteca\backend\Biblioteca.Api
 dotnet run -- asignar-rol persona@correo.com admin
 ```
 
-Cierra sesión en el teléfono y entra de nuevo. El icono de publicar aparece en el catálogo. Ahí se eligen los `.txt` ya guardados, en orden de página, y se escriben id, título, autor e idioma. Se envía texto. La foto no sale del teléfono.
+Cierra sesión en el teléfono y entra de nuevo. En la pestaña **Ajustes** aparece «Publicar textos». Ahí se eligen los `.txt` ya guardados, en orden de página, y se escriben id, título, autor e idioma. Se envía texto. La foto no sale del teléfono.
 
 Para ver el 403 sin cambiar de rol, desde el PC, con una cuenta lectora:
 

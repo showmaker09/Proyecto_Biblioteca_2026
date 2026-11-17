@@ -23,6 +23,7 @@ class _PuertaState extends State<Puerta> {
   }
 
   Future<void> _entrar() async {
+    setState(() => _error = null);
     final cliente = context.read<ClienteBiblioteca>();
     if (cliente.base.isEmpty) {
       setState(() {
@@ -39,6 +40,14 @@ class _PuertaState extends State<Puerta> {
       if (!mounted) return;
       setState(() => _error = mensajeDe(error));
     }
+  }
+
+  Future<void> _irAlLogin() async {
+    try {
+      await context.read<ClienteBiblioteca>().almacen.borrar();
+    } catch (_) {}
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -61,7 +70,15 @@ class _PuertaState extends State<Puerta> {
                   children: [
                     Text(_error!, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
-                    FilledButton(onPressed: _entrar, child: const Text('Reintentar')),
+                    FilledButton(
+                      onPressed: _entrar,
+                      child: const Text('Reintentar'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: _irAlLogin,
+                      child: const Text('Iniciar sesión de nuevo'),
+                    ),
                   ],
                 ),
         ),

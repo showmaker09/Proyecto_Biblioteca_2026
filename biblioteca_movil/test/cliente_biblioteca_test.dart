@@ -184,4 +184,38 @@ void main() {
     lector.dispose();
     limitado.dispose();
   });
+
+  test('el buscador manda tipo, extensión y palabra en el texto', () async {
+    final cliente = ClienteBiblioteca(
+      base: 'http://10.0.2.2:8000',
+      almacen: AlmacenSesion(caja: CajaMemoria()),
+      httpCliente: MockClient((request) async {
+        expect(request.url.path, '/libros');
+        expect(request.url.queryParameters['desde'], '0');
+        expect(request.url.queryParameters['orden'], 'largos');
+        expect(request.url.queryParameters['q'], 'amor');
+        expect(request.url.queryParameters['idioma'], 'es');
+        expect(request.url.queryParameters['en_contenido'], 'true');
+        expect(request.url.queryParameters['paginas_min'], '50');
+        expect(request.url.queryParameters['paginas_max'], '150');
+        expect(request.url.queryParametersAll['tema'], ['Teatro', 'Poesía']);
+        expect(request.headers.containsKey('cookie'), isFalse);
+        return http.Response(
+          jsonEncode({'libros': <Object>[], 'total': 0, 'siguiente': null}),
+          200,
+        );
+      }),
+    );
+
+    await cliente.listarLibros(
+      orden: 'largos',
+      q: ' amor ',
+      idioma: 'es',
+      temas: const ['Teatro', 'Poesía'],
+      paginasMin: 50,
+      paginasMax: 150,
+      enContenido: true,
+    );
+    cliente.dispose();
+  });
 }

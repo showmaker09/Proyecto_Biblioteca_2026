@@ -28,6 +28,8 @@ var app = builder.Build();
 
 if (esComando) return await AsignarRol.EjecutarAsync(app.Services, args[1..]);
 
+// Un fallo de Atlas (el timeout de 8 s al elegir servidor, por ejemplo) no
+// tumba el proceso: la petición sale como error HTTP y la app móvil lo muestra.
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 if (!app.Environment.IsDevelopment()) app.UseHsts();

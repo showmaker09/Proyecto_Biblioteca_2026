@@ -3,11 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../nucleo/casos.dart';
 import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/modelos.dart';
 import '../../nucleo/navegacion.dart';
-import '../catalogo/casos_catalogo.dart';
-import 'casos_escaner.dart';
 import 'guardar_texto.dart';
 
 /// Junta textos ya guardados y llama a POST /libros. Solo se muestra a un admin.

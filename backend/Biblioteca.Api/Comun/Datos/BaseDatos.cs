@@ -17,6 +17,12 @@ public sealed class BaseDatos(IMongoClient cliente, IOptions<OpcionesMongo> opci
     public IMongoCollection<Usuario> Usuarios => bd.GetCollection<Usuario>("Usuarios");
 
     public IMongoCollection<SesionRefresco> Sesiones => bd.GetCollection<SesionRefresco>("Sesiones");
+
+    /// <summary>Filas del plan (responsable y estado). No contienen el texto del libro.</summary>
+    public IMongoCollection<Asignacion> Asignaciones => bd.GetCollection<Asignacion>("Asignaciones");
+
+    /// <summary>Meta del equipo y los cuatro integrantes. Un documento, id "equipo".</summary>
+    public IMongoCollection<PlanEquipo> Plan => bd.GetCollection<PlanEquipo>("Plan");
 }
 
 public sealed class OpcionesMongo
@@ -42,6 +48,12 @@ public static class ServiciosBaseDatos
             .Validate(opciones => opciones.Uri.Length > 0, "Falta MONGO_URI en el .env de la raíz del proyecto (o en las variables de entorno).")
             .ValidateOnStart();
 
+        // La app móvil no abre este cliente. Manda HTTP a la API y todas las
+        // peticiones, aunque lleguen a la vez, usan este único MongoClient.
+        // El driver presta conexiones de su pool hacia Atlas y las devuelve;
+        // no nace un socket TCP/TLS nuevo por cada request.
+        // A los 8 s sin servidor la operación falla (ServerSelectionTimeout)
+        // y UseExceptionHandler en Program.cs la responde como HTTP.
         servicios.AddSingleton<IMongoClient>(sp =>
         {
             var ajustes = MongoClientSettings.FromConnectionString(sp.GetRequiredService<IOptions<OpcionesMongo>>().Value.Uri);
