@@ -139,7 +139,7 @@ public class AutorizacionTests(FabricaApi fabrica) : IClassFixture<FabricaApi>
     public void Solo_registro_login_y_sesion_se_pueden_usar_sin_token()
     {
         var anonimas = Rutas().Where(r => r.Metadata.GetMetadata<IAllowAnonymous>() is not null).Select(Describir).Order();
-        Assert.Equal(["POST /auth/cerrar-sesion", "POST /auth/login", "POST /auth/refrescar", "POST /auth/registro"], anonimas);
+        Assert.Equal(["GET /salud", "POST /auth/cerrar-sesion", "POST /auth/login", "POST /auth/refrescar", "POST /auth/registro"], anonimas);
     }
 
     IEnumerable<RouteEndpoint> Rutas() => fabrica.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>();
