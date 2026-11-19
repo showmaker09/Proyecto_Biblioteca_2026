@@ -34,6 +34,7 @@ class CasosEscaner {
     required String? portada,
     required List<Capitulo> capitulos,
     IntegrantePlan? integranteActivo,
+    List<Asignacion> asignacionesActuales = const [],
   }) {
     return guardar.verificarPaquete(
       archivosEnOrden: archivosEnOrden,
@@ -45,6 +46,7 @@ class CasosEscaner {
       portada: portada,
       capitulos: capitulos,
       integranteActivo: integranteActivo,
+      asignacionesActuales: asignacionesActuales,
     );
   }
 }

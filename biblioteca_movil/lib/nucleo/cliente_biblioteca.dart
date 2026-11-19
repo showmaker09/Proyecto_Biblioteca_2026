@@ -212,7 +212,7 @@ class ClienteBiblioteca extends ChangeNotifier {
       int? desde = 0;
       var total = 0;
       var paginas = 0;
-      while (desde != null && paginas < 10) {
+      while (desde != null && paginas < 60) {
         final lote = await listarLibros(desde: desde);
         acumulados.addAll(lote.libros);
         total = lote.total;
@@ -395,7 +395,7 @@ class ClienteBiblioteca extends ChangeNotifier {
     final cabeceras = <String, String>{
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'Connection': 'close',
+      if (!uri.isScheme('https')) 'Connection': 'close',
       if (conBearer && almacen.token != null)
         'Authorization': 'Bearer ${almacen.token}',
       if (cookie != null) 'Cookie': 'biblioteca_refresco=$cookie',
@@ -414,11 +414,12 @@ class ClienteBiblioteca extends ChangeNotifier {
     Map<String, String> cabeceras,
     String? texto,
   ) {
+    const limite = Duration(seconds: 45);
     switch (metodo) {
       case 'GET':
-        return _http.get(uri, headers: cabeceras);
+        return _http.get(uri, headers: cabeceras).timeout(limite);
       case 'POST':
-        return _http.post(uri, headers: cabeceras, body: texto);
+        return _http.post(uri, headers: cabeceras, body: texto).timeout(limite);
       default:
         throw ArgumentError('Método no soportado: $metodo');
     }

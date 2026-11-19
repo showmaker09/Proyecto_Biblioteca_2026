@@ -96,6 +96,39 @@ void main() {
         fueraDeBloque.errores,
         contains(predicate<String>((e) => e.contains('032–062'))),
       );
+
+      final asignacionesCon32Ocupado = asignacionesBase()
+          .map(
+            (a) => a.numero == 32
+                ? a.conEstado(
+                    'subido',
+                    nuevoId: '032_existente',
+                    nuevoTitulo: 'Libro Existente',
+                  )
+                : a,
+          )
+          .toList();
+      final duplicadoEnBloque = await GuardarTexto().verificarPaquete(
+        archivosEnOrden: [p1],
+        id: '032_nuevo_escaneo',
+        titulo: 'Nuevo Escaneo',
+        autor: 'Octavio',
+        idioma: 'es',
+        temas: const ['Prueba'],
+        portada: null,
+        capitulos: const [],
+        integranteActivo: octavio,
+        asignacionesActuales: asignacionesCon32Ocupado,
+      );
+      expect(duplicadoEnBloque.esValido, isFalse);
+      expect(
+        duplicadoEnBloque.errores,
+        contains(predicate<String>((e) => e.contains('#032 ya está ocupado'))),
+      );
+      expect(
+        duplicadoEnBloque.errores,
+        contains(predicate<String>((e) => e.contains('033_'))),
+      );
     } finally {
       if (await tempDir.exists()) await tempDir.delete(recursive: true);
     }

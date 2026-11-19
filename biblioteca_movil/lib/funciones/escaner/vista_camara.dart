@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../nucleo/casos.dart';
 import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/plan_logistico.dart';
-import 'casos_escaner.dart';
 
 /// Encuadre con la cámara trasera (solo rol admin). El permiso lo pide el
 /// plugin al crear el controlador, antes de mostrar la vista previa.
@@ -23,6 +23,9 @@ class _VistaCamaraState extends State<VistaCamara> {
   final _nombre = TextEditingController();
   CameraController? _controlador;
   IntegrantePlan? _integrante;
+  List<Asignacion> _asignaciones = asignacionesBase();
+  int? _numeroElegido;
+  int _numeroPagina = 1;
   var _fase = _Fase.abriendo;
   var _cerrada = false;
   String? _aviso;
@@ -46,23 +49,66 @@ class _VistaCamaraState extends State<VistaCamara> {
   Future<void> _iniciar() async {
     final usuario = context.read<ClienteBiblioteca>().usuario;
     if (usuario?.esAdmin != true) return;
-    final integrante = await context
-        .read<VinculoIntegranteSesion>()
-        .resolverParaUsuario(usuario);
+    final arg = ModalRoute.of(context)?.settings.arguments;
+    final asignacionInicial = arg is Asignacion ? arg : null;
+
+    final vinculo = context.read<VinculoIntegranteSesion>();
+    final dashboard = context.read<CasosDashboard>();
+
+    var asignaciones = asignacionesBase();
+    var integrantes = planEquipoBase.integrantes;
+    try {
+      final progreso = await dashboard.cargarProgreso();
+      asignaciones = progreso.asignaciones;
+      integrantes = progreso.plan.integrantes;
+    } catch (_) {
+      // Si no hay red al abrir la cámara, se usa el catálogo base de asignaciones.
+    }
     if (!mounted || _cerrada) return;
+
+    IntegrantePlan? integrante;
+    if (asignacionInicial != null) {
+      integrante = resolverIntegrante(
+        idManual: asignacionInicial.responsable,
+        integrantes: integrantes,
+      );
+    }
+    integrante ??= await vinculo.resolverParaUsuario(
+      usuario,
+      integrantes: integrantes,
+    );
+    if (!mounted || _cerrada) return;
+
+    final pendientes = integrante == null
+        ? const <Asignacion>[]
+        : asignacionesPendientesDe(integrante, asignaciones);
+    int? numeroElegido;
+    if (asignacionInicial != null &&
+        pendientes.any((a) => a.numero == asignacionInicial.numero)) {
+      numeroElegido = asignacionInicial.numero;
+    } else if (pendientes.isNotEmpty) {
+      numeroElegido = pendientes.first.numero;
+    }
+
     setState(() {
+      _asignaciones = asignaciones;
       _integrante = integrante;
-      _aplicarPrefijoSugerido(integrante);
+      _numeroElegido = numeroElegido;
+      _aplicarNombreSugerido(forzar: true);
     });
     await _abrirCamara();
   }
 
-  void _aplicarPrefijoSugerido(IntegrantePlan? integrante) {
-    if (integrante == null) return;
-    final prefijo = '${integrante.bloqueInicio.toString().padLeft(3, '0')}_';
+  void _aplicarNombreSugerido({bool forzar = false}) {
+    final numero = _numeroElegido ?? _integrante?.bloqueInicio;
+    if (numero == null) return;
+    final codigo = numero.toString().padLeft(3, '0');
+    final pag = _numeroPagina.toString().padLeft(3, '0');
     final actual = _nombre.text.trim();
-    if (actual.isEmpty || RegExp(r'^\d{3}_$').hasMatch(actual)) {
-      _nombre.text = prefijo;
+    if (forzar ||
+        actual.isEmpty ||
+        RegExp(r'^\d{3}_(?:pagina_\d{3})?$').hasMatch(actual)) {
+      _nombre.text = '${codigo}_pagina_$pag';
     }
   }
 
@@ -73,9 +119,21 @@ class _VistaCamaraState extends State<VistaCamara> {
       integrante.id,
     );
     if (!mounted) return;
+    final pendientes = asignacionesPendientesDe(integrante, _asignaciones);
     setState(() {
       _integrante = integrante;
-      _aplicarPrefijoSugerido(integrante);
+      _numeroElegido = pendientes.isEmpty ? null : pendientes.first.numero;
+      _numeroPagina = 1;
+      _aplicarNombreSugerido(forzar: true);
+    });
+  }
+
+  void _seleccionarNumeroPendiente(int? numero) {
+    if (numero == null) return;
+    setState(() {
+      _numeroElegido = numero;
+      _numeroPagina = 1;
+      _aplicarNombreSugerido(forzar: true);
     });
   }
 
@@ -152,7 +210,7 @@ class _VistaCamaraState extends State<VistaCamara> {
       final texto = await context.read<CasosEscaner>().reconocer(foto.path);
       if (!mounted || _cerrada) return;
       _texto.text = texto;
-      _aplicarPrefijoSugerido(_integrante);
+      _aplicarNombreSugerido();
       setState(() => _fase = _Fase.revision);
     } catch (_) {
       await _soltarCamara();
@@ -243,9 +301,12 @@ class _VistaCamaraState extends State<VistaCamara> {
     if (controlador == null || !controlador.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
+    final codigo = _numeroElegido?.toString().padLeft(3, '0');
     final etiqueta = _integrante == null
         ? 'Sesión: $correo (sin integrante vinculado)'
-        : '${_integrante!.primerNombre} · Bloque ${_integrante!.etiquetaBloque}';
+        : codigo == null
+        ? '${_integrante!.primerNombre} · Bloque ${_integrante!.etiquetaBloque}'
+        : '${_integrante!.primerNombre} · ID #$codigo (pendiente) · Pág. $_numeroPagina';
 
     return Stack(
       fit: StackFit.expand,
@@ -295,9 +356,17 @@ class _VistaCamaraState extends State<VistaCamara> {
 
   Widget _revision(String correo) {
     final integrante = _integrante;
-    final ejemplo = integrante == null
-        ? '004_la_celestina_001'
-        : '${integrante.bloqueInicio.toString().padLeft(3, '0')}_titulo_001';
+    final pendientes = integrante == null
+        ? const <Asignacion>[]
+        : asignacionesPendientesDe(integrante, _asignaciones);
+    final numeroValido =
+        _numeroElegido != null &&
+            pendientes.any((a) => a.numero == _numeroElegido)
+        ? _numeroElegido
+        : (pendientes.isEmpty ? null : pendientes.first.numero);
+    final ejemplo = numeroValido == null
+        ? '004_pagina_001'
+        : '${numeroValido.toString().padLeft(3, '0')}_pagina_001';
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -316,7 +385,7 @@ class _VistaCamaraState extends State<VistaCamara> {
                 Text(
                   integrante == null
                       ? 'Asocia tu correo a tu integrante del equipo:'
-                      : '${integrante.nombre} · Bloque ${integrante.etiquetaBloque}',
+                      : '${integrante.nombre} · Bloque activo ${etiquetaBloqueActivo(integrante, _asignaciones)}',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
@@ -327,7 +396,7 @@ class _VistaCamaraState extends State<VistaCamara> {
                     for (final item in planEquipoBase.integrantes)
                       ChoiceChip(
                         label: Text(
-                          '${item.primerNombre} (${item.etiquetaBloque})',
+                          '${item.primerNombre} (${etiquetaBloqueActivo(item, _asignaciones)})',
                         ),
                         selected: integrante?.id == item.id,
                         visualDensity: VisualDensity.compact,
@@ -335,6 +404,35 @@ class _VistaCamaraState extends State<VistaCamara> {
                       ),
                   ],
                 ),
+                if (integrante != null && pendientes.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'ID pendiente del bloque a escanear',
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<int>(
+                        isExpanded: true,
+                        value: numeroValido,
+                        items: [
+                          for (final p in pendientes)
+                            DropdownMenuItem<int>(
+                              value: p.numero,
+                              child: Text(
+                                '#${p.numero.toString().padLeft(3, '0')} · ${p.titulo} (pendiente)',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                        onChanged: _seleccionarNumeroPendiente,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -379,7 +477,11 @@ class _VistaCamaraState extends State<VistaCamara> {
         ),
         TextButton(
           onPressed: () {
+            if (_guardado != null) {
+              _numeroPagina++;
+            }
             _guardado = null;
+            _aplicarNombreSugerido(forzar: true);
             _abrirCamara();
           },
           child: const Text('Otra página'),

@@ -107,6 +107,7 @@ class GuardarTexto {
     required String? portada,
     required List<Capitulo> capitulos,
     IntegrantePlan? integranteActivo,
+    List<Asignacion> asignacionesActuales = const [],
   }) async {
     final errores = <String>[];
     final idLimpio = id.trim();
@@ -122,13 +123,36 @@ class GuardarTexto {
       );
     } else if (integranteActivo != null) {
       final numeroLibro = numeroDesdeIdLibro(idLimpio);
+      final bloqueTexto = asignacionesActuales.isNotEmpty
+          ? etiquetaBloqueActivo(integranteActivo, asignacionesActuales)
+          : integranteActivo.etiquetaBloque;
       if (numeroLibro == null || !integranteActivo.contieneNumero(numeroLibro)) {
-        final ejemplo =
-            '${integranteActivo.bloqueInicio.toString().padLeft(3, '0')}_titulo';
+        final ejemplo = asignacionesActuales.isNotEmpty
+            ? '${prefijoSiguienteLibro(integranteActivo, asignacionesActuales)}titulo'
+            : '${integranteActivo.bloqueInicio.toString().padLeft(3, '0')}_titulo';
         errores.add(
-          'El Id debe comenzar con un número de tu bloque asignado (${integranteActivo.etiquetaBloque}) '
+          'El Id debe comenzar con un número de tu bloque asignado ($bloqueTexto) '
           'para acreditar el avance a ${integranteActivo.nombre} (ej. $ejemplo).',
         );
+      } else {
+        Asignacion? ocupada;
+        for (final fila in asignacionesActuales) {
+          if (fila.numero == numeroLibro && fila.completado) {
+            ocupada = fila;
+            break;
+          }
+        }
+        if (ocupada != null) {
+          final codigo = numeroLibro.toString().padLeft(3, '0');
+          final siguiente = prefijoSiguienteLibro(
+            integranteActivo,
+            asignacionesActuales,
+          );
+          errores.add(
+            'El número #$codigo ya está ocupado en MongoDB por «${ocupada.titulo}» (${ocupada.id}). '
+            'Usa el siguiente número disponible de tu bloque ($bloqueTexto): $siguiente',
+          );
+        }
       }
     }
     if (tituloLimpio.isEmpty || tituloLimpio.length > 300) {

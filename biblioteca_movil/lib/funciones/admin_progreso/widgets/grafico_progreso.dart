@@ -33,17 +33,18 @@ class GraficoProgresoEquipo extends StatelessWidget {
             Expanded(
               child: _TarjetaKpi(
                 etiqueta: 'Meta total',
-                valor: '${resumen.plan.metaTotal} libros',
-                subtitulo: '$pctGlobal% acumulado',
+                valor: '${resumen.totalCompletados} / ${resumen.plan.metaTotal}',
+                subtitulo:
+                    '$pctGlobal% · ${resumen.totalPendientes} pendientes',
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _TarjetaKpi(
-                etiqueta: 'Cuota semanal',
+                etiqueta: 'Semana ${resumen.semanaActual} (cuota)',
                 valor:
-                    '${resumen.totalCompletados} / ${resumen.plan.cuotaSemanal}',
-                subtitulo: '$pctSemanal% completado',
+                    '${resumen.completadosSemanaActual} / ${resumen.plan.cuotaSemanal}',
+                subtitulo: '$pctSemanal% de esta semana',
               ),
             ),
           ],
@@ -56,14 +57,18 @@ class GraficoProgresoEquipo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      'Avance de la cuota semanal',
-                      style: tema.textTheme.titleMedium,
+                    Expanded(
+                      child: Text(
+                        'Avance global del proyecto (1,000 libros)',
+                        style: tema.textTheme.titleMedium,
+                        softWrap: true,
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
-                      '$pctSemanal%',
+                      '$pctGlobal%',
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ],
@@ -72,7 +77,7 @@ class GraficoProgresoEquipo extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
-                    value: resumen.avanceSemanal,
+                    value: resumen.avanceGlobal,
                     minHeight: 10,
                     backgroundColor: const Color(0xFFE7E1D6),
                     color: const Color(0xFF141414),
@@ -168,8 +173,8 @@ class GraficoProgresoEquipo extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Bloque ${item.integrante.etiquetaBloque} · '
-                    'Asignados: ${item.integrante.asignados} · '
+                    'Bloque activo ${item.bloqueActual ?? item.integrante.etiquetaBloque} · '
+                    'Meta: ${item.integrante.asignados} · '
                     'Listos: ${item.completados} · '
                     'Pendientes: ${item.pendientes}',
                     style: tema.textTheme.bodySmall,
@@ -217,12 +222,16 @@ class _TarjetaKpi extends StatelessWidget {
           children: [
             Text(etiqueta, style: tema.textTheme.bodySmall),
             const SizedBox(height: 4),
-            Text(
-              valor,
-              style: const TextStyle(
-                fontFamily: 'serif',
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                valor,
+                style: const TextStyle(
+                  fontFamily: 'serif',
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             const SizedBox(height: 2),

@@ -36,58 +36,57 @@ void main() {
     expect(plan.toJson()['cuota_semanal'], 125);
   });
 
-  test('ResumenProgresoLogistico empareja libros publicados por prefijo numérico y actualiza título, autor y estado', () {
+  test('ResumenProgresoLogistico cubre los 1,000 libros reales y refleja avances sin quedar en 100%', () {
     final base = asignacionesBase();
-    expect(base, hasLength(125));
+    expect(base, hasLength(1000));
     expect(numeroDesdeIdLibro('004_la_celestina'), 4);
-    expect(numeroDesdeIdLibro('032_el_quijote'), 32);
+    expect(numeroDesdeIdLibro('376_nueva_obra'), 376);
 
+    // Simula los 375 libros existentes en MongoDB Atlas (#001 al #375)
+    final ids375 = {
+      for (var n = 1; n <= 375; n++) '${n.toString().padLeft(3, '0')}_libro',
+    };
     final resumen = ResumenProgresoLogistico.calcular(
       plan: planEquipoBase,
       asignaciones: base,
-      librosPublicados: const [
-        ResumenLibro(
-          id: '004_la_celestina',
-          titulo: 'La Celestina',
-          autor: 'Fernando de Rojas',
-          idioma: 'es',
-          temas: ['Teatro'],
-          portada: null,
-          totalPaginas: 12,
-          caracteresTotales: 18000,
-        ),
-        ResumenLibro(
-          id: '032_el_quijote',
-          titulo: 'Don Quijote',
-          autor: 'Miguel de Cervantes',
-          idioma: 'es',
-          temas: ['Novela'],
-          portada: null,
-          totalPaginas: 50,
-          caracteresTotales: 90000,
-        ),
-      ],
+      idsPublicados: ids375,
     );
 
     expect(resumen.progresoIntegrantes, hasLength(4));
+    expect(resumen.totalCompletados, 375);
+    expect(resumen.totalPendientes, 625);
+    expect(resumen.avanceGlobal, closeTo(0.375, 0.001));
+    expect(resumen.semanaActual, 5);
+    expect(resumen.completadosSemanaActual, 0);
+
     final alan = resumen.progresoIntegrantes.firstWhere(
       (i) => i.integrante.id == 'alan',
     );
     final octavio = resumen.progresoIntegrantes.firstWhere(
       (i) => i.integrante.id == 'octavio',
     );
-    expect(alan.verificados, 3);
-    expect(alan.subidos, 1);
-    expect(alan.pendientes, 27);
-    expect(octavio.subidos, 1);
-    expect(octavio.pendientes, 30);
-    expect(resumen.totalCompletados, 5);
+    final hector = resumen.progresoIntegrantes.firstWhere(
+      (i) => i.integrante.id == 'hector',
+    );
+    final uziel = resumen.progresoIntegrantes.firstWhere(
+      (i) => i.integrante.id == 'uziel',
+    );
 
-    final fila4 = resumen.asignaciones.firstWhere((a) => a.numero == 4);
-    expect(fila4.id, '004_la_celestina');
-    expect(fila4.titulo, 'La Celestina');
-    expect(fila4.autor, 'Fernando de Rojas');
-    expect(fila4.estado, 'subido');
+    expect(alan.completados, 93);
+    expect(alan.pendientes, 155);
+    expect(alan.bloqueActual, '376–406');
+    expect(octavio.completados, 93);
+    expect(octavio.bloqueActual, '407–437');
+    expect(hector.completados, 93);
+    expect(hector.bloqueActual, '438–468');
+    expect(uziel.completados, 96);
+    expect(uziel.bloqueActual, '469–500');
+
+    expect(prefijoSiguienteLibro(alan.integrante, resumen.asignaciones), '376_');
+    expect(
+      prefijoSiguienteLibro(octavio.integrante, resumen.asignaciones),
+      '407_',
+    );
   });
 
   test('resolverIntegrante detecta por nombre/correo y prioriza vínculo manual por correo', () async {

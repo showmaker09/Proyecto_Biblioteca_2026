@@ -36,6 +36,7 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
   final List<Capitulo> _capitulos = [];
   List<Asignacion> _asignaciones = asignacionesBase();
   IntegrantePlan? _integrante;
+  int? _numeroElegido;
   ResultadoVerificacionLocal? _verificacion;
   var _cargando = true;
   var _verificando = false;
@@ -78,6 +79,9 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
   Future<void> _cargar() async {
     try {
       final usuario = context.read<ClienteBiblioteca>().usuario;
+      final arg = ModalRoute.of(context)?.settings.arguments;
+      final asignacionInicial = arg is Asignacion ? arg : null;
+
       final escaner = context.read<CasosEscaner>();
       final vinculo = context.read<VinculoIntegranteSesion>();
       final dashboard = context.read<CasosDashboard>();
@@ -92,19 +96,39 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
       } catch (_) {
         // Si no hay red al abrir, se mantiene la base local para poder verificar.
       }
-      final integrante = await vinculo.resolverParaUsuario(
+      IntegrantePlan? integrante;
+      if (asignacionInicial != null) {
+        integrante = resolverIntegrante(
+          idManual: asignacionInicial.responsable,
+          integrantes: integrantes,
+        );
+      }
+      integrante ??= await vinculo.resolverParaUsuario(
         usuario,
         integrantes: integrantes,
       );
       if (!mounted) return;
+
+      final pendientes = integrante == null
+          ? const <Asignacion>[]
+          : asignacionesPendientesDe(integrante, asignaciones);
+      int? numeroElegido;
+      if (asignacionInicial != null &&
+          pendientes.any((a) => a.numero == asignacionInicial.numero)) {
+        numeroElegido = asignacionInicial.numero;
+      } else if (pendientes.isNotEmpty) {
+        numeroElegido = pendientes.first.numero;
+      }
+
       setState(() {
         _archivos = archivos;
         _asignaciones = asignaciones;
         _integrante = integrante;
+        _numeroElegido = numeroElegido;
         _cargando = false;
       });
-      if (integrante != null) {
-        _aplicarPrefijoId(integrante, asignaciones);
+      if (numeroElegido != null) {
+        _aplicarNumeroEnId(numeroElegido, forzar: false);
       }
     } catch (_) {
       if (!mounted) return;
@@ -115,15 +139,16 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
     }
   }
 
-  void _aplicarPrefijoId(
-    IntegrantePlan integrante,
-    List<Asignacion> asignaciones, {
-    bool forzar = false,
-  }) {
-    final prefijo = prefijoSiguienteLibro(integrante, asignaciones);
+  void _aplicarNumeroEnId(int numero, {bool forzar = true}) {
+    final prefijo = '${numero.toString().padLeft(3, '0')}_';
     final actual = _id.text.trim();
-    if (forzar || actual.isEmpty || RegExp(r'^\d{3}_$').hasMatch(actual)) {
+    if (actual.isEmpty || RegExp(r'^\d{3}_$').hasMatch(actual)) {
       _id.text = prefijo;
+      return;
+    }
+    if (forzar) {
+      final sinPrefijo = actual.replaceFirst(RegExp(r'^\d+_'), '');
+      _id.text = '$prefijo$sinPrefijo';
     }
   }
 
@@ -134,12 +159,27 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
       integrante.id,
     );
     if (!mounted) return;
+    final pendientes = asignacionesPendientesDe(integrante, _asignaciones);
+    final numero = pendientes.isEmpty ? null : pendientes.first.numero;
     setState(() {
       _integrante = integrante;
+      _numeroElegido = numero;
       _verificacion = null;
       _publicadoExito = false;
     });
-    _aplicarPrefijoId(integrante, _asignaciones);
+    if (numero != null) {
+      _aplicarNumeroEnId(numero, forzar: true);
+    }
+  }
+
+  void _seleccionarNumeroPendiente(int? numero) {
+    if (numero == null) return;
+    setState(() {
+      _numeroElegido = numero;
+      _verificacion = null;
+      _publicadoExito = false;
+    });
+    _aplicarNumeroEnId(numero, forzar: true);
   }
 
   void _alternar(File archivo) {
@@ -277,6 +317,7 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
         portada: _portada.text,
         capitulos: List<Capitulo>.of(_capitulos),
         integranteActivo: _integrante,
+        asignacionesActuales: _asignaciones,
       );
       if (!mounted) return;
       setState(() => _verificacion = resultado);
@@ -316,6 +357,7 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
         portada: _portada.text,
         capitulos: List<Capitulo>.of(_capitulos),
         integranteActivo: _integrante,
+        asignacionesActuales: _asignaciones,
       );
       if (!mounted) return;
       if (!revalidado.esValido || revalidado.solicitud == null) {
@@ -324,7 +366,31 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
       }
       final resumen = await catalogo.publicar(revalidado.solicitud!);
       if (!mounted) return;
+      final numeroSubido = numeroDesdeIdLibro(resumen.id);
+      final actualizadas = numeroSubido == null
+          ? _asignaciones
+          : _asignaciones
+                .map(
+                  (fila) => fila.numero == numeroSubido
+                      ? fila.conEstado(
+                          'subido',
+                          nuevoId: resumen.id,
+                          nuevoTitulo: resumen.titulo,
+                          nuevoAutor: resumen.autor,
+                        )
+                      : fila,
+                )
+                .toList();
+      final pendientesDespues = asignacionesPendientesDe(
+        _integrante!,
+        actualizadas,
+      );
       setState(() {
+        _asignaciones = actualizadas;
+        _numeroElegido = pendientesDespues.isEmpty
+            ? null
+            : pendientesDespues.first.numero;
+        _verificacion = null;
         _publicadoExito = true;
         _aviso =
             'Subido a MongoDB para ${_integrante!.primerNombre}: '
@@ -353,9 +419,17 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
         _integrante != null &&
         !_verificando &&
         !_publicando;
-    final prefijoSugerido = _integrante == null
+    final pendientes = _integrante == null
+        ? const <Asignacion>[]
+        : asignacionesPendientesDe(_integrante!, _asignaciones);
+    final numeroValido =
+        _numeroElegido != null &&
+            pendientes.any((a) => a.numero == _numeroElegido)
+        ? _numeroElegido
+        : (pendientes.isEmpty ? null : pendientes.first.numero);
+    final prefijoSugerido = numeroValido == null
         ? null
-        : prefijoSiguienteLibro(_integrante!, _asignaciones);
+        : '${numeroValido.toString().padLeft(3, '0')}_';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Publicar')),
@@ -388,7 +462,7 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                         Text(
                           _integrante == null
                               ? 'Elige a qué integrante corresponde este correo admin:'
-                              : '${_integrante!.nombre} · Bloque ${_integrante!.etiquetaBloque}',
+                              : '${_integrante!.nombre} · Bloque activo ${etiquetaBloqueActivo(_integrante!, _asignaciones)}',
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 8),
@@ -399,7 +473,7 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                             for (final item in planEquipoBase.integrantes)
                               ChoiceChip(
                                 label: Text(
-                                  '${item.primerNombre} (${item.etiquetaBloque})',
+                                  '${item.primerNombre} (${etiquetaBloqueActivo(item, _asignaciones)})',
                                 ),
                                 selected: _integrante?.id == item.id,
                                 visualDensity: VisualDensity.compact,
@@ -407,19 +481,31 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                               ),
                           ],
                         ),
-                        if (prefijoSugerido != null) ...[
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: ActionChip(
-                              avatar: const Icon(Icons.auto_fix_high, size: 16),
-                              label: Text(
-                                'Usar prefijo siguiente: $prefijoSugerido',
+                        if (_integrante != null && pendientes.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'ID pendiente disponible en tu bloque',
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
                               ),
-                              onPressed: () => _aplicarPrefijoId(
-                                _integrante!,
-                                _asignaciones,
-                                forzar: true,
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<int>(
+                                isExpanded: true,
+                                value: numeroValido,
+                                items: [
+                                  for (final p in pendientes)
+                                    DropdownMenuItem<int>(
+                                      value: p.numero,
+                                      child: Text(
+                                        '#${p.numero.toString().padLeft(3, '0')} · ${p.titulo} (pendiente)',
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                ],
+                                onChanged: _seleccionarNumeroPendiente,
                               ),
                             ),
                           ),
@@ -505,7 +591,7 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                     labelText: 'Id',
                     helperText: prefijoSugerido == null
                         ? 'Minúsculas, números o guion bajo, como 004_la_celestina'
-                        : 'Debe empezar con un número de tu bloque (${_integrante!.etiquetaBloque}), ej. ${prefijoSugerido}titulo',
+                        : 'Debe empezar con un número pendiente de tu bloque (${_integrante!.etiquetaBloque}), ej. ${prefijoSugerido}titulo',
                   ),
                 ),
                 const SizedBox(height: 8),

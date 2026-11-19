@@ -17,6 +17,29 @@ int? numeroDesdeIdLibro(String id) {
   return int.tryParse(match.group(1)!);
 }
 
+/// Determina el integrante dueño de un número de libro (1..1000) según la
+/// distribución semanal de 125 libros (31 Alan, 31 Octavio, 31 Hector, 32 Uziel).
+String? responsableDeNumero(int numero) {
+  if (numero < 1 || numero > 1000) return null;
+  final offset = (numero - 1) % 125;
+  if (offset <= 30) return 'alan';
+  if (offset <= 61) return 'octavio';
+  if (offset <= 92) return 'hector';
+  return 'uziel';
+}
+
+/// Rango `(inicio, fin)` del bloque semanal al que pertenece [numero] dentro de
+/// su cuota de 125 libros (ej. 376 -> `(376, 406)`, 407 -> `(407, 437)`).
+(int, int) rangoBloqueSemanal(int numero) {
+  final semana = (numero - 1) ~/ 125;
+  final base = semana * 125 + 1;
+  final offset = (numero - 1) % 125;
+  if (offset <= 30) return (base, base + 30);
+  if (offset <= 61) return (base + 31, base + 61);
+  if (offset <= 92) return (base + 62, base + 92);
+  return (base + 93, base + 124);
+}
+
 String _normalizarTexto(String texto) {
   return texto
       .toLowerCase()
@@ -62,41 +85,52 @@ IntegrantePlan? resolverIntegrante({
   return null;
 }
 
-/// Devuelve el primer número pendiente dentro del bloque asignado a [integrante].
-int siguienteNumeroPendiente(
+/// Devuelve las asignaciones en estado `pendiente` del integrante [integrante],
+/// ordenadas por número ascendente.
+List<Asignacion> asignacionesPendientesDe(
   IntegrantePlan integrante,
   List<Asignacion> asignaciones,
 ) {
-  final pendientes = asignaciones
+  return asignaciones
       .where(
         (a) =>
             a.responsable == integrante.id &&
             a.estado == 'pendiente' &&
-            a.numero >= integrante.bloqueInicio &&
-            a.numero <= integrante.bloqueFin,
+            integrante.contieneNumero(a.numero),
       )
       .toList()
     ..sort((a, b) => a.numero.compareTo(b.numero));
+}
 
+/// Devuelve el primer número pendiente dentro de los bloques de [integrante].
+int siguienteNumeroPendiente(
+  IntegrantePlan integrante,
+  List<Asignacion> asignaciones,
+) {
+  final pendientes = asignacionesPendientesDe(integrante, asignaciones);
   if (pendientes.isNotEmpty) return pendientes.first.numero;
-
-  final existentes = asignaciones
-      .where((a) => a.responsable == integrante.id)
-      .map((a) => a.numero)
-      .toSet();
-  for (var n = integrante.bloqueInicio; n <= integrante.bloqueFin; n++) {
-    if (!existentes.contains(n)) return n;
-  }
   return integrante.bloqueInicio;
 }
 
-/// Formatea el prefijo de 3 dígitos para el siguiente libro (ej. `032_`).
+/// Formatea el prefijo de 3 dígitos para el siguiente libro (ej. `376_`).
 String prefijoSiguienteLibro(
   IntegrantePlan integrante,
   List<Asignacion> asignaciones,
 ) {
   final numero = siguienteNumeroPendiente(integrante, asignaciones);
   return '${numero.toString().padLeft(3, '0')}_';
+}
+
+/// Etiqueta del bloque semanal actual con pendientes para [integrante]
+/// (por ejemplo `376–406` si sus 3 semanas previas ya están completas).
+String etiquetaBloqueActivo(
+  IntegrantePlan integrante,
+  List<Asignacion> asignaciones,
+) {
+  final pendientes = asignacionesPendientesDe(integrante, asignaciones);
+  if (pendientes.isEmpty) return integrante.etiquetaBloque;
+  final (inicio, fin) = rangoBloqueSemanal(pendientes.first.numero);
+  return '${inicio.toString().padLeft(3, '0')}–${fin.toString().padLeft(3, '0')}';
 }
 
 /// Persiste en el teléfono el vínculo manual `correo -> id_integrante` para
@@ -221,8 +255,14 @@ class IntegrantePlan {
 
   String get primerNombre => nombre.split(' ').first;
 
-  bool contieneNumero(int numero) =>
-      numero >= bloqueInicio && numero <= bloqueFin;
+  bool get esPlanMultisemana => asignados > (bloqueFin - bloqueInicio + 1);
+
+  bool contieneNumero(int numero) {
+    if (esPlanMultisemana) {
+      return responsableDeNumero(numero) == id;
+    }
+    return numero >= bloqueInicio && numero <= bloqueFin;
+  }
 
   factory IntegrantePlan.fromJson(Map<String, dynamic> json) => IntegrantePlan(
     id: json['_id'] as String? ?? '',
@@ -274,19 +314,21 @@ class PlanEquipo {
   };
 }
 
-/// Métrica consolidada de un integrante frente a su bloque asignado.
+/// Métrica consolidada de un integrante frente a su meta acumulada asignada.
 class IntegranteProgreso {
   const IntegranteProgreso({
     required this.integrante,
     required this.verificados,
     required this.subidos,
     required this.pendientes,
+    this.bloqueActual,
   });
 
   final IntegrantePlan integrante;
   final int verificados;
   final int subidos;
   final int pendientes;
+  final String? bloqueActual;
 
   int get completados => verificados + subidos;
 
@@ -296,7 +338,7 @@ class IntegranteProgreso {
   }
 }
 
-/// Estado analítico consolidado del plan logístico de digitalización.
+/// Estado analítico consolidado del plan logístico de digitalización (1,000 libros).
 class ResumenProgresoLogistico {
   const ResumenProgresoLogistico({
     required this.plan,
@@ -313,9 +355,26 @@ class ResumenProgresoLogistico {
   int get totalCompletados =>
       progresoIntegrantes.fold(0, (suma, item) => suma + item.completados);
 
+  int get totalPendientes =>
+      progresoIntegrantes.fold(0, (suma, item) => suma + item.pendientes);
+
+  /// Semana operativa en curso (cuota de 125 libros). Empieza en Semana 2.
+  int get semanaActual {
+    if (plan.cuotaSemanal <= 0) return 2;
+    final completadas = totalCompletados ~/ plan.cuotaSemanal;
+    return (2 + completadas).clamp(2, 9);
+  }
+
+  /// Libros completados dentro de la cuota semanal actual (0..125).
+  int get completadosSemanaActual {
+    if (plan.cuotaSemanal <= 0) return 0;
+    if (totalCompletados >= plan.metaTotal) return plan.cuotaSemanal;
+    return totalCompletados % plan.cuotaSemanal;
+  }
+
   double get avanceSemanal {
     if (plan.cuotaSemanal <= 0) return 0;
-    return (totalCompletados / plan.cuotaSemanal).clamp(0.0, 1.0);
+    return (completadosSemanaActual / plan.cuotaSemanal).clamp(0.0, 1.0);
   }
 
   double get avanceGlobal {
@@ -383,6 +442,7 @@ class ResumenProgresoLogistico {
         verificados: verificados,
         subidos: subidos,
         pendientes: pendientes,
+        bloqueActual: etiquetaBloqueActivo(integrante, normalizadas),
       );
     }).toList();
 
@@ -424,7 +484,8 @@ class ResumenProgresoLogistico {
   }
 }
 
-/// Plan base del equipo según la distribución de bloques del proyecto.
+/// Plan completo del proyecto (1,000 libros en 8 semanas de 125 libros:
+/// 31/31/31/32 por semana = 248 Alan, 248 Octavio, 248 Hector, 256 Uziel).
 const planEquipoBase = PlanEquipo(
   id: 'equipo',
   metaTotal: 1000,
@@ -435,33 +496,34 @@ const planEquipoBase = PlanEquipo(
       nombre: 'Alan Emmanuel Kuk Hau',
       bloqueInicio: 1,
       bloqueFin: 31,
-      asignados: 31,
+      asignados: 248,
     ),
     IntegrantePlan(
       id: 'octavio',
       nombre: 'Jose Octavio Hernandez Tec',
       bloqueInicio: 32,
       bloqueFin: 62,
-      asignados: 31,
+      asignados: 248,
     ),
     IntegrantePlan(
       id: 'hector',
       nombre: 'Hector Manuel Gracia Dzul',
       bloqueInicio: 63,
       bloqueFin: 93,
-      asignados: 31,
+      asignados: 248,
     ),
     IntegrantePlan(
       id: 'uziel',
       nombre: 'Uziel Isaac Pech Balam',
       bloqueInicio: 94,
       bloqueFin: 125,
-      asignados: 32,
+      asignados: 256,
     ),
   ],
 );
 
-/// Genera las 125 asignaciones de la cuota semanal del plan logístico.
+/// Genera las 1,000 asignaciones reales del plan logístico (Semanas 2 a 9),
+/// repartidas por bloques de 31/31/31/32 en cada cuota semanal de 125 libros.
 List<Asignacion> asignacionesBase() {
   const verificadosIniciales = <int, (String, String, String)>{
     1: ('001_fuente_ovejuna', 'Fuente Ovejuna', 'Lope de Vega'),
@@ -470,37 +532,32 @@ List<Asignacion> asignacionesBase() {
   };
 
   final lista = <Asignacion>[];
-  for (final integrante in planEquipoBase.integrantes) {
-    for (
-      var num = integrante.bloqueInicio;
-      num <= integrante.bloqueFin;
-      num++
-    ) {
-      final inicial = verificadosIniciales[num];
-      if (inicial != null) {
-        lista.add(
-          Asignacion(
-            id: inicial.$1,
-            numero: num,
-            titulo: inicial.$2,
-            autor: inicial.$3,
-            responsable: integrante.id,
-            estado: 'verificado',
-          ),
-        );
-      } else {
-        final codigo = num.toString().padLeft(3, '0');
-        lista.add(
-          Asignacion(
-            id: '${codigo}_obra_asignada',
-            numero: num,
-            titulo: 'Obra asignada #$codigo',
-            autor: 'Proyecto Gutenberg',
-            responsable: integrante.id,
-            estado: 'pendiente',
-          ),
-        );
-      }
+  for (var num = 1; num <= planEquipoBase.metaTotal; num++) {
+    final responsable = responsableDeNumero(num) ?? 'uziel';
+    final inicial = verificadosIniciales[num];
+    if (inicial != null) {
+      lista.add(
+        Asignacion(
+          id: inicial.$1,
+          numero: num,
+          titulo: inicial.$2,
+          autor: inicial.$3,
+          responsable: responsable,
+          estado: 'verificado',
+        ),
+      );
+    } else {
+      final codigo = num.toString().padLeft(3, '0');
+      lista.add(
+        Asignacion(
+          id: '${codigo}_obra_asignada',
+          numero: num,
+          titulo: 'Obra asignada #$codigo',
+          autor: 'Proyecto Gutenberg',
+          responsable: responsable,
+          estado: 'pendiente',
+        ),
+      );
     }
   }
   return lista;

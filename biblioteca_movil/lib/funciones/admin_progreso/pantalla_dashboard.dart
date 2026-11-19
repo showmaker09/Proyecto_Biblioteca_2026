@@ -23,7 +23,7 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
   IntegrantePlan? _integranteActivo;
   int _txtLocales = 0;
   String _responsable = '';
-  String _estado = '';
+  String _estado = 'pendiente';
   int _visibles = _porPagina;
   var _cargando = true;
   String? _error;
@@ -63,6 +63,9 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
       setState(() {
         _resumen = resumen;
         _integranteActivo = integrante;
+        if (_responsable.isEmpty && integrante != null) {
+          _responsable = integrante.id;
+        }
         _txtLocales = locales;
         _visibles = _porPagina;
       });
@@ -85,13 +88,70 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
       integrante.id,
     );
     if (!mounted) return;
-    setState(() => _integranteActivo = integrante);
+    setState(() {
+      _integranteActivo = integrante;
+      _responsable = integrante.id;
+      _visibles = _porPagina;
+    });
   }
 
-  Future<void> _abrirYRecargar(String ruta) async {
-    await Navigator.pushNamed(context, ruta);
+  Future<void> _abrirYRecargar(String ruta, {Object? argumentos}) async {
+    await Navigator.pushNamed(context, ruta, arguments: argumentos);
     if (!mounted) return;
     await _cargar();
+  }
+
+  Future<void> _abrirPendiente(
+    Asignacion fila,
+    ResumenProgresoLogistico resumen,
+  ) async {
+    final codigo = fila.numero.toString().padLeft(3, '0');
+    final dueno = resumen.plan.integrantes.cast<IntegrantePlan?>().firstWhere(
+      (i) => i?.id == fila.responsable,
+      orElse: () => null,
+    );
+    final accion = await showModalBottomSheet<String>(
+      context: context,
+      builder: (contexto) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ID #$codigo pendiente (${dueno?.primerNombre ?? fila.responsable})',
+                style: Theme.of(contexto).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Selecciona si deseas escanear páginas para este ID o ir directo a publicarlo.',
+                style: Theme.of(contexto).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.document_scanner_outlined),
+                title: Text('Escanear páginas para #$codigo'),
+                subtitle: Text('Autocompleta el archivo como ${codigo}_pagina_001.txt'),
+                onTap: () => Navigator.pop(contexto, '/escaner'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.cloud_upload_outlined),
+                title: Text('Publicar textos como #$codigo'),
+                subtitle: Text('Preselecciona el prefijo ${codigo}_ para subir a MongoDB'),
+                onTap: () => Navigator.pop(contexto, '/publicar'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (accion == null || !mounted) return;
+    if (dueno != null) {
+      await _vincularIntegrante(dueno);
+      if (!mounted) return;
+    }
+    await _abrirYRecargar(accion, argumentos: fila);
   }
 
   List<Asignacion> _filtradas(ResumenProgresoLogistico resumen) {
@@ -185,7 +245,7 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
                 Text(
                   activo == null
                       ? 'Asocia este correo admin a un integrante del equipo'
-                      : '${activo.nombre} · Bloque ${activo.etiquetaBloque}',
+                      : '${activo.nombre} · Bloque activo ${etiquetaBloqueActivo(activo, resumen.asignaciones)}',
                   style: const TextStyle(
                     fontFamily: 'serif',
                     fontWeight: FontWeight.w700,
@@ -200,7 +260,7 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
                     for (final integrante in resumen.plan.integrantes)
                       ChoiceChip(
                         label: Text(
-                          '${integrante.primerNombre} (${integrante.etiquetaBloque})',
+                          '${integrante.primerNombre} (${etiquetaBloqueActivo(integrante, resumen.asignaciones)})',
                         ),
                         selected: activo?.id == integrante.id,
                         visualDensity: VisualDensity.compact,
@@ -316,7 +376,7 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
                       context,
                       '/libro/${Uri.encodeComponent(fila.id)}',
                     )
-                  : null,
+                  : () => _abrirPendiente(fila, resumen),
             ),
           ),
           const SizedBox(height: 8),
