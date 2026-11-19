@@ -5,6 +5,7 @@ import 'aplicacion.dart';
 import 'nucleo/almacen_sesion.dart';
 import 'nucleo/casos.dart';
 import 'nucleo/cliente_biblioteca.dart';
+import 'nucleo/plan_logistico.dart';
 import 'nucleo/preferencias_lectura.dart';
 import 'nucleo/progreso_local.dart';
 
@@ -16,7 +17,14 @@ void main() {
   final almacen = AlmacenSesion();
   final cliente = ClienteBiblioteca(almacen: almacen);
   final progreso = ProgresoLocal();
-  runApp(BibliotecaApp(cliente: cliente, progreso: progreso));
+  final vinculoIntegrante = VinculoIntegranteSesion();
+  runApp(
+    BibliotecaApp(
+      cliente: cliente,
+      progreso: progreso,
+      vinculoIntegrante: vinculoIntegrante,
+    ),
+  );
 }
 
 class BibliotecaApp extends StatelessWidget {
@@ -24,10 +32,12 @@ class BibliotecaApp extends StatelessWidget {
     super.key,
     required this.cliente,
     required this.progreso,
+    required this.vinculoIntegrante,
   });
 
   final ClienteBiblioteca cliente;
   final ProgresoLocal progreso;
+  final VinculoIntegranteSesion vinculoIntegrante;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +45,7 @@ class BibliotecaApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<ClienteBiblioteca>.value(value: cliente),
         Provider<ProgresoLocal>.value(value: progreso),
+        Provider<VinculoIntegranteSesion>.value(value: vinculoIntegrante),
         Provider<CasosCuenta>(
           create: (c) => CasosCuenta(c.read<ClienteBiblioteca>()),
         ),

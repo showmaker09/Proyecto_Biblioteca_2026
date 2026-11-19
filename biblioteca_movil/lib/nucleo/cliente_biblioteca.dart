@@ -208,12 +208,22 @@ class ClienteBiblioteca extends ChangeNotifier {
       return ResumenProgresoLogistico.fromJson(_objeto(respuesta));
     }
     if (respuesta.statusCode == 404) {
-      final listado = await listarLibros(desde: 0);
+      final acumulados = <ResumenLibro>[];
+      int? desde = 0;
+      var total = 0;
+      var paginas = 0;
+      while (desde != null && paginas < 10) {
+        final lote = await listarLibros(desde: desde);
+        acumulados.addAll(lote.libros);
+        total = lote.total;
+        desde = lote.siguiente;
+        paginas++;
+      }
       return ResumenProgresoLogistico.calcular(
         plan: planEquipoBase,
         asignaciones: asignacionesBase(),
-        idsPublicados: listado.libros.map((l) => l.id).toSet(),
-        totalCatalogo: listado.total,
+        librosPublicados: acumulados,
+        totalCatalogo: total,
       );
     }
     _exigirOk(respuesta);

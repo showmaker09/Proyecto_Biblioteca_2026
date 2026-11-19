@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../nucleo/cliente_biblioteca.dart';
+import '../../nucleo/plan_logistico.dart';
 import 'casos_escaner.dart';
 
-/// Encuadre con la cámara trasera. El permiso lo pide el plugin al crear el
-/// controlador, antes de mostrar la vista previa. El audio queda apagado.
+/// Encuadre con la cámara trasera (solo rol admin). El permiso lo pide el
+/// plugin al crear el controlador, antes de mostrar la vista previa.
 class VistaCamara extends StatefulWidget {
   const VistaCamara({super.key});
 
@@ -20,6 +22,7 @@ class _VistaCamaraState extends State<VistaCamara> {
   final _texto = TextEditingController();
   final _nombre = TextEditingController();
   CameraController? _controlador;
+  IntegrantePlan? _integrante;
   var _fase = _Fase.abriendo;
   var _cerrada = false;
   String? _aviso;
@@ -28,7 +31,7 @@ class _VistaCamaraState extends State<VistaCamara> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _abrirCamara());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _iniciar());
   }
 
   @override
@@ -38,6 +41,42 @@ class _VistaCamaraState extends State<VistaCamara> {
     _texto.dispose();
     _nombre.dispose();
     super.dispose();
+  }
+
+  Future<void> _iniciar() async {
+    final usuario = context.read<ClienteBiblioteca>().usuario;
+    if (usuario?.esAdmin != true) return;
+    final integrante = await context
+        .read<VinculoIntegranteSesion>()
+        .resolverParaUsuario(usuario);
+    if (!mounted || _cerrada) return;
+    setState(() {
+      _integrante = integrante;
+      _aplicarPrefijoSugerido(integrante);
+    });
+    await _abrirCamara();
+  }
+
+  void _aplicarPrefijoSugerido(IntegrantePlan? integrante) {
+    if (integrante == null) return;
+    final prefijo = '${integrante.bloqueInicio.toString().padLeft(3, '0')}_';
+    final actual = _nombre.text.trim();
+    if (actual.isEmpty || RegExp(r'^\d{3}_$').hasMatch(actual)) {
+      _nombre.text = prefijo;
+    }
+  }
+
+  Future<void> _seleccionarIntegrante(IntegrantePlan integrante) async {
+    final correo = context.read<ClienteBiblioteca>().usuario?.correo ?? '';
+    await context.read<VinculoIntegranteSesion>().guardar(
+      correo,
+      integrante.id,
+    );
+    if (!mounted) return;
+    setState(() {
+      _integrante = integrante;
+      _aplicarPrefijoSugerido(integrante);
+    });
   }
 
   Future<void> _soltarCamara() {
@@ -59,7 +98,8 @@ class _VistaCamaraState extends State<VistaCamara> {
       if (camaras.isEmpty) {
         setState(() {
           _fase = _Fase.sinCamara;
-          _aviso = 'Este aparato no tiene una cámara usable. El catálogo sigue disponible.';
+          _aviso =
+              'Este aparato no tiene una cámara usable. El catálogo sigue disponible.';
         });
         return;
       }
@@ -99,7 +139,9 @@ class _VistaCamaraState extends State<VistaCamara> {
 
   Future<void> _capturar() async {
     final controlador = _controlador;
-    if (controlador == null || !controlador.value.isInitialized || _fase != _Fase.encuadre) {
+    if (controlador == null ||
+        !controlador.value.isInitialized ||
+        _fase != _Fase.encuadre) {
       return;
     }
     setState(() => _fase = _Fase.leyendo);
@@ -110,11 +152,15 @@ class _VistaCamaraState extends State<VistaCamara> {
       final texto = await context.read<CasosEscaner>().reconocer(foto.path);
       if (!mounted || _cerrada) return;
       _texto.text = texto;
+      _aplicarPrefijoSugerido(_integrante);
       setState(() => _fase = _Fase.revision);
     } catch (_) {
       await _soltarCamara();
       if (!mounted || _cerrada) return;
-      setState(() => _aviso = 'No se pudo leer la página. Encuádrala de nuevo, con luz pareja.');
+      setState(
+        () => _aviso =
+            'No se pudo leer la página. Encuádrala de nuevo, con luz pareja.',
+      );
       await _abrirCamara();
     }
   }
@@ -122,7 +168,10 @@ class _VistaCamaraState extends State<VistaCamara> {
   Future<void> _guardar() async {
     setState(() => _aviso = null);
     try {
-      final archivo = await context.read<CasosEscaner>().guardarTexto(_nombre.text, _texto.text);
+      final archivo = await context.read<CasosEscaner>().guardarTexto(
+        _nombre.text,
+        _texto.text,
+      );
       if (!mounted) return;
       setState(() => _guardado = archivo.path);
     } on FormatException catch (error) {
@@ -136,7 +185,11 @@ class _VistaCamaraState extends State<VistaCamara> {
     final ruta = _guardado;
     if (ruta == null) return;
     await SharePlus.instance.share(
-      ShareParams(files: [XFile(ruta, mimeType: 'text/plain', name: nombreCompartido(ruta))]),
+      ShareParams(
+        files: [
+          XFile(ruta, mimeType: 'text/plain', name: nombreCompartido(ruta)),
+        ],
+      ),
     );
   }
 
@@ -148,39 +201,73 @@ class _VistaCamaraState extends State<VistaCamara> {
 
   @override
   Widget build(BuildContext context) {
+    final usuario = context.watch<ClienteBiblioteca>().usuario;
+    final esAdmin = usuario?.esAdmin == true;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Escanear')),
-      body: switch (_fase) {
-        _Fase.abriendo || _Fase.leyendo => const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 12),
-              Text('Un momento…'),
-            ],
-          ),
-        ),
-        _Fase.sinCamara => _Aviso(
-          texto: _aviso ?? 'No hay cámara.',
-          accion: 'Reintentar',
-          onPressed: _abrirCamara,
-        ),
-        _Fase.encuadre => _encuadre(),
-        _Fase.revision => _revision(),
-      },
+      body: !esAdmin
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Solo una cuenta administradora puede escanear páginas para digitalización.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            )
+          : switch (_fase) {
+              _Fase.abriendo || _Fase.leyendo => const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 12),
+                    Text('Un momento…'),
+                  ],
+                ),
+              ),
+              _Fase.sinCamara => _Aviso(
+                texto: _aviso ?? 'No hay cámara.',
+                accion: 'Reintentar',
+                onPressed: _abrirCamara,
+              ),
+              _Fase.encuadre => _encuadre(usuario?.correo ?? ''),
+              _Fase.revision => _revision(usuario?.correo ?? ''),
+            },
     );
   }
 
-  Widget _encuadre() {
+  Widget _encuadre(String correo) {
     final controlador = _controlador;
     if (controlador == null || !controlador.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
+    final etiqueta = _integrante == null
+        ? 'Sesión: $correo (sin integrante vinculado)'
+        : '${_integrante!.primerNombre} · Bloque ${_integrante!.etiquetaBloque}';
+
     return Stack(
       fit: StackFit.expand,
       children: [
         ColoredBox(color: Colors.black, child: CameraPreview(controlador)),
+        Positioned(
+          top: 12,
+          left: 16,
+          right: 16,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              etiqueta,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+            ),
+          ),
+        ),
         Positioned(
           left: 24,
           right: 24,
@@ -190,9 +277,15 @@ class _VistaCamaraState extends State<VistaCamara> {
               if (_aviso != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(_aviso!, style: const TextStyle(color: Colors.white)),
+                  child: Text(
+                    _aviso!,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
-              FilledButton(onPressed: _capturar, child: const Text('Capturar página')),
+              FilledButton(
+                onPressed: _capturar,
+                child: const Text('Capturar página'),
+              ),
             ],
           ),
         ),
@@ -200,33 +293,82 @@ class _VistaCamaraState extends State<VistaCamara> {
     );
   }
 
-  Widget _revision() {
+  Widget _revision(String correo) {
+    final integrante = _integrante;
+    final ejemplo = integrante == null
+        ? '004_la_celestina_001'
+        : '${integrante.bloqueInicio.toString().padLeft(3, '0')}_titulo_001';
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sesión admin: $correo',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  integrante == null
+                      ? 'Asocia tu correo a tu integrante del equipo:'
+                      : '${integrante.nombre} · Bloque ${integrante.etiquetaBloque}',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    for (final item in planEquipoBase.integrantes)
+                      ChoiceChip(
+                        label: Text(
+                          '${item.primerNombre} (${item.etiquetaBloque})',
+                        ),
+                        selected: integrante?.id == item.id,
+                        visualDensity: VisualDensity.compact,
+                        onSelected: (_) => _seleccionarIntegrante(item),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         const Text('Corrige el texto antes de guardarlo. La foto ya se borró.'),
         const SizedBox(height: 12),
         TextField(
           controller: _texto,
           minLines: 8,
           maxLines: 16,
-          decoration: const InputDecoration(labelText: 'Texto', alignLabelWithHint: true),
+          decoration: const InputDecoration(
+            labelText: 'Texto',
+            alignLabelWithHint: true,
+          ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _nombre,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Nombre del archivo',
-            helperText: 'Por ejemplo 004_la_celestina_012',
+            helperText: 'Por ejemplo $ejemplo',
           ),
         ),
         if (_aviso != null) ...[
           const SizedBox(height: 8),
-          Text(_aviso!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          Text(
+            _aviso!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         ],
         if (_guardado != null) ...[
           const SizedBox(height: 8),
-          Text('Guardado en el teléfono.'),
+          const Text('Guardado en la memoria interna del teléfono.'),
         ],
         const SizedBox(height: 16),
         FilledButton(onPressed: _guardar, child: const Text('Guardar texto')),
@@ -248,7 +390,11 @@ class _VistaCamaraState extends State<VistaCamara> {
 }
 
 class _Aviso extends StatelessWidget {
-  const _Aviso({required this.texto, required this.accion, required this.onPressed});
+  const _Aviso({
+    required this.texto,
+    required this.accion,
+    required this.onPressed,
+  });
 
   final String texto;
   final String accion;

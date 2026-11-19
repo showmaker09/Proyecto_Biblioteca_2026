@@ -4,9 +4,14 @@ import '../../../nucleo/plan_logistico.dart';
 
 /// Tarjetas de KPIs y barras comparativas de progreso por integrante del equipo.
 class GraficoProgresoEquipo extends StatelessWidget {
-  const GraficoProgresoEquipo({super.key, required this.resumen});
+  const GraficoProgresoEquipo({
+    super.key,
+    required this.resumen,
+    this.integranteActivoId,
+  });
 
   final ResumenProgresoLogistico resumen;
+  final String? integranteActivoId;
 
   Color _colorPorcentaje(double avance) {
     if (avance >= 0.5) return const Color(0xFF2E6F40);
@@ -85,6 +90,15 @@ class GraficoProgresoEquipo extends StatelessWidget {
         const SizedBox(height: 10),
         for (final item in resumen.progresoIntegrantes) ...[
           Card(
+            shape: integranteActivoId == item.integrante.id
+                ? RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(
+                      color: Color(0xFF141414),
+                      width: 1.8,
+                    ),
+                  )
+                : null,
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
@@ -93,13 +107,38 @@ class GraficoProgresoEquipo extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          item.integrante.nombre,
-                          style: const TextStyle(
-                            fontFamily: 'serif',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                          ),
+                        child: Wrap(
+                          spacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              item.integrante.nombre,
+                              style: const TextStyle(
+                                fontFamily: 'serif',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                            ),
+                            if (integranteActivoId == item.integrante.id)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF141414),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'Tu bloque',
+                                  style: TextStyle(
+                                    color: Color(0xFFF6F3EC),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       Container(
