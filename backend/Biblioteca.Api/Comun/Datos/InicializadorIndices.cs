@@ -32,6 +32,9 @@ public sealed class InicializadorIndices(BaseDatos bd) : IHostedService
             {
                 new CreateIndexModel<Libro>(Builders<Libro>.IndexKeys.Ascending(l => l.Titulo), new CreateIndexOptions { Collation = colacionEs }),
                 new CreateIndexModel<Libro>(Builders<Libro>.IndexKeys.Ascending(l => l.Autor), new CreateIndexOptions { Collation = colacionEs }),
+                new CreateIndexModel<Libro>(Builders<Libro>.IndexKeys.Ascending(l => l.Idioma)),
+                // Multiclave: un libro con varios temas queda buscable por cada uno con $in.
+                new CreateIndexModel<Libro>(Builders<Libro>.IndexKeys.Ascending("temas")),
             },
             ct);
     }

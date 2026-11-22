@@ -29,7 +29,9 @@ class ProblemaApi implements Exception {
   }
 
   factory ProblemaApi.desdeCuerpo(int estado, Object? cuerpo) {
-    var titulo = 'La biblioteca respondió $estado.';
+    var titulo = estado == 503 || estado == 504
+        ? 'No se pudo conectar con el servidor de la biblioteca (tiempo de espera agotado).'
+        : 'La biblioteca respondió $estado.';
     String? detalle;
     final errores = <String, List<String>>{};
     if (cuerpo is Map) {

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'almacen_sesion.dart';
 import 'modelos.dart';
+import 'plan_logistico.dart';
 
 /// Lee el valor de `biblioteca_refresco` aunque `Expires` traiga comas.
 String? valorRefresco(http.Response respuesta) {
@@ -17,9 +18,17 @@ String? valorRefresco(http.Response respuesta) {
   return null;
 }
 
-/// Un solo cliente HTTP para toda la app. La cookie de refresco se manda a mano
-/// y solo en las dos rutas de sesión, así el Path de Development y el de
-/// producción sirven sin cambiar el JSON del servidor.
+/// Única puerta de red del teléfono. Inicio, Biblioteca, la ficha y el lector
+/// llaman estos métodos, y cada uno hace HTTP contra Biblioteca.Api
+/// (emulador: http://10.0.2.2:8000; teléfono por USB: http://127.0.0.1:8000
+/// con adb reverse). La app no tiene driver de Mongo ni MONGO_URI.
+///
+/// Hay un solo http.Client. Varias pantallas pueden pedir a la vez y reutilizan
+/// las conexiones hacia la API. Del otro lado, la API atiende esas peticiones
+/// con el mismo MongoClient y su pool hacia Atlas.
+///
+/// La cookie de refresco se manda a mano y solo en las dos rutas de sesión,
+/// así el Path de Development y el de producción sirven sin cambiar el JSON.
 class ClienteBiblioteca extends ChangeNotifier {
   ClienteBiblioteca({
     http.Client? httpCliente,
@@ -51,7 +60,9 @@ class ClienteBiblioteca extends ChangeNotifier {
 
   static String _normalizar(String valor) {
     final limpia = valor.trim();
-    return limpia.endsWith('/') ? limpia.substring(0, limpia.length - 1) : limpia;
+    return limpia.endsWith('/')
+        ? limpia.substring(0, limpia.length - 1)
+        : limpia;
   }
 
   void _exigirBase() {
@@ -114,12 +125,20 @@ class ClienteBiblioteca extends ChangeNotifier {
     String? q,
     String? idioma,
     List<String> ids = const [],
+    List<String> temas = const [],
+    int? paginasMin,
+    int? paginasMax,
+    bool enContenido = false,
   }) async {
     final consulta = <String, dynamic>{
       if (ids.isEmpty) 'desde': '$desde',
       if (ids.isEmpty) 'orden': orden,
       if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
       if (idioma != null && idioma.isNotEmpty) 'idioma': idioma,
+      if (ids.isEmpty && temas.isNotEmpty) 'tema': temas,
+      if (ids.isEmpty && paginasMin != null) 'paginas_min': '$paginasMin',
+      if (ids.isEmpty && paginasMax != null) 'paginas_max': '$paginasMax',
+      if (ids.isEmpty && enContenido) 'en_contenido': 'true',
       if (ids.isNotEmpty) 'id': ids,
     };
     final respuesta = await enviar('GET', '/libros', consulta: consulta);
@@ -155,6 +174,19 @@ class ClienteBiblioteca extends ChangeNotifier {
     return decoded.map((item) => item.toString()).toList();
   }
 
+  Future<List<String>> listarTemas() async {
+    final respuesta = await enviar('GET', '/temas');
+    _exigirOk(respuesta);
+    final decoded = jsonDecode(utf8.decode(respuesta.bodyBytes));
+    if (decoded is! List) {
+      throw const ProblemaApi(
+        estado: 200,
+        titulo: 'La lista de tipos no tiene el formato esperado.',
+      );
+    }
+    return decoded.map((item) => item.toString()).toList();
+  }
+
   Future<ResumenLibro> crearLibro(SolicitudLibro solicitud) async {
     final cuerpo = solicitud.toJson();
     if (utf8.encode(jsonEncode(cuerpo)).length > 15 * 1024 * 1024) {
@@ -166,6 +198,36 @@ class ClienteBiblioteca extends ChangeNotifier {
     final respuesta = await enviar('POST', '/libros', cuerpo: cuerpo);
     _exigirOk(respuesta, aceptados: const {201});
     return ResumenLibro.fromJson(_objeto(respuesta));
+  }
+
+  /// Obtiene el avance del plan logístico desde la API o lo cruza con los
+  /// libros publicados en el catálogo cuando la ruta específica responde 404.
+  Future<ResumenProgresoLogistico> obtenerProgresoLogistico() async {
+    final respuesta = await enviar('GET', '/admin/progreso-logistico');
+    if (respuesta.statusCode == 200) {
+      return ResumenProgresoLogistico.fromJson(_objeto(respuesta));
+    }
+    if (respuesta.statusCode == 404) {
+      final acumulados = <ResumenLibro>[];
+      int? desde = 0;
+      var total = 0;
+      var paginas = 0;
+      while (desde != null && paginas < 10) {
+        final lote = await listarLibros(desde: desde);
+        acumulados.addAll(lote.libros);
+        total = lote.total;
+        desde = lote.siguiente;
+        paginas++;
+      }
+      return ResumenProgresoLogistico.calcular(
+        plan: planEquipoBase,
+        asignaciones: asignacionesBase(),
+        librosPublicados: acumulados,
+        totalCatalogo: total,
+      );
+    }
+    _exigirOk(respuesta);
+    return ResumenProgresoLogistico.fromJson(_objeto(respuesta));
   }
 
   Future<void> cerrarSesion() async {
@@ -214,7 +276,10 @@ class ClienteBiblioteca extends ChangeNotifier {
       return false;
     }
     if (respuesta.statusCode != 200) {
-      throw ProblemaApi.desdeCuerpo(respuesta.statusCode, _cuerpoONull(respuesta));
+      throw ProblemaApi.desdeCuerpo(
+        respuesta.statusCode,
+        _cuerpoONull(respuesta),
+      );
     }
     final cookie = valorRefresco(respuesta);
     // El servidor ya gastó la cookie anterior. Sin la nueva no se puede volver a entrar.
@@ -276,7 +341,8 @@ class ClienteBiblioteca extends ChangeNotifier {
       conBearer: conBearer,
       cookie: cookie,
     );
-    final renovar = reintentar401 && primera.statusCode == 401 && !ruta.startsWith('/auth');
+    final renovar =
+        reintentar401 && primera.statusCode == 401 && !ruta.startsWith('/auth');
     if (!renovar) return primera;
     final ok = await refrescar();
     if (!ok) throw const SesionTerminada();
@@ -324,15 +390,30 @@ class ClienteBiblioteca extends ChangeNotifier {
     Map<String, dynamic>? consulta,
     required bool conBearer,
     String? cookie,
-  }) {
+  }) async {
     final uri = _uri(ruta, consulta);
     final cabeceras = <String, String>{
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      if (conBearer && almacen.token != null) 'Authorization': 'Bearer ${almacen.token}',
+      'Connection': 'close',
+      if (conBearer && almacen.token != null)
+        'Authorization': 'Bearer ${almacen.token}',
       if (cookie != null) 'Cookie': 'biblioteca_refresco=$cookie',
     };
     final texto = cuerpo == null ? null : jsonEncode(cuerpo);
+    try {
+      return await _despachar(metodo, uri, cabeceras, texto);
+    } on http.ClientException {
+      return _despachar(metodo, uri, cabeceras, texto);
+    }
+  }
+
+  Future<http.Response> _despachar(
+    String metodo,
+    Uri uri,
+    Map<String, String> cabeceras,
+    String? texto,
+  ) {
     switch (metodo) {
       case 'GET':
         return _http.get(uri, headers: cabeceras);
@@ -363,10 +444,14 @@ class ClienteBiblioteca extends ChangeNotifier {
 
   void _exigirOk(http.Response respuesta, {Set<int> aceptados = const {200}}) {
     if (aceptados.contains(respuesta.statusCode)) return;
-    throw ProblemaApi.desdeCuerpo(respuesta.statusCode, _cuerpoONull(respuesta));
+    throw ProblemaApi.desdeCuerpo(
+      respuesta.statusCode,
+      _cuerpoONull(respuesta),
+    );
   }
 
-  Map<String, dynamic> _objeto(http.Response respuesta) => comoMapa(_cuerpoONull(respuesta));
+  Map<String, dynamic> _objeto(http.Response respuesta) =>
+      comoMapa(_cuerpoONull(respuesta));
 
   Object? _cuerpoONull(http.Response respuesta) {
     if (respuesta.bodyBytes.isEmpty) return null;

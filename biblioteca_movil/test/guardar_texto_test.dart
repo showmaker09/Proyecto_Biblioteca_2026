@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:biblioteca_movil/funciones/escaner/guardar_texto.dart';
+import 'package:biblioteca_movil/nucleo/modelos.dart';
+import 'package:biblioteca_movil/nucleo/plan_logistico.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -7,5 +11,93 @@ void main() {
     expect(nombreDeTextoValido('../secreto'), isFalse);
     expect(nombreDeTextoValido('pagina 12'), isFalse);
     await expectLater(GuardarTexto().guardar('../secreto', 'hola'), throwsFormatException);
+  });
+
+  test('verificarPaquete rechaza archivos vacíos o inexistentes en memoria interna', () async {
+    final tempDir = await Directory.systemTemp.createTemp('prueba_verificador_');
+    try {
+      final vacio = File('${tempDir.path}/004_pagina_01.txt');
+      await vacio.writeAsString('   \n  ');
+      final inexistente = File('${tempDir.path}/004_pagina_02.txt');
+
+      final resultado = await GuardarTexto().verificarPaquete(
+        archivosEnOrden: [vacio, inexistente],
+        id: '004_la_celestina',
+        titulo: 'La Celestina',
+        autor: 'Fernando de Rojas',
+        idioma: 'es',
+        temas: const ['Teatro'],
+        portada: null,
+        capitulos: const [Capitulo(numero: 1, titulo: 'Acto I', paginaInicio: 5)],
+      );
+
+      expect(resultado.esValido, isFalse);
+      expect(resultado.solicitud, isNull);
+      expect(
+        resultado.errores,
+        contains(predicate<String>((e) => e.contains('está vacío en la memoria interna'))),
+      );
+      expect(
+        resultado.errores,
+        contains(predicate<String>((e) => e.contains('ya no existe en la memoria interna'))),
+      );
+      expect(
+        resultado.errores,
+        contains(predicate<String>((e) => e.contains('página de inicio (5) no existe'))),
+      );
+    } finally {
+      if (await tempDir.exists()) await tempDir.delete(recursive: true);
+    }
+  });
+
+  test('verificarPaquete aprueba archivos íntegros en memoria interna y arma SolicitudLibro', () async {
+    final tempDir = await Directory.systemTemp.createTemp('prueba_verificador_ok_');
+    try {
+      final p1 = File('${tempDir.path}/004_la_celestina_001.txt');
+      final p2 = File('${tempDir.path}/004_la_celestina_002.txt');
+      await p1.writeAsString('Calisto entra en la huerta.');
+      await p2.writeAsString('Melibea escucha sus palabras.');
+
+      final resultado = await GuardarTexto().verificarPaquete(
+        archivosEnOrden: [p1, p2],
+        id: '004_la_celestina',
+        titulo: 'La Celestina',
+        autor: 'Fernando de Rojas',
+        idioma: 'es',
+        temas: const ['Teatro', 'Clásico'],
+        portada: 'https://ejemplo.com/portada.jpg',
+        capitulos: const [Capitulo(numero: 1, titulo: 'Acto I', paginaInicio: 1)],
+      );
+
+      expect(resultado.esValido, isTrue);
+      expect(resultado.errores, isEmpty);
+      expect(resultado.totalPaginas, 2);
+      expect(resultado.totalPalabras, 9);
+      expect(resultado.solicitud, isNotNull);
+      expect(resultado.solicitud!.id, '004_la_celestina');
+      expect(resultado.solicitud!.paginas, hasLength(2));
+
+      final octavio = planEquipoBase.integrantes.firstWhere(
+        (i) => i.id == 'octavio',
+      );
+      final fueraDeBloque = await GuardarTexto().verificarPaquete(
+        archivosEnOrden: [p1],
+        id: '004_la_celestina',
+        titulo: 'La Celestina',
+        autor: 'Fernando de Rojas',
+        idioma: 'es',
+        temas: const ['Teatro'],
+        portada: null,
+        capitulos: const [],
+        integranteActivo: octavio,
+      );
+      expect(fueraDeBloque.esValido, isFalse);
+      expect(
+        fueraDeBloque.errores,
+        contains(predicate<String>((e) => e.contains('032–062'))),
+      );
+    } finally {
+      if (await tempDir.exists()) await tempDir.delete(recursive: true);
+    }
   });
 }

@@ -1,0 +1,36 @@
+# Credenciales, secretos y variables de entorno (nunca copiar a la imagen)
+**/.env
+**/.env.*
+**/*.env
+**/*.pem
+**/*.key
+**/*.pfx
+**/*.p12
+**/secrets*
+**/credentials*.json
+
+# Configuración exclusiva de desarrollo local
+**/appsettings.Development.json
+**/Properties/launchSettings.json
+
+# Documentación, planes y archivos con información del equipo o personal
+**/*.md
+**/*.xlsx
+**/*.xls
+**/*.csv
+**/*.txt
+
+# Pruebas, compilaciones previas, control de versiones y editores
+**/bin/
+**/obj/
+**/TestResults/
+Biblioteca.Api.Tests/
+.git/
+.gitignore
+.vs/
+.vscode/
+.idea/
+**/*.user
+**/*.suo
+**/.DS_Store
+**/Thumbs.db

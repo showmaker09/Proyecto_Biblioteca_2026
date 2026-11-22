@@ -3,14 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../nucleo/casos.dart';
 import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/modelos.dart';
 import '../../nucleo/navegacion.dart';
-import '../catalogo/casos_catalogo.dart';
-import 'casos_escaner.dart';
+import '../../nucleo/plan_logistico.dart';
 import 'guardar_texto.dart';
 
-/// Junta textos ya guardados y llama a POST /libros. Solo se muestra a un admin.
+/// Verifica primero los archivos `.txt` en la memoria interna del teléfono y
+/// la pertenencia al bloque del integrante vinculado al correo `admin`;
+/// solo si cumple todas las reglas habilita el envío a `POST /libros` en MongoDB.
 class PantallaPublicar extends StatefulWidget {
   const PantallaPublicar({super.key});
 
@@ -32,13 +34,21 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
   List<File> _archivos = const [];
   final List<File> _orden = [];
   final List<Capitulo> _capitulos = [];
+  List<Asignacion> _asignaciones = asignacionesBase();
+  IntegrantePlan? _integrante;
+  ResultadoVerificacionLocal? _verificacion;
   var _cargando = true;
+  var _verificando = false;
   var _publicando = false;
   String? _aviso;
+  bool _publicadoExito = false;
 
   @override
   void initState() {
     super.initState();
+    for (final ctrl in [_id, _titulo, _autor, _idioma, _temas, _portada]) {
+      ctrl.addListener(_invalidarVerificacion);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => _cargar());
   }
 
@@ -56,21 +66,80 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
     super.dispose();
   }
 
+  void _invalidarVerificacion() {
+    if (_verificacion != null || _publicadoExito) {
+      setState(() {
+        _verificacion = null;
+        _publicadoExito = false;
+      });
+    }
+  }
+
   Future<void> _cargar() async {
     try {
-      final archivos = await context.read<CasosEscaner>().textosGuardados();
+      final usuario = context.read<ClienteBiblioteca>().usuario;
+      final escaner = context.read<CasosEscaner>();
+      final vinculo = context.read<VinculoIntegranteSesion>();
+      final dashboard = context.read<CasosDashboard>();
+
+      final archivos = await escaner.textosGuardados();
+      var asignaciones = asignacionesBase();
+      var integrantes = planEquipoBase.integrantes;
+      try {
+        final progreso = await dashboard.cargarProgreso();
+        asignaciones = progreso.asignaciones;
+        integrantes = progreso.plan.integrantes;
+      } catch (_) {
+        // Si no hay red al abrir, se mantiene la base local para poder verificar.
+      }
+      final integrante = await vinculo.resolverParaUsuario(
+        usuario,
+        integrantes: integrantes,
+      );
       if (!mounted) return;
       setState(() {
         _archivos = archivos;
+        _asignaciones = asignaciones;
+        _integrante = integrante;
         _cargando = false;
       });
+      if (integrante != null) {
+        _aplicarPrefijoId(integrante, asignaciones);
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _cargando = false;
-        _aviso = 'No se pudieron leer los textos guardados.';
+        _aviso = 'No se pudieron leer los textos guardados en memoria interna.';
       });
     }
+  }
+
+  void _aplicarPrefijoId(
+    IntegrantePlan integrante,
+    List<Asignacion> asignaciones, {
+    bool forzar = false,
+  }) {
+    final prefijo = prefijoSiguienteLibro(integrante, asignaciones);
+    final actual = _id.text.trim();
+    if (forzar || actual.isEmpty || RegExp(r'^\d{3}_$').hasMatch(actual)) {
+      _id.text = prefijo;
+    }
+  }
+
+  Future<void> _seleccionarIntegrante(IntegrantePlan integrante) async {
+    final correo = context.read<ClienteBiblioteca>().usuario?.correo ?? '';
+    await context.read<VinculoIntegranteSesion>().guardar(
+      correo,
+      integrante.id,
+    );
+    if (!mounted) return;
+    setState(() {
+      _integrante = integrante;
+      _verificacion = null;
+      _publicadoExito = false;
+    });
+    _aplicarPrefijoId(integrante, _asignaciones);
   }
 
   void _alternar(File archivo) {
@@ -80,6 +149,8 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
       } else {
         _orden.add(archivo);
       }
+      _verificacion = null;
+      _publicadoExito = false;
     });
   }
 
@@ -89,7 +160,69 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
     setState(() {
       final archivo = _orden.removeAt(indice);
       _orden.insert(destino, archivo);
+      _verificacion = null;
+      _publicadoExito = false;
     });
+  }
+
+  Future<void> _previsualizarArchivo(File archivo) async {
+    final etiqueta = nombreVisible(archivo.path);
+    try {
+      final texto = await context.read<CasosEscaner>().leerTexto(archivo);
+      final palabras = contarPalabrasTexto(texto);
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (contexto) => AlertDialog(
+          title: Text(etiqueta),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$palabras palabras · ${texto.runes.length} caracteres en memoria interna',
+                    style: Theme.of(contexto).textTheme.bodySmall,
+                  ),
+                  const Divider(),
+                  SelectableText(
+                    texto.trim().isEmpty ? '(Archivo vacío)' : texto,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(contexto),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _aviso = 'No se pudo leer $etiqueta desde la memoria interna.',
+      );
+    }
+  }
+
+  Future<void> _eliminarArchivo(File archivo) async {
+    try {
+      await context.read<CasosEscaner>().eliminarTexto(archivo);
+      if (!mounted) return;
+      setState(() {
+        _orden.remove(archivo);
+        _verificacion = null;
+      });
+      await _cargar();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _aviso = 'No se pudo borrar el archivo de la memoria.');
+    }
   }
 
   void _agregarCapitulo() {
@@ -97,19 +230,73 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
     final pagina = int.tryParse(_capituloPagina.text.trim());
     final titulo = _capituloTitulo.text.trim();
     if (numero == null || pagina == null || titulo.isEmpty) {
-      setState(() => _aviso = 'Cada capítulo necesita número, título y página de inicio.');
+      setState(
+        () => _aviso =
+            'Cada capítulo necesita número, título y página de inicio.',
+      );
       return;
     }
     setState(() {
       _aviso = null;
-      _capitulos.add(Capitulo(numero: numero, titulo: titulo, paginaInicio: pagina));
+      _capitulos.add(
+        Capitulo(numero: numero, titulo: titulo, paginaInicio: pagina),
+      );
       _capituloTitulo.clear();
+      _verificacion = null;
+      _publicadoExito = false;
     });
   }
 
+  List<String> _listaTemas() => _temas.text
+      .split(',')
+      .map((tema) => tema.trim())
+      .where((tema) => tema.isNotEmpty)
+      .toList();
+
+  Future<void> _verificarMemoriaInterna() async {
+    if (_integrante == null) {
+      setState(
+        () => _aviso =
+            'Selecciona primero a qué integrante del equipo corresponde este correo.',
+      );
+      return;
+    }
+    setState(() {
+      _verificando = true;
+      _aviso = null;
+      _publicadoExito = false;
+    });
+    try {
+      final resultado = await context.read<CasosEscaner>().verificarParaSubida(
+        archivosEnOrden: List<File>.of(_orden),
+        id: _id.text,
+        titulo: _titulo.text,
+        autor: _autor.text,
+        idioma: _idioma.text,
+        temas: _listaTemas(),
+        portada: _portada.text,
+        capitulos: List<Capitulo>.of(_capitulos),
+        integranteActivo: _integrante,
+      );
+      if (!mounted) return;
+      setState(() => _verificacion = resultado);
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _aviso = 'Ocurrió un error al verificar la memoria interna.',
+      );
+    } finally {
+      if (mounted) setState(() => _verificando = false);
+    }
+  }
+
   Future<void> _publicar() async {
-    if (_orden.isEmpty) {
-      setState(() => _aviso = 'Elige al menos un texto, en el orden de las páginas.');
+    final verificacion = _verificacion;
+    if (verificacion == null || !verificacion.esValido || _integrante == null) {
+      setState(
+        () => _aviso =
+            'Primero vincula tu integrante y verifica que los archivos en memoria interna sean correctos.',
+      );
       return;
     }
     setState(() {
@@ -117,35 +304,39 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
       _aviso = null;
     });
     try {
-      final casos = context.read<CasosEscaner>();
+      final escaner = context.read<CasosEscaner>();
       final catalogo = context.read<CasosCatalogo>();
-      final paginas = <String>[];
-      for (final archivo in _orden) {
-        paginas.add(await casos.leerTexto(archivo));
-      }
-      final temas = _temas.text
-          .split(',')
-          .map((tema) => tema.trim())
-          .where((tema) => tema.isNotEmpty)
-          .toList();
-      final portada = _portada.text.trim();
-      final resumen = await catalogo.publicar(
-        SolicitudLibro(
-          id: _id.text.trim(),
-          titulo: _titulo.text.trim(),
-          autor: _autor.text.trim(),
-          idioma: _idioma.text.trim(),
-          temas: temas,
-          portada: portada.isEmpty ? null : portada,
-          capitulos: List<Capitulo>.of(_capitulos),
-          paginas: paginas,
-        ),
+      final revalidado = await escaner.verificarParaSubida(
+        archivosEnOrden: List<File>.of(_orden),
+        id: _id.text,
+        titulo: _titulo.text,
+        autor: _autor.text,
+        idioma: _idioma.text,
+        temas: _listaTemas(),
+        portada: _portada.text,
+        capitulos: List<Capitulo>.of(_capitulos),
+        integranteActivo: _integrante,
       );
       if (!mounted) return;
-      setState(() => _aviso = 'Publicado: ${resumen.titulo}.');
+      if (!revalidado.esValido || revalidado.solicitud == null) {
+        setState(() => _verificacion = revalidado);
+        return;
+      }
+      final resumen = await catalogo.publicar(revalidado.solicitud!);
+      if (!mounted) return;
+      setState(() {
+        _publicadoExito = true;
+        _aviso =
+            'Subido a MongoDB para ${_integrante!.primerNombre}: '
+            '${resumen.titulo} (${resumen.totalPaginas} páginas).';
+      });
     } catch (error) {
       if (!mounted) return;
-      atenderError(context, error, (mensaje) => setState(() => _aviso = mensaje));
+      atenderError(
+        context,
+        error,
+        (mensaje) => setState(() => _aviso = mensaje),
+      );
     } finally {
       if (mounted) setState(() => _publicando = false);
     }
@@ -153,7 +344,19 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
 
   @override
   Widget build(BuildContext context) {
-    final admin = context.watch<ClienteBiblioteca>().usuario?.esAdmin == true;
+    final usuario = context.watch<ClienteBiblioteca>().usuario;
+    final admin = usuario?.esAdmin == true;
+    final verificacion = _verificacion;
+    final listoParaSubir =
+        verificacion != null &&
+        verificacion.esValido &&
+        _integrante != null &&
+        !_verificando &&
+        !_publicando;
+    final prefijoSugerido = _integrante == null
+        ? null
+        : prefijoSiguienteLibro(_integrante!, _asignaciones);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Publicar')),
       body: !admin
@@ -171,27 +374,111 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Integrante asociado a ${usuario?.correo ?? ''}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _integrante == null
+                              ? 'Elige a qué integrante corresponde este correo admin:'
+                              : '${_integrante!.nombre} · Bloque ${_integrante!.etiquetaBloque}',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            for (final item in planEquipoBase.integrantes)
+                              ChoiceChip(
+                                label: Text(
+                                  '${item.primerNombre} (${item.etiquetaBloque})',
+                                ),
+                                selected: _integrante?.id == item.id,
+                                visualDensity: VisualDensity.compact,
+                                onSelected: (_) => _seleccionarIntegrante(item),
+                              ),
+                          ],
+                        ),
+                        if (prefijoSugerido != null) ...[
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: ActionChip(
+                              avatar: const Icon(Icons.auto_fix_high, size: 16),
+                              label: Text(
+                                'Usar prefijo siguiente: $prefijoSugerido',
+                              ),
+                              onPressed: () => _aplicarPrefijoId(
+                                _integrante!,
+                                _asignaciones,
+                                forzar: true,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 const Text(
-                  'Se envía el texto, no la foto. El servidor calcula las palabras y rechaza un id repetido.',
+                  'Paso 1: selecciona y ordena los archivos .txt guardados en la memoria interna. '
+                  'Paso 2: verifica su integridad local y tu bloque para habilitar la subida a MongoDB.',
                 ),
                 const SizedBox(height: 12),
                 if (_archivos.isEmpty)
-                  const Text('Todavía no hay textos guardados. Escanéalos primero.')
+                  const Text(
+                    'Todavía no hay textos guardados en memoria interna. Escanéalos primero.',
+                  )
                 else
                   for (final archivo in _archivos)
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: _orden.contains(archivo),
-                      title: Text(nombreVisible(archivo.path)),
-                      onChanged: (_) => _alternar(archivo),
+                    Card(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      child: CheckboxListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                        ),
+                        value: _orden.contains(archivo),
+                        title: Text(nombreVisible(archivo.path)),
+                        secondary: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: 'Ver contenido en memoria interna',
+                              onPressed: () => _previsualizarArchivo(archivo),
+                              icon: const Icon(Icons.visibility_outlined),
+                            ),
+                            IconButton(
+                              tooltip: 'Borrar de memoria interna',
+                              onPressed: () => _eliminarArchivo(archivo),
+                              icon: const Icon(Icons.delete_outline),
+                            ),
+                          ],
+                        ),
+                        onChanged: (_) => _alternar(archivo),
+                      ),
                     ),
                 if (_orden.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text('Orden de las páginas', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Orden de las páginas (${_orden.length})',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   for (var i = 0; i < _orden.length; i++)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text('${i + 1}. ${nombreVisible(_orden[i].path)}'),
+                      title: Text(
+                        '${i + 1}. ${nombreVisible(_orden[i].path)}',
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -202,7 +489,9 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                           ),
                           IconButton(
                             tooltip: 'Bajar',
-                            onPressed: i == _orden.length - 1 ? null : () => _mover(i, 1),
+                            onPressed: i == _orden.length - 1
+                                ? null
+                                : () => _mover(i, 1),
                             icon: const Icon(Icons.arrow_downward),
                           ),
                         ],
@@ -212,17 +501,29 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: _id,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Id',
-                    helperText: 'Minúsculas, números o guion bajo, como 004_la_celestina',
+                    helperText: prefijoSugerido == null
+                        ? 'Minúsculas, números o guion bajo, como 004_la_celestina'
+                        : 'Debe empezar con un número de tu bloque (${_integrante!.etiquetaBloque}), ej. ${prefijoSugerido}titulo',
                   ),
                 ),
-                TextField(controller: _titulo, decoration: const InputDecoration(labelText: 'Título')),
-                TextField(controller: _autor, decoration: const InputDecoration(labelText: 'Autor')),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _titulo,
+                  decoration: const InputDecoration(labelText: 'Título'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _autor,
+                  decoration: const InputDecoration(labelText: 'Autor'),
+                ),
+                const SizedBox(height: 8),
                 TextField(
                   controller: _idioma,
                   decoration: const InputDecoration(labelText: 'Idioma'),
                 ),
+                const SizedBox(height: 8),
                 TextField(
                   controller: _temas,
                   decoration: const InputDecoration(
@@ -230,6 +531,7 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                     helperText: 'Separados por comas',
                   ),
                 ),
+                const SizedBox(height: 8),
                 TextField(
                   controller: _portada,
                   decoration: const InputDecoration(
@@ -237,12 +539,26 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Capítulos', style: Theme.of(context).textTheme.titleMedium),
-                for (final capitulo in _capitulos)
+                Text(
+                  'Capítulos',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                for (var i = 0; i < _capitulos.length; i++)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(capitulo.titulo),
-                    subtitle: Text('Número ${capitulo.numero}, página ${capitulo.paginaInicio}'),
+                    title: Text(_capitulos[i].titulo),
+                    subtitle: Text(
+                      'Número ${_capitulos[i].numero}, página ${_capitulos[i].paginaInicio}',
+                    ),
+                    trailing: IconButton(
+                      tooltip: 'Quitar capítulo',
+                      onPressed: () => setState(() {
+                        _capitulos.removeAt(i);
+                        _verificacion = null;
+                        _publicadoExito = false;
+                      }),
+                      icon: const Icon(Icons.close),
+                    ),
                   ),
                 Row(
                   children: [
@@ -258,7 +574,9 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                     Expanded(
                       child: TextField(
                         controller: _capituloTitulo,
-                        decoration: const InputDecoration(labelText: 'Título del capítulo'),
+                        decoration: const InputDecoration(
+                          labelText: 'Título del capítulo',
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -274,19 +592,112 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: TextButton(onPressed: _agregarCapitulo, child: const Text('Añadir capítulo')),
+                  child: TextButton(
+                    onPressed: _agregarCapitulo,
+                    child: const Text('Añadir capítulo'),
+                  ),
                 ),
-                if (_aviso != null) ...[
-                  const SizedBox(height: 8),
-                  Text(_aviso!),
+                const SizedBox(height: 12),
+                if (verificacion != null) ...[
+                  _TarjetaResultadoVerificacion(verificacion: verificacion),
+                  const SizedBox(height: 12),
                 ],
+                if (_aviso != null) ...[
+                  Text(
+                    _aviso!,
+                    style: TextStyle(
+                      color: _publicadoExito
+                          ? const Color(0xFF2E6F40)
+                          : Theme.of(context).colorScheme.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                OutlinedButton.icon(
+                  onPressed: _verificando || _publicando
+                      ? null
+                      : _verificarMemoriaInterna,
+                  icon: const Icon(Icons.fact_check_outlined),
+                  label: Text(
+                    _verificando
+                        ? 'Verificando en memoria interna…'
+                        : '1. Verificar en memoria interna',
+                  ),
+                ),
                 const SizedBox(height: 8),
-                FilledButton(
-                  onPressed: _publicando ? null : _publicar,
-                  child: Text(_publicando ? 'Publicando…' : 'Publicar libro'),
+                FilledButton.icon(
+                  onPressed: listoParaSubir ? _publicar : null,
+                  icon: const Icon(Icons.cloud_upload_outlined),
+                  label: Text(
+                    _publicando
+                        ? 'Subiendo a MongoDB…'
+                        : '2. Subir libro a MongoDB',
+                  ),
                 ),
               ],
             ),
+    );
+  }
+}
+
+class _TarjetaResultadoVerificacion extends StatelessWidget {
+  const _TarjetaResultadoVerificacion({required this.verificacion});
+
+  final ResultadoVerificacionLocal verificacion;
+
+  @override
+  Widget build(BuildContext context) {
+    final ok = verificacion.esValido;
+    final color = ok
+        ? const Color(0xFF2E6F40)
+        : Theme.of(context).colorScheme.error;
+    final kb = (verificacion.bytesTotales / 1024).toStringAsFixed(1);
+
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: color),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  ok ? Icons.check_circle_outline : Icons.error_outline,
+                  color: color,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    ok
+                        ? 'Verificación en memoria interna correcta'
+                        : 'Fallo en la verificación local (${verificacion.errores.length})',
+                    style: TextStyle(color: color, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            if (ok)
+              Text(
+                '${verificacion.totalPaginas} páginas válidas · '
+                '${verificacion.totalPalabras} palabras · '
+                '${verificacion.totalCaracteres} caracteres · '
+                '$kb KB listos para subir a MongoDB.',
+              )
+            else
+              for (final err in verificacion.errores)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text('• $err', style: TextStyle(color: color)),
+                ),
+          ],
+        ),
+      ),
     );
   }
 }

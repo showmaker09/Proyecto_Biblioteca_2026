@@ -38,6 +38,15 @@ public static class BusquedaSinAcentos
         return patron.ToString();
     }
 
+    /// <summary>
+    /// La misma búsqueda sin acentos, pero solo como palabra completa: "amor" no entra en "amoroso".
+    /// </summary>
+    public static string PalabraExacta(string texto)
+    {
+        const string letra = @"A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9";
+        return $@"(?<![{letra}]){Patron(texto)}(?![{letra}])";
+    }
+
     static string QuitarAcentos(string texto)
     {
         var sinAcentos = new StringBuilder(texto.Length);
