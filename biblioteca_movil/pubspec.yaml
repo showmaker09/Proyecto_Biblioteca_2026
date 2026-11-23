@@ -42,6 +42,9 @@ dependencies:
   google_mlkit_text_recognition: ^0.16.0
   path_provider: ^2.1.5
   share_plus: ^12.0.2
+  flutter_svg: ^2.5.0
+  flutter_tts: ^4.2.5
+  cached_network_image: ^4.0.3
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +67,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/svg/libro_3d.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

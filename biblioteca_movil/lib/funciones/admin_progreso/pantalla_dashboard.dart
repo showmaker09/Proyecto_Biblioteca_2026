@@ -5,6 +5,7 @@ import '../../nucleo/casos.dart';
 import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/navegacion.dart';
 import '../../nucleo/plan_logistico.dart';
+import '../../nucleo/tema.dart';
 import '../../nucleo/widgets/widget_error_conexion.dart';
 import 'widgets/grafico_progreso.dart';
 
@@ -289,8 +290,8 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
           Card(
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: const Color(0xFFE7E1D6),
-                foregroundColor: const Color(0xFF141414),
+                backgroundColor: ColoresBiblioteca.pizarra100,
+                foregroundColor: ColoresBiblioteca.texto,
                 child: Text(
                   fila.numero.toString().padLeft(3, '0'),
                   style: const TextStyle(

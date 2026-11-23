@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'modelos.dart';
 
@@ -17,6 +18,9 @@ String mensajeDe(Object error) {
     return 'No se pudo conectar con el servidor de la biblioteca (tiempo de espera agotado).';
   }
   if (error is ProblemaApi) return error.mensaje;
+  if (kIsWeb && error is http.ClientException) {
+    return 'El navegador bloqueó la petición (CORS) hacia la API. Prueba en Android o macOS.';
+  }
   return 'No se pudo hablar con la biblioteca.';
 }
 

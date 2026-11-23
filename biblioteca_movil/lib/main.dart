@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'aplicacion.dart';
+import 'funciones/lector/voz/motor_voz.dart';
 import 'nucleo/almacen_sesion.dart';
 import 'nucleo/casos.dart';
 import 'nucleo/cliente_biblioteca.dart';
+import 'nucleo/marcadores_lectura.dart';
 import 'nucleo/plan_logistico.dart';
 import 'nucleo/preferencias_lectura.dart';
 import 'nucleo/progreso_local.dart';
@@ -44,7 +46,7 @@ class BibliotecaApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<ClienteBiblioteca>.value(value: cliente),
-        Provider<ProgresoLocal>.value(value: progreso),
+        ChangeNotifierProvider<ProgresoLocal>.value(value: progreso),
         Provider<VinculoIntegranteSesion>.value(value: vinculoIntegrante),
         Provider<CasosCuenta>(
           create: (c) => CasosCuenta(c.read<ClienteBiblioteca>()),
@@ -62,6 +64,8 @@ class BibliotecaApp extends StatelessWidget {
           create: (c) => CasosDashboard(c.read<ClienteBiblioteca>()),
         ),
         ChangeNotifierProvider(create: (_) => PreferenciasLectura()),
+        ChangeNotifierProvider(create: (_) => MarcadoresLectura()),
+        Provider<MotorVoz>(create: (_) => MotorVozSistema()),
         Provider<CasosEscaner>(create: (_) => CasosEscaner()),
       ],
       child: const Aplicacion(),

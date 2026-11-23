@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../nucleo/tema.dart';
+import '../../nucleo/widgets/encabezado_editorial.dart';
+import '../../nucleo/widgets/hoja_inferior.dart';
+
 /// Criterios que viajan juntos en una sola consulta paginada a GET /libros.
 /// El tipo de libro es un valor de `temas`. No hay campos de fecha ni de
 /// iglesia en el documento, así que no se envían.
@@ -66,156 +70,157 @@ class _HojaFiltrosState extends State<HojaFiltros> {
     widget.inicial.paginasMax,
   );
 
+  void _aplicar() {
+    final (minimo, maximo) = _rango(_extension);
+    Navigator.pop(
+      context,
+      FiltroCatalogo(
+        idioma: _idioma,
+        temas: List.unmodifiable(_temas),
+        paginasMin: minimo,
+        paginasMax: maximo,
+        enContenido: _enContenido,
+        orden: _orden,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD9D9D9),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+    return HojaInferior(
+      titulo: 'Filtros',
+      subtitulo:
+          'Se combinan en una sola consulta. Cada tanda trae como mucho 20 libros.',
+      pie: Row(
+        children: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, const FiltroCatalogo()),
+            child: const Text('Limpiar'),
+          ),
+          const Spacer(),
+          FilledButton(
+            onPressed: _aplicar,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(148, 48),
+              shape: const StadiumBorder(),
             ),
-            Text('Filtros', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 4),
-            Text(
-              'Se combinan en una sola consulta. Cada tanda trae como mucho 20 libros.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tipo de libro',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            if (widget.temas.isEmpty)
-              const Text('El catálogo todavía no tiene tipos.')
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final tema in widget.temas)
-                    FilterChip(
-                      label: Text(tema),
-                      selected: _temas.contains(tema),
-                      onSelected: (activo) => setState(() {
-                        if (activo) {
-                          _temas.add(tema);
-                        } else {
-                          _temas.remove(tema);
-                        }
-                      }),
-                    ),
-                ],
-              ),
-            const SizedBox(height: 16),
-            Text('Idioma', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
+            child: const Text('Aplicar'),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const EtiquetaSeccion('Tipo de libro'),
+          const SizedBox(height: 10),
+          if (widget.temas.isEmpty)
+            const Text(
+              'El catálogo todavía no tiene tipos.',
+              style: TextStyle(color: ColoresBiblioteca.textoSuave),
+            )
+          else
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
+                for (final tema in widget.temas)
+                  FilterChip(
+                    label: Text(tema),
+                    selected: _temas.contains(tema),
+                    onSelected: (activo) => setState(() {
+                      if (activo) {
+                        _temas.add(tema);
+                      } else {
+                        _temas.remove(tema);
+                      }
+                    }),
+                  ),
+              ],
+            ),
+          const SizedBox(height: 22),
+          const EtiquetaSeccion('Idioma'),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('Todos'),
+                selected: _idioma.isEmpty,
+                onSelected: (_) => setState(() => _idioma = ''),
+              ),
+              for (final idioma in widget.idiomas)
                 ChoiceChip(
-                  label: const Text('Todos'),
-                  selected: _idioma.isEmpty,
-                  onSelected: (_) => setState(() => _idioma = ''),
+                  label: Text(idioma),
+                  selected: _idioma == idioma,
+                  onSelected: (_) => setState(() => _idioma = idioma),
                 ),
-                for (final idioma in widget.idiomas)
-                  ChoiceChip(
-                    label: Text(idioma),
-                    selected: _idioma == idioma,
-                    onSelected: (_) => setState(() => _idioma = idioma),
-                  ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 22),
+          const EtiquetaSeccion('Extensión'),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final opcion in const [
+                ('cualquiera', 'Cualquiera'),
+                ('breve', 'Breve'),
+                ('mediano', 'Mediano'),
+                ('extenso', 'Extenso'),
+              ])
+                ChoiceChip(
+                  label: Text(opcion.$2),
+                  selected: _extension == opcion.$1,
+                  onSelected: (_) => setState(() => _extension = opcion.$1),
+                ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          const EtiquetaSeccion('Orden'),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final opcion in const [
+                ('titulo', 'Título'),
+                ('autor', 'Autor'),
+                ('largos', 'Más largos'),
+              ])
+                ChoiceChip(
+                  label: Text(opcion.$2),
+                  selected: _orden == opcion.$1,
+                  onSelected: (_) => setState(() => _orden = opcion.$1),
+                ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          // El interruptor va en un bloque tintado: cambia dónde se busca,
+          // no qué se filtra, y conviene que se distinga del resto.
+          Material(
+            color: ColoresBiblioteca.pizarra50,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: ColoresBiblioteca.pizarra100),
             ),
-            const SizedBox(height: 16),
-            Text('Extensión', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final opcion in const [
-                  ('cualquiera', 'Cualquiera'),
-                  ('breve', 'Breve'),
-                  ('mediano', 'Mediano'),
-                  ('extenso', 'Extenso'),
-                ])
-                  ChoiceChip(
-                    label: Text(opcion.$2),
-                    selected: _extension == opcion.$1,
-                    onSelected: (_) => setState(() => _extension = opcion.$1),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Palabra exacta en capítulos y páginas'),
+            clipBehavior: Clip.antiAlias,
+            child: SwitchListTile(
+              contentPadding: const EdgeInsets.fromLTRB(16, 4, 10, 4),
+              title: const Text(
+                'Palabra exacta en capítulos y páginas',
+                style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+              ),
               subtitle: const Text(
                 'Si está apagado, el texto busca solo en título y autor.',
+                style: TextStyle(fontSize: 12.5),
               ),
               value: _enContenido,
               onChanged: (valor) => setState(() => _enContenido = valor),
             ),
-            const SizedBox(height: 8),
-            Text('Orden', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final opcion in const [
-                  ('titulo', 'Título'),
-                  ('autor', 'Autor'),
-                  ('largos', 'Más largos'),
-                ])
-                  ChoiceChip(
-                    label: Text(opcion.$2),
-                    selected: _orden == opcion.$1,
-                    onSelected: (_) => setState(() => _orden = opcion.$1),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () =>
-                      Navigator.pop(context, const FiltroCatalogo()),
-                  child: const Text('Limpiar'),
-                ),
-                const Spacer(),
-                FilledButton(
-                  onPressed: () {
-                    final (minimo, maximo) = _rango(_extension);
-                    Navigator.pop(
-                      context,
-                      FiltroCatalogo(
-                        idioma: _idioma,
-                        temas: List.unmodifiable(_temas),
-                        paginasMin: minimo,
-                        paginasMax: maximo,
-                        enContenido: _enContenido,
-                        orden: _orden,
-                      ),
-                    );
-                  },
-                  child: const Text('Aplicar'),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

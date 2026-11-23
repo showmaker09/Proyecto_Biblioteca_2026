@@ -31,7 +31,8 @@ Para trabajar sin base de datos, poner `VITE_USAR_MOCKS=true` en `.env.local` (3
 
 | Variable | Descripción |
 |---|---|
-| `VITE_API_URL` | URL base de la API. `/api` usa el proxy de Vite hacia `127.0.0.1:8000` (ver `vite.config.ts`) y evita problemas de CORS |
+| `VITE_API_URL` | URL base de la API en el navegador. `/api` pasa por el proxy de Vite hacia `API_PROXY_TARGET` (ver `vite.config.ts`) y evita problemas de CORS |
+| `API_PROXY_TARGET` | Destino real del backend para el proxy de Vite (ej. `http://127.0.0.1:8000` en local o la URL desplegada en Render) |
 | `VITE_USAR_MOCKS` | `true` = datos falsos de `shared/mocks`, sin red |
 
 ## Arquitectura: vertical slice

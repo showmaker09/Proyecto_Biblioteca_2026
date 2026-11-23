@@ -51,11 +51,12 @@ class ClienteBiblioteca extends ChangeNotifier {
 
   Future<bool>? _refrescoEnCurso;
 
+  static const urlNubePorDefecto = 'https://backend-para-movil.onrender.com';
+
   static String basePorDefecto() {
     const definida = String.fromEnvironment('API_BASE');
     if (definida.isNotEmpty) return definida;
-    if (kReleaseMode) return '';
-    return 'http://10.0.2.2:8000';
+    return urlNubePorDefecto;
   }
 
   static String _normalizar(String valor) {
@@ -279,6 +280,7 @@ class ClienteBiblioteca extends ChangeNotifier {
       throw ProblemaApi.desdeCuerpo(
         respuesta.statusCode,
         _cuerpoONull(respuesta),
+        origen: _origenDe(respuesta),
       );
     }
     final cookie = valorRefresco(respuesta);
@@ -309,13 +311,18 @@ class ClienteBiblioteca extends ChangeNotifier {
     );
     _exigirOk(respuesta, aceptados: const {200, 201});
     final cookie = valorRefresco(respuesta);
-    if (cookie == null || cookie.isEmpty) {
-      throw ProblemaApi(
-        estado: respuesta.statusCode,
-        titulo: 'El servidor no devolvió la cookie de refresco.',
-      );
+    if (!kIsWeb) {
+      if (cookie == null || cookie.isEmpty) {
+        throw ProblemaApi(
+          estado: respuesta.statusCode,
+          titulo: 'El servidor no devolvió la cookie de refresco.',
+          origen: _origenDe(respuesta),
+        );
+      }
+      await almacen.guardarRefresco(cookie);
+    } else if (cookie != null && cookie.isNotEmpty) {
+      await almacen.guardarRefresco(cookie);
     }
-    await almacen.guardarRefresco(cookie);
     final sesion = RespuestaSesion.fromJson(_objeto(respuesta));
     almacen.token = sesion.tokenAcceso;
     almacen.usuario = sesion.usuario;
@@ -395,10 +402,10 @@ class ClienteBiblioteca extends ChangeNotifier {
     final cabeceras = <String, String>{
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'Connection': 'close',
+      if (!kIsWeb) 'Connection': 'close',
       if (conBearer && almacen.token != null)
         'Authorization': 'Bearer ${almacen.token}',
-      if (cookie != null) 'Cookie': 'biblioteca_refresco=$cookie',
+      if (!kIsWeb && cookie != null) 'Cookie': 'biblioteca_refresco=$cookie',
     };
     final texto = cuerpo == null ? null : jsonEncode(cuerpo);
     try {
@@ -408,6 +415,8 @@ class ClienteBiblioteca extends ChangeNotifier {
     }
   }
 
+  static const _tiempoLimite = Duration(seconds: 45);
+
   Future<http.Response> _despachar(
     String metodo,
     Uri uri,
@@ -416,9 +425,11 @@ class ClienteBiblioteca extends ChangeNotifier {
   ) {
     switch (metodo) {
       case 'GET':
-        return _http.get(uri, headers: cabeceras);
+        return _http.get(uri, headers: cabeceras).timeout(_tiempoLimite);
       case 'POST':
-        return _http.post(uri, headers: cabeceras, body: texto);
+        return _http
+            .post(uri, headers: cabeceras, body: texto)
+            .timeout(_tiempoLimite);
       default:
         throw ArgumentError('Método no soportado: $metodo');
     }
@@ -447,7 +458,14 @@ class ClienteBiblioteca extends ChangeNotifier {
     throw ProblemaApi.desdeCuerpo(
       respuesta.statusCode,
       _cuerpoONull(respuesta),
+      origen: _origenDe(respuesta),
     );
+  }
+
+  String? _origenDe(http.Response respuesta) {
+    final req = respuesta.request;
+    if (req == null) return null;
+    return '${req.method} ${req.url.path}';
   }
 
   Map<String, dynamic> _objeto(http.Response respuesta) =>

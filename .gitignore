@@ -35,6 +35,3 @@ dist/
 
 # Videos crudos o de origen (la app utiliza los fotogramas WebP en public/secuencia_inmersion)
 *.mp4
-
-
-

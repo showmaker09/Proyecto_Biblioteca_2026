@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/navegacion.dart';
+import '../../nucleo/tema.dart';
 import 'casos_cuenta.dart';
+import 'widgets_auth.dart';
 
 /// Al arrancar, renueva el JWT con el refresco guardado o manda al login.
 class Puerta extends StatefulWidget {
@@ -53,34 +55,50 @@ class _PuertaState extends State<Puerta> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColoresBiblioteca.pizarra50,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: _error == null
-              ? const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Abriendo la biblioteca…'),
-                  ],
-                )
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(_error!, textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: _entrar,
-                      child: const Text('Reintentar'),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: _irAlLogin,
-                      child: const Text('Iniciar sesión de nuevo'),
-                    ),
-                  ],
-                ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 380),
+            child: _error == null
+                ? const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      MarcaBiblioteca(tamano: 48),
+                      SizedBox(height: 20),
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      ),
+                      SizedBox(height: 14),
+                      Text(
+                        'Abriendo la biblioteca…',
+                        style: TextStyle(color: ColoresBiblioteca.textoSuave),
+                      ),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Center(child: MarcaBiblioteca(tamano: 44)),
+                      const SizedBox(height: 20),
+                      AlertaErrorAuth(mensaje: _error!),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: _entrar,
+                        child: const Text('Reintentar'),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: _irAlLogin,
+                        child: const Text('Iniciar sesión de nuevo'),
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

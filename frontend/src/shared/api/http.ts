@@ -108,7 +108,7 @@ function obtenerUrlCompleta(ruta: string): string {
   if (typeof window !== 'undefined' && window.location?.origin && window.location.origin !== 'null') {
     return `${window.location.origin}${base}${ruta}`
   }
-  return `http://127.0.0.1:8000${base}${ruta}`
+  return `${base}${ruta}`
 }
 
 async function intentarRefrescar(): Promise<string | null> {

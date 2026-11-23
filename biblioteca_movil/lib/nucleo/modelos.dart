@@ -13,12 +13,14 @@ class ProblemaApi implements Exception {
     required this.titulo,
     this.detalle,
     this.errores = const {},
+    this.origen,
   });
 
   final int estado;
   final String titulo;
   final String? detalle;
   final Map<String, List<String>> errores;
+  final String? origen;
 
   String get mensaje {
     if (errores.isNotEmpty) {
@@ -28,7 +30,22 @@ class ProblemaApi implements Exception {
     return titulo;
   }
 
-  factory ProblemaApi.desdeCuerpo(int estado, Object? cuerpo) {
+  @override
+  String toString() {
+    final donde = origen == null || origen!.isEmpty ? '' : ' [$origen]';
+    final encabezado = 'ProblemaApi(HTTP $estado$donde): $titulo';
+    final extras = <String>[
+      if (detalle != null && detalle!.isNotEmpty) detalle!,
+      if (errores.isNotEmpty) 'errores: $errores',
+    ];
+    return extras.isEmpty ? encabezado : '$encabezado — ${extras.join(' | ')}';
+  }
+
+  factory ProblemaApi.desdeCuerpo(
+    int estado,
+    Object? cuerpo, {
+    String? origen,
+  }) {
     var titulo = estado == 503 || estado == 504
         ? 'No se pudo conectar con el servidor de la biblioteca (tiempo de espera agotado).'
         : 'La biblioteca respondió $estado.';
@@ -49,7 +66,13 @@ class ProblemaApi implements Exception {
         });
       }
     }
-    return ProblemaApi(estado: estado, titulo: titulo, detalle: detalle, errores: errores);
+    return ProblemaApi(
+      estado: estado,
+      titulo: titulo,
+      detalle: detalle,
+      errores: errores,
+      origen: origen,
+    );
   }
 }
 

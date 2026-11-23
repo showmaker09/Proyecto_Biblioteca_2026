@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/modelos.dart';
 import '../../nucleo/progreso_local.dart';
@@ -10,23 +12,38 @@ class CasosLectura {
   final ClienteBiblioteca _cliente;
   final ProgresoLocal _progreso;
   final Map<String, PaginaLeida> _cache = {};
+  final Map<String, Future<PaginaLeida>> _enVuelo = {};
+
+  /// Notifica cada vez que se guarda un nuevo avance en cualquier libro.
+  Listenable get cambiosProgreso => _progreso;
 
   String _clave(String id, int numero) => '$id#$numero';
 
-  Future<PaginaLeida> pagina(String id, int numero) async {
+  /// Un mismo número pedido a la vez (navegación + precarga) viaja una sola vez.
+  Future<PaginaLeida> pagina(String id, int numero) {
     final clave = _clave(id, numero);
     final guardada = _cache[clave];
-    if (guardada != null) return guardada;
-    final leida = await _cliente.obtenerPagina(id, numero);
-    _cache[clave] = leida;
-    return leida;
+    if (guardada != null) return Future.value(guardada);
+    return _enVuelo.putIfAbsent(clave, () async {
+      try {
+        final leida = await _cliente.obtenerPagina(id, numero);
+        _cache[clave] = leida;
+        return leida;
+      } finally {
+        _enVuelo.remove(clave);
+      }
+    });
   }
 
-  /// Pide la página, recuerda la posición y precarga las vecinas.
+  /// Pide la página, recuerda la posición con su total y precarga las vecinas.
   Future<PaginaLeida> abrir(String id, int numero) async {
     final leida = await pagina(id, numero);
     try {
-      await _progreso.guardar(id, leida.numeroPagina);
+      await _progreso.guardar(
+        id,
+        leida.numeroPagina,
+        totalPaginas: leida.totalPaginas,
+      );
     } catch (_) {
       // Leer no depende de que el teléfono recuerde la página.
     }
@@ -47,4 +64,10 @@ class CasosLectura {
   }
 
   Future<({String id, int pagina})?> continuar() => _progreso.leer();
+
+  Future<List<ProgresoLibro>> enCurso() => _progreso.leerEnCurso();
+
+  Future<Map<String, ProgresoLibro>> progresos() => _progreso.leerTodos();
+
+  Future<ProgresoLibro?> progresoDe(String id) => _progreso.leerLibro(id);
 }

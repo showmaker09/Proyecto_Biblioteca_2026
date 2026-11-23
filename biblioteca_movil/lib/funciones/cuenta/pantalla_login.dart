@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/modelos.dart';
 import '../../nucleo/navegacion.dart';
+import '../../nucleo/tema.dart';
 import 'casos_cuenta.dart';
+import 'widgets_auth.dart';
 
 class PantallaLogin extends StatefulWidget {
   const PantallaLogin({super.key});
@@ -18,6 +18,7 @@ class _PantallaLoginState extends State<PantallaLogin> {
   final _correo = TextEditingController();
   final _contrasena = TextEditingController();
   var _ocupado = false;
+  var _ocultarContrasena = true;
   String? _error;
   Map<String, List<String>> _errores = {};
 
@@ -35,7 +36,10 @@ class _PantallaLoginState extends State<PantallaLogin> {
       _errores = {};
     });
     try {
-      await context.read<CasosCuenta>().iniciar(_correo.text.trim(), _contrasena.text);
+      await context.read<CasosCuenta>().iniciar(
+        _correo.text.trim(),
+        _contrasena.text,
+      );
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/catalogo');
     } catch (error) {
@@ -51,54 +55,64 @@ class _PantallaLoginState extends State<PantallaLogin> {
 
   @override
   Widget build(BuildContext context) {
-    final base = context.read<ClienteBiblioteca>().base;
-    return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            const SizedBox(height: 32),
-            Text('Biblioteca', style: Theme.of(context).textTheme.headlineLarge),
-            const SizedBox(height: 8),
-            const Text('Entra para leer el catálogo.'),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _correo,
-              keyboardType: TextInputType.emailAddress,
-              autocorrect: false,
-              decoration: InputDecoration(
-                labelText: 'Correo',
-                errorText: _errores['correo']?.join(' '),
-              ),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _contrasena,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Contraseña',
-                errorText: _errores['contrasena']?.join(' '),
-              ),
-              onSubmitted: (_) => _ocupado ? null : _entrar(),
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            ],
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _ocupado ? null : _entrar,
-              child: Text(_ocupado ? 'Entrando…' : 'Entrar'),
-            ),
-            TextButton(
-              onPressed: _ocupado ? null : () => Navigator.pushNamed(context, '/registro'),
-              child: const Text('Crear cuenta'),
-            ),
-            if (kDebugMode)
-              Text('API $base', style: Theme.of(context).textTheme.bodySmall),
+    return ContenedorAuth(
+      pestana: 'Entrar',
+      cuerpo: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_error != null) ...[
+            AlertaErrorAuth(mensaje: _error!),
+            const SizedBox(height: 16),
           ],
-        ),
+          CampoAuth(
+            etiqueta: 'Correo electrónico',
+            controller: _correo,
+            icono: Icons.mail_outline_rounded,
+            keyboardType: TextInputType.emailAddress,
+            autocorrect: false,
+            errorText: _errores['correo']?.join(' '),
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.email],
+          ),
+          const SizedBox(height: 14),
+          CampoAuth(
+            etiqueta: 'Contraseña',
+            controller: _contrasena,
+            icono: Icons.lock_outline_rounded,
+            obscureText: _ocultarContrasena,
+            errorText: _errores['contrasena']?.join(' '),
+            textInputAction: TextInputAction.done,
+            autofillHints: const [AutofillHints.password],
+            onSubmitted: (_) => _ocupado ? null : _entrar(),
+            suffixIcon: IconButton(
+              tooltip: _ocultarContrasena
+                  ? 'Mostrar contraseña'
+                  : 'Ocultar contraseña',
+              onPressed: () =>
+                  setState(() => _ocultarContrasena = !_ocultarContrasena),
+              icon: Icon(
+                _ocultarContrasena
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                size: 19,
+                color: ColoresBiblioteca.textoSuave,
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
+          BotonPillAuth(
+            etiqueta: _ocupado ? 'Entrando…' : 'Entrar',
+            cargando: _ocupado,
+            onPressed: _ocupado ? null : _entrar,
+          ),
+        ],
+      ),
+      pie: PieEnlaceAuth(
+        pregunta: '¿No tienes cuenta?',
+        enlace: 'Crear cuenta',
+        onTap: _ocupado
+            ? null
+            : () => Navigator.pushNamed(context, '/registro'),
       ),
     );
   }

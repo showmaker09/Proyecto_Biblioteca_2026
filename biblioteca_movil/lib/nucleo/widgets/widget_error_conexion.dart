@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../tema.dart';
+
 /// Componente visual reutilizable para fallos de red o timeouts (503, 504,
 /// SocketException, TimeoutException) con opción de reintento interactivo.
 class WidgetErrorConexion extends StatelessWidget {
@@ -20,21 +22,35 @@ class WidgetErrorConexion extends StatelessWidget {
   Widget build(BuildContext context) {
     final esquema = Theme.of(context).colorScheme;
     if (compacto) {
-      return Card(
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: ColoresBiblioteca.errorFondo,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: ColoresBiblioteca.errorBorde),
+        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              Icon(Icons.cloud_off_outlined, color: esquema.error, size: 20),
+              const Icon(
+                Icons.cloud_off_outlined,
+                color: ColoresBiblioteca.errorTexto,
+                size: 20,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   mensaje,
-                  style: TextStyle(color: colorTexto ?? esquema.error),
+                  style: TextStyle(
+                    color: colorTexto ?? ColoresBiblioteca.errorTexto,
+                  ),
                 ),
               ),
               TextButton.icon(
                 onPressed: alReintentar,
+                style: TextButton.styleFrom(
+                  foregroundColor: ColoresBiblioteca.errorTexto,
+                ),
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text('Reintentar'),
               ),

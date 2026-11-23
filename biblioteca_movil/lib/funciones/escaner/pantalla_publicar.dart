@@ -8,6 +8,7 @@ import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/modelos.dart';
 import '../../nucleo/navegacion.dart';
 import '../../nucleo/plan_logistico.dart';
+import '../../nucleo/tema.dart';
 import 'guardar_texto.dart';
 
 /// Verifica primero los archivos `.txt` en la memoria interna del teléfono y
@@ -607,7 +608,7 @@ class _PantallaPublicarState extends State<PantallaPublicar> {
                     _aviso!,
                     style: TextStyle(
                       color: _publicadoExito
-                          ? const Color(0xFF2E6F40)
+                          ? ColoresBiblioteca.exito
                           : Theme.of(context).colorScheme.error,
                       fontWeight: FontWeight.w600,
                     ),
@@ -650,7 +651,7 @@ class _TarjetaResultadoVerificacion extends StatelessWidget {
   Widget build(BuildContext context) {
     final ok = verificacion.esValido;
     final color = ok
-        ? const Color(0xFF2E6F40)
+        ? ColoresBiblioteca.exito
         : Theme.of(context).colorScheme.error;
     final kb = (verificacion.bytesTotales / 1024).toStringAsFixed(1);
 

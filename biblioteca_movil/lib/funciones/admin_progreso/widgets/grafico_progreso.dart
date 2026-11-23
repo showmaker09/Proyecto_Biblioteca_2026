@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../nucleo/plan_logistico.dart';
+import '../../../nucleo/tema.dart';
 
 /// Tarjetas de KPIs y barras comparativas de progreso por integrante del equipo.
 class GraficoProgresoEquipo extends StatelessWidget {
@@ -14,9 +15,9 @@ class GraficoProgresoEquipo extends StatelessWidget {
   final String? integranteActivoId;
 
   Color _colorPorcentaje(double avance) {
-    if (avance >= 0.5) return const Color(0xFF2E6F40);
-    if (avance > 0.0) return const Color(0xFFB7791F);
-    return const Color(0xFF8C2D2D);
+    if (avance >= 0.5) return ColoresBiblioteca.exito;
+    if (avance > 0.0) return ColoresBiblioteca.aviso;
+    return ColoresBiblioteca.errorTexto;
   }
 
   @override
@@ -74,8 +75,8 @@ class GraficoProgresoEquipo extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: resumen.avanceSemanal,
                     minHeight: 10,
-                    backgroundColor: const Color(0xFFE7E1D6),
-                    color: const Color(0xFF141414),
+                    backgroundColor: ColoresBiblioteca.pizarra100,
+                    color: ColoresBiblioteca.acento,
                   ),
                 ),
               ],
@@ -92,9 +93,9 @@ class GraficoProgresoEquipo extends StatelessWidget {
           Card(
             shape: integranteActivoId == item.integrante.id
                 ? RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                     side: const BorderSide(
-                      color: Color(0xFF141414),
+                      color: ColoresBiblioteca.acento,
                       width: 1.8,
                     ),
                   )
@@ -126,13 +127,13 @@ class GraficoProgresoEquipo extends StatelessWidget {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF141414),
+                                  color: ColoresBiblioteca.acento,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: const Text(
                                   'Tu bloque',
                                   style: TextStyle(
-                                    color: Color(0xFFF6F3EC),
+                                    color: ColoresBiblioteca.acentoTexto,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -180,7 +181,7 @@ class GraficoProgresoEquipo extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: item.avance,
                       minHeight: 8,
-                      backgroundColor: const Color(0xFFE7E1D6),
+                      backgroundColor: ColoresBiblioteca.pizarra100,
                       color: _colorPorcentaje(item.avance),
                     ),
                   ),
