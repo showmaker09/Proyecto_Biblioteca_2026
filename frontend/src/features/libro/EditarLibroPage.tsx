@@ -35,7 +35,6 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
   // Campos de metadatos
   const [titulo, setTitulo] = useState(libro.titulo)
   const [autor, setAutor] = useState(libro.autor)
-  const [idioma, setIdioma] = useState(libro.idioma)
   const [temasTexto, setTemasTexto] = useState(libro.temas.join(', '))
   const [portada, setPortada] = useState(() => normalizarPortadaGutenberg(libro.portada ?? ''))
   const [portadaFallida, setPortadaFallida] = useState<string | null>(null)
@@ -131,7 +130,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
         await actualizarLibro(libro._id, {
           titulo: titulo.trim(),
           autor: autor.trim(),
-          idioma: idioma.trim().toLowerCase() || 'es',
+          idioma: libro.idioma.trim().toLowerCase() || 'es',
           temas,
           portada: portadaLimpia ? portadaLimpia : null,
           capitulos: capitulos.length > 0 ? capitulos : [],
@@ -157,7 +156,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
         await reemplazarLibro(libro._id, {
           titulo: titulo.trim(),
           autor: autor.trim(),
-          idioma: idioma.trim().toLowerCase() || 'es',
+          idioma: libro.idioma.trim().toLowerCase() || 'es',
           temas,
           portada: portadaLimpia ? portadaLimpia : null,
           capitulos: capitulos.length > 0 ? capitulos : [],
@@ -224,35 +223,18 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
           />
         </div>
 
-        <div className={estilos.rejilla}>
-          <div className={estilos.campo}>
-            <label htmlFor="autor" className={estilos.etiqueta}>
-              Autor *
-            </label>
-            <input
-              id="autor"
-              type="text"
-              className={estilos.entrada}
-              value={autor}
-              onChange={(e) => setAutor(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className={estilos.campo}>
-            <label htmlFor="idioma" className={estilos.etiqueta}>
-              Idioma *
-            </label>
-            <input
-              id="idioma"
-              type="text"
-              className={estilos.entrada}
-              value={idioma}
-              onChange={(e) => setIdioma(e.target.value)}
-              maxLength={3}
-              required
-            />
-          </div>
+        <div className={estilos.campo}>
+          <label htmlFor="autor" className={estilos.etiqueta}>
+            Autor *
+          </label>
+          <input
+            id="autor"
+            type="text"
+            className={estilos.entrada}
+            value={autor}
+            onChange={(e) => setAutor(e.target.value)}
+            required
+          />
         </div>
 
         <div className={estilos.campo}>
