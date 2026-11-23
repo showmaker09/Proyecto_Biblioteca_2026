@@ -94,14 +94,9 @@ export function Layout({ children }: { children?: ReactNode } = {}) {
               Continuar leyendo
             </NavLink>
             {usuario?.rol === 'admin' && (
-              <>
-                <NavLink to="/libros/nuevo" className={({ isActive }) => (isActive ? estilos.activo : undefined)}>
-                  Nuevo libro
-                </NavLink>
-                <a href="/scalar/v1" target="_blank" rel="noreferrer">
-                  Documentación API
-                </a>
-              </>
+              <NavLink to="/libros/nuevo" className={({ isActive }) => (isActive ? estilos.activo : undefined)}>
+                Nuevo libro
+              </NavLink>
             )}
           </nav>
 
