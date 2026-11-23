@@ -34,7 +34,13 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
   const [idioma, setIdioma] = useState(libro.idioma)
   const [temasTexto, setTemasTexto] = useState(libro.temas.join(', '))
   const [portada, setPortada] = useState(libro.portada ?? '')
+  const [portadaFallida, setPortadaFallida] = useState<string | null>(null)
+  const [portadaCargada, setPortadaCargada] = useState<string | null>(null)
   const [capitulos, setCapitulos] = useState<Capitulo[]>(libro.capitulos ?? [])
+
+  const portadaLimpia = portada.trim()
+  const portadaHttpsValida = !portadaLimpia || /^https:\/\/\S+$/i.test(portadaLimpia)
+  const portadaInvalida = Boolean(portadaLimpia) && (!portadaHttpsValida || portadaFallida === portadaLimpia)
 
   // Para modo PUT (reemplazo completo)
   const [contenidoPaginas, setContenidoPaginas] = useState('')
@@ -87,6 +93,11 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
 
     if (!autor.trim()) {
       setError('El autor es obligatorio.')
+      return
+    }
+
+    if (portadaInvalida) {
+      setError('La URL de portada no apunta a una imagen válida. Usa un enlace https directo a la imagen (.jpg, .png, .webp).')
       return
     }
 
@@ -272,18 +283,41 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
             URL de portada (HTTPS externa)
           </label>
           <div className={estilos.portadaFila}>
-            <input
-              id="portada"
-              type="url"
-              className={estilos.entrada}
-              style={{ flex: 1 }}
-              placeholder="https://ejemplo.com/portada.jpg"
-              value={portada}
-              onChange={(e) => setPortada(e.target.value)}
-            />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <input
+                id="portada"
+                type="url"
+                className={estilos.entrada}
+                placeholder="https://ejemplo.com/portada.jpg"
+                value={portada}
+                onChange={(e) => setPortada(e.target.value)}
+              />
+              {portadaInvalida ? (
+                <span className={estilos.pista} style={{ color: '#dc2626', fontWeight: 500 }}>
+                  El enlace no pudo cargarse como imagen. Haz clic derecho sobre la foto y elige «Copiar vínculo de imagen» (.jpg, .png, .webp).
+                </span>
+              ) : portadaLimpia && portadaCargada === portadaLimpia ? (
+                <span className={estilos.pista} style={{ color: '#15803d', fontWeight: 500 }}>
+                  Imagen de portada válida.
+                </span>
+              ) : (
+                <span className={estilos.pista}>
+                  Debe ser el enlace directo a la imagen (.jpg, .png, .webp), no la página web de la tienda.
+                </span>
+              )}
+            </div>
             <div className={estilos.portadaPreview}>
-              {portada ? (
-                <img src={portada} alt="Vista previa" onError={(e) => ((e.target as HTMLElement).style.display = 'none')} />
+              {portadaLimpia && !portadaInvalida ? (
+                <img
+                  key={portadaLimpia}
+                  src={portadaLimpia}
+                  alt="Vista previa"
+                  referrerPolicy="no-referrer"
+                  onLoad={() => setPortadaCargada(portadaLimpia)}
+                  onError={() => setPortadaFallida(portadaLimpia)}
+                />
+              ) : portadaInvalida ? (
+                <span style={{ color: '#dc2626', padding: '0.25rem' }}>URL no es imagen</span>
               ) : (
                 <span>Sin portada</span>
               )}

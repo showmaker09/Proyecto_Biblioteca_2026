@@ -28,6 +28,12 @@ export function CrearLibroPage() {
   const [idioma, setIdioma] = useState('es')
   const [temasTexto, setTemasTexto] = useState('')
   const [portada, setPortada] = useState('')
+  const [portadaFallida, setPortadaFallida] = useState<string | null>(null)
+  const [portadaCargada, setPortadaCargada] = useState<string | null>(null)
+
+  const portadaLimpia = portada.trim()
+  const portadaHttpsValida = !portadaLimpia || /^https:\/\/\S+$/i.test(portadaLimpia)
+  const portadaInvalida = Boolean(portadaLimpia) && (!portadaHttpsValida || portadaFallida === portadaLimpia)
 
   // Archivo PDF y páginas
   const [archivoPdf, setArchivoPdf] = useState<File | null>(null)
@@ -139,6 +145,11 @@ export function CrearLibroPage() {
 
     if (!autor.trim()) {
       setError('El autor es obligatorio.')
+      return false
+    }
+
+    if (portadaInvalida) {
+      setError('La URL de portada no apunta a una imagen válida. Usa un enlace https directo a la imagen (.jpg, .png, .webp).')
       return false
     }
 
@@ -686,15 +697,47 @@ export function CrearLibroPage() {
           <label htmlFor="portada" className={estilos.etiqueta}>
             URL de portada (opcional)
           </label>
-          <input
-            id="portada"
-            type="url"
-            value={portada}
-            onChange={(e) => setPortada(e.target.value)}
-            placeholder="https://ejemplo.com/portada.jpg"
-            className={estilos.entrada}
-          />
-          <span className={estilos.pista}>Debe ser un enlace https seguro a una imagen externa.</span>
+          <div className={estilos.portadaFila}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <input
+                id="portada"
+                type="url"
+                value={portada}
+                onChange={(e) => setPortada(e.target.value)}
+                placeholder="https://ejemplo.com/portada.jpg"
+                className={estilos.entrada}
+              />
+              {portadaInvalida ? (
+                <span className={estilos.pista} style={{ color: '#dc2626', fontWeight: 500 }}>
+                  El enlace no pudo cargarse como imagen. Haz clic derecho sobre la foto y elige «Copiar vínculo de imagen» (.jpg, .png, .webp).
+                </span>
+              ) : portadaLimpia && portadaCargada === portadaLimpia ? (
+                <span className={estilos.pista} style={{ color: '#15803d', fontWeight: 500 }}>
+                  Imagen de portada válida.
+                </span>
+              ) : (
+                <span className={estilos.pista}>
+                  Debe ser un enlace https directo a una imagen externa (.jpg, .png, .webp), no la página web de una tienda.
+                </span>
+              )}
+            </div>
+            <div className={estilos.portadaPreview}>
+              {portadaLimpia && !portadaInvalida ? (
+                <img
+                  key={portadaLimpia}
+                  src={portadaLimpia}
+                  alt="Vista previa"
+                  referrerPolicy="no-referrer"
+                  onLoad={() => setPortadaCargada(portadaLimpia)}
+                  onError={() => setPortadaFallida(portadaLimpia)}
+                />
+              ) : portadaInvalida ? (
+                <span style={{ color: '#dc2626', padding: '0.25rem' }}>URL no es imagen</span>
+              ) : (
+                <span>Sin portada</span>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Zona de subida de PDF */}
