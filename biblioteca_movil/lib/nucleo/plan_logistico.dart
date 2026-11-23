@@ -313,6 +313,21 @@ class ResumenProgresoLogistico {
   int get totalCompletados =>
       progresoIntegrantes.fold(0, (suma, item) => suma + item.completados);
 
+  int get totalVerificados =>
+      progresoIntegrantes.fold(0, (suma, item) => suma + item.verificados);
+
+  int get totalSubidos =>
+      progresoIntegrantes.fold(0, (suma, item) => suma + item.subidos);
+
+  int get totalPendientes =>
+      progresoIntegrantes.fold(0, (suma, item) => suma + item.pendientes);
+
+  /// Libros que cuentan para la meta total: el catálogo publicado o, si aún
+  /// no llega, lo completado del plan.
+  int get librosAcumulados => librosEnCatalogo > totalCompletados
+      ? librosEnCatalogo
+      : totalCompletados;
+
   double get avanceSemanal {
     if (plan.cuotaSemanal <= 0) return 0;
     return (totalCompletados / plan.cuotaSemanal).clamp(0.0, 1.0);
@@ -320,10 +335,7 @@ class ResumenProgresoLogistico {
 
   double get avanceGlobal {
     if (plan.metaTotal <= 0) return 0;
-    final base = librosEnCatalogo > totalCompletados
-        ? librosEnCatalogo
-        : totalCompletados;
-    return (base / plan.metaTotal).clamp(0.0, 1.0);
+    return (librosAcumulados / plan.metaTotal).clamp(0.0, 1.0);
   }
 
   factory ResumenProgresoLogistico.calcular({
