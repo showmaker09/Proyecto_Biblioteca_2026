@@ -35,6 +35,12 @@ describe('servidor falso: GET /libros', () => {
     expect(resolverRuta('/libros?id=001_fuente_ovejuna&id=no_existe')).toMatchObject({ libros: [{ _id: '001_fuente_ovejuna' }], total: 1 })
   })
 
+  it('devuelve géneros disponibles y filtra con ?genero=', () => {
+    expect(resolverRuta('/generos')).toEqual([{ id: 'teatro', nombre: 'Teatro' }])
+    expect(ids('/libros?genero=teatro')).toHaveLength(3)
+    expect(ids('/libros?genero=poesia')).toEqual([])
+  })
+
   it('los resúmenes no traen páginas ni capítulos', () => {
     const [libro] = (resolverRuta('/libros') as Pagina).libros
     expect(libro).not.toHaveProperty('paginas')

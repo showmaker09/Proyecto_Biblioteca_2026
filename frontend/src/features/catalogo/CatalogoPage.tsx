@@ -30,6 +30,7 @@ export function CatalogoPage() {
   const limpiar = () => {
     c.setBusqueda('')
     c.setIdioma('todos')
+    c.setGenero('todos')
   }
 
   return (
@@ -84,6 +85,20 @@ export function CatalogoPage() {
           </label>
         )}
 
+        {c.generos.length > 0 && (
+          <label className={estilos.selector}>
+            <span>Género</span>
+            <select value={c.genero} onChange={(e) => c.setGenero(e.target.value)}>
+              <option value="todos">Todos</option>
+              {c.generos.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
         <label className={estilos.selector}>
           <span>Ordenar</span>
           <select value={c.orden} onChange={(e) => c.setOrden(e.target.value as Orden)}>
@@ -118,7 +133,7 @@ export function CatalogoPage() {
                     : 'Ningún libro coincide con el filtro elegido.'}
                 </p>
                 <button type="button" className="boton boton-secundario" onClick={limpiar}>
-                  Limpiar búsqueda
+                  Limpiar filtros
                 </button>
               </div>
             )

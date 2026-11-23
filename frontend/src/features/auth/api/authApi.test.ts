@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { loginApi, registroApi, usuarioActualApi, cerrarSesionApi } from './authApi'
+import { loginApi, registroApi, refrescarApi, usuarioActualApi, cerrarSesionApi, olvideContrasenaApi, restablecerContrasenaApi } from './authApi'
 import { setTokenEnMemoria, getTokenEnMemoria, post, get } from '@/shared/api/http'
 
 vi.mock('@/shared/api/http', async (importOriginal) => {
@@ -59,5 +59,33 @@ describe('authApi', () => {
     await cerrarSesionApi()
     expect(postMock).toHaveBeenCalledWith('/auth/cerrar-sesion')
     expect(getTokenEnMemoria()).toBeNull()
+  })
+
+  it('olvidé mi contraseña pide el enlace y devuelve el mensaje del servidor', async () => {
+    postMock.mockResolvedValueOnce({ mensaje: 'Si el correo está registrado, te enviamos un enlace.' })
+    const mensaje = await olvideContrasenaApi('a@b.com')
+    expect(postMock).toHaveBeenCalledWith('/auth/olvide-contrasena', { correo: 'a@b.com' })
+    expect(mensaje).toBe('Si el correo está registrado, te enviamos un enlace.')
+  })
+
+  it('restablecer contraseña manda el token y la contraseña nueva, y no guarda sesión', async () => {
+    postMock.mockResolvedValueOnce(undefined)
+    await restablecerContrasenaApi('token-del-correo', 'contrasena-nueva-1')
+    expect(postMock).toHaveBeenCalledWith('/auth/restablecer-contrasena', { token: 'token-del-correo', nueva: 'contrasena-nueva-1' })
+    expect(getTokenEnMemoria()).toBeNull()
+  })
+
+  it('refrescarApi comparte una sola petición si se llama dos veces a la vez (StrictMode)', async () => {
+    postMock.mockResolvedValueOnce({
+      token_acceso: 'jwt-refresco',
+      expira_en: '2026-10-27T18:00:00Z',
+      usuario: { id: '1', correo: 'a@b.com', nombre: 'A', rol: 'lector', permisos: [] },
+    })
+
+    const [primera, segunda] = await Promise.all([refrescarApi(), refrescarApi()])
+    expect(postMock).toHaveBeenCalledTimes(1)
+    expect(primera?.token_acceso).toBe('jwt-refresco')
+    expect(segunda?.token_acceso).toBe('jwt-refresco')
+    expect(getTokenEnMemoria()).toBe('jwt-refresco')
   })
 })

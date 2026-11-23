@@ -10,6 +10,7 @@ public static class LibrosEndpoints
     {
         ListarLibros.Mapear(app);
         ListarIdiomas.Mapear(app);
+        ListarGeneros.Mapear(app);
         ListarTemas.Mapear(app);
         ObtenerLibro.Mapear(app);
         ObtenerPagina.Mapear(app);

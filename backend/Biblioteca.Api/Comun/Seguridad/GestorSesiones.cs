@@ -59,9 +59,12 @@ public sealed class GestorSesiones(BaseDatos bd, IOptions<OpcionesSesion> opcion
 
         if (sesion is null)
         {
-            // Si otra pestaña acaba de refrescar, su cookie nueva ya está en el navegador: no hay que borrarla.
-            if (!await EsRelevoConcurrenteAsync(hash, ahora, ct)) BorrarCookie(http);
-            return null;
+            sesion = await ObtenerRelevoConcurrenteAsync(hash, ahora, ct);
+            if (sesion is null)
+            {
+                BorrarCookie(http);
+                return null;
+            }
         }
 
         // El usuario se vuelve a leer: si le cambiaron el rol, el JWT nuevo ya lo trae.
@@ -90,30 +93,34 @@ public sealed class GestorSesiones(BaseDatos bd, IOptions<OpcionesSesion> opcion
     /// Cierra todas las sesiones de una persona en todos sus dispositivos: al cambiarle el rol, desactivarla,
     /// borrarla o cambiar su contraseña. Su JWT actual sigue valiendo hasta que vence (como mucho MinutosToken).
     /// </summary>
-    public Task RevocarUsuarioAsync(ObjectId usuarioId, CancellationToken ct) =>
-        bd.Sesiones.UpdateManyAsync(
+    public Task RevocarUsuarioAsync(ObjectId usuarioId, CancellationToken ct)
+    {
+        var ahora = reloj.GetUtcNow().UtcDateTime;
+        return bd.Sesiones.UpdateManyAsync(
             s => s.UsuarioId == usuarioId && s.RevocadoEn == null,
-            Builders<SesionRefresco>.Update.Set(s => s.RevocadoEn, reloj.GetUtcNow().UtcDateTime),
+            Builders<SesionRefresco>.Update.Set(s => s.RevocadoEn, ahora).Set(s => s.ExpiraEn, ahora),
             cancellationToken: ct);
+    }
 
     /// <summary>
-    /// true si el token se usó hace un instante (otra pestaña). Si se usó hace más, alguien lo copió:
+    /// Si el token se usó hace un instante (otra pestaña o varios F5 seguidos que cancelaron la respuesta anterior),
+    /// devuelve la sesión para emitir otro relevo válido. Si se usó hace más, alguien lo copió:
     /// se revoca la familia entera y quien lo robó y la persona legítima tienen que volver a entrar.
     /// </summary>
-    async Task<bool> EsRelevoConcurrenteAsync(string hash, DateTime ahora, CancellationToken ct)
+    async Task<SesionRefresco?> ObtenerRelevoConcurrenteAsync(string hash, DateTime ahora, CancellationToken ct)
     {
-        var usada = await bd.Sesiones.Find(s => s.HashToken == hash).FirstOrDefaultAsync(ct);
-        if (usada?.RevocadoEn is not { } revocadoEn) return false;
-        if (ahora - revocadoEn < MargenConcurrencia) return true;
+        var usada = await bd.Sesiones.Find(s => s.HashToken == hash && s.ExpiraEn > ahora).FirstOrDefaultAsync(ct);
+        if (usada?.RevocadoEn is not { } revocadoEn) return null;
+        if (ahora - revocadoEn < MargenConcurrencia) return usada;
 
         await RevocarFamiliaAsync(usada.Familia, ahora, ct);
-        return false;
+        return null;
     }
 
     Task RevocarFamiliaAsync(ObjectId familia, DateTime ahora, CancellationToken ct) =>
         bd.Sesiones.UpdateManyAsync(
-            s => s.Familia == familia && s.RevocadoEn == null,
-            Builders<SesionRefresco>.Update.Set(s => s.RevocadoEn, ahora),
+            s => s.Familia == familia,
+            Builders<SesionRefresco>.Update.Set(s => s.RevocadoEn, ahora).Set(s => s.ExpiraEn, ahora),
             cancellationToken: ct);
 
     async Task<RespuestaSesion> EmitirAsync(Usuario usuario, ObjectId familia, HttpContext http, CancellationToken ct)

@@ -21,3 +21,9 @@ export interface PaginaLibros {
 
 /** Órdenes que entiende la API. */
 export type Orden = 'titulo' | 'autor' | 'largos'
+
+/** Género agrupado que devuelve GET /generos. */
+export interface Genero {
+  id: string
+  nombre: string
+}

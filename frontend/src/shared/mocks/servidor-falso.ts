@@ -7,6 +7,24 @@ const POR_PAGINA = 20
 const comparar = new Intl.Collator('es', { sensitivity: 'base' }).compare
 const normalizar = (texto: string) => texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
+const GENEROS: { id: string; nombre: string; patron: RegExp }[] = [
+  { id: 'novela', nombre: 'Novela y ficción', patron: /fiction|novela|romance|satire|s[aá]tira/i },
+  { id: 'cuentos', nombre: 'Cuentos y relatos', patron: /short stories|tales|folklore|fairy|cuentos?|fables|f[aá]bulas|relatos?/i },
+  { id: 'teatro', nombre: 'Teatro', patron: /drama|comedy|comedies|tragedy|tragedia|comedia|teatro|plays/i },
+  { id: 'poesia', nombre: 'Poesía', patron: /poetry|poems|poes[ií]a|poemas?/i },
+  { id: 'historia', nombre: 'Historia y biografía', patron: /history|historia|biography|biograf[ií]a|chronicles|cr[oó]nicas?|early accounts|revolution|revoluci[oó]n|war|guerra|antiquities|civilization/i },
+  { id: 'viajes', nombre: 'Viajes', patron: /travel|viajes?|voyages/i },
+  { id: 'ensayo', nombre: 'Ensayo y pensamiento', patron: /philosophy|filosof[ií]a|religion|religi[oó]n|christian|church|essays?|ensayos?|criticism|cr[ií]tica|education|educaci[oó]n|politics|pol[ií]tica|socialism|economics|econom[ií]a|ethics|[eé]tica|psychology|character/i },
+]
+
+function coincideGenero(temas: readonly string[], genero: string): boolean {
+  if (genero === 'otros') {
+    return !temas.some((t) => GENEROS.some((g) => g.patron.test(t)))
+  }
+  const def = GENEROS.find((g) => g.id === genero)
+  return def ? temas.some((t) => def.patron.test(t)) : true
+}
+
 /**
  * Imita el contrato de la API:
  *   GET /libros?desde=&orden=&q=&idioma=  -> { libros (máx. 20, sin páginas), total, siguiente }
@@ -40,6 +58,8 @@ export function resolverRuta(ruta: string, metodo = 'GET', cuerpo?: unknown): un
   if (pathname === '/auth/login' || pathname === '/auth/registro' || pathname === '/auth/refrescar') return SESION_MOCK
   if (pathname === '/auth/yo') return USUARIO_MOCK
   if (pathname === '/auth/cerrar-sesion') return undefined
+  if (pathname === '/auth/olvide-contrasena') return { mensaje: 'Si el correo está registrado, te enviamos un enlace para restablecer la contraseña.' }
+  if (pathname === '/auth/restablecer-contrasena') return undefined
 
   if (metodo === 'POST' && pathname === '/libros') {
     const c = cuerpo as { id?: string; titulo?: string; autor?: string } | undefined
@@ -101,6 +121,15 @@ export function resolverRuta(ruta: string, metodo = 'GET', cuerpo?: unknown): un
 
   if (pathname === '/libros') return listar(searchParams)
   if (pathname === '/idiomas') return [...new Set(LIBROS.map((l) => l.idioma))].sort()
+  if (pathname === '/generos') {
+    const disponibles = GENEROS.filter((g) => LIBROS.some((l) => l.temas.some((t) => g.patron.test(t)))).map(
+      ({ id, nombre }) => ({ id, nombre }),
+    )
+    if (LIBROS.some((l) => coincideGenero(l.temas, 'otros'))) {
+      disponibles.push({ id: 'otros', nombre: 'Otros' })
+    }
+    return disponibles
+  }
 
   const pagina = pathname.match(/^\/libros\/([^/]+)\/paginas\/(\d+)$/)
   if (pagina) {
@@ -127,12 +156,16 @@ function listar(parametros: URLSearchParams) {
 
   const ids = parametros.getAll('id').slice(0, POR_PAGINA)
   const idioma = parametros.get('idioma')
+  const genero = parametros.get('genero')
   const termino = normalizar(parametros.get('q')?.trim() ?? '')
   const filtrados =
     ids.length > 0
       ? resumenes.filter((l) => ids.includes(l._id))
       : resumenes.filter(
-          (l) => (!idioma || l.idioma === idioma) && (!termino || [l.titulo, l.autor].some((t) => normalizar(t).includes(termino))),
+          (l) =>
+            (!idioma || l.idioma === idioma) &&
+            (!genero || coincideGenero(l.temas, genero)) &&
+            (!termino || [l.titulo, l.autor].some((t) => normalizar(t).includes(termino))),
         )
 
   const porTitulo = (a: { titulo: string }, b: { titulo: string }) => comparar(a.titulo, b.titulo)

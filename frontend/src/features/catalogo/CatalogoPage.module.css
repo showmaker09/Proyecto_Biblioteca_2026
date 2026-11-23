@@ -35,8 +35,8 @@
 
 .buscador {
   position: relative;
-  flex: 1 1 16rem;
-  max-width: 26rem;
+  flex: 1 1 14rem;
+  max-width: 22rem;
 }
 
 .buscador input {

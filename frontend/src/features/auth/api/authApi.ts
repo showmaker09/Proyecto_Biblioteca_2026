@@ -13,15 +13,35 @@ export async function registroApi(datos: SolicitudRegistro): Promise<RespuestaSe
   return respuesta
 }
 
-export async function refrescarApi(): Promise<RespuestaSesion | null> {
-  try {
-    const respuesta = await post<RespuestaSesion>('/auth/refrescar')
-    setTokenEnMemoria(respuesta.token_acceso)
-    return respuesta
-  } catch {
-    setTokenEnMemoria(null)
-    return null
+/** Pide el correo de recuperación. La respuesta es la misma exista o no la cuenta. */
+export async function olvideContrasenaApi(correo: string): Promise<string> {
+  const respuesta = await post<{ mensaje: string }>('/auth/olvide-contrasena', { correo })
+  return respuesta.mensaje
+}
+
+/** Cambia la contraseña con el token del enlace del correo. No inicia sesión. */
+export async function restablecerContrasenaApi(token: string, nueva: string): Promise<void> {
+  await post<void>('/auth/restablecer-contrasena', { token, nueva })
+}
+
+let refrescoEnCurso: Promise<RespuestaSesion | null> | null = null
+
+export function refrescarApi(): Promise<RespuestaSesion | null> {
+  if (!refrescoEnCurso) {
+    refrescoEnCurso = (async () => {
+      try {
+        const respuesta = await post<RespuestaSesion>('/auth/refrescar')
+        setTokenEnMemoria(respuesta.token_acceso)
+        return respuesta
+      } catch {
+        setTokenEnMemoria(null)
+        return null
+      } finally {
+        refrescoEnCurso = null
+      }
+    })()
   }
+  return refrescoEnCurso
 }
 
 export async function cerrarSesionApi(): Promise<void> {

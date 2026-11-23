@@ -65,4 +65,31 @@ public class FiltroLibrosTests
         Assert.Null(ListarLibros.Paginas("10001"));
         Assert.Equal(49, ListarLibros.Paginas("49"));
     }
+
+    [Fact]
+    public void Filtro_por_genero_agrega_condicion_sin_romper_otros_filtros()
+    {
+        var filtro = ListarLibros.Filtro(null, "quijote", "es", null, false, "teatro");
+        var json = filtro.ToString();
+        Assert.Contains("drama|comedy", json);
+        Assert.Contains("titulo", json);
+        Assert.Equal("es", filtro["$and"].AsBsonArray[0].AsBsonDocument["idioma"].AsString);
+    }
+
+    [Fact]
+    public void Filtro_por_genero_otros_usa_nor_y_ignora_desconocidos()
+    {
+        var otros = ListarLibros.Filtro(null, null, null, null, false, "otros");
+        Assert.Contains("$nor", otros.ToString());
+
+        var desconocido = ListarLibros.Filtro(null, null, null, null, false, "inexistente");
+        Assert.Empty(desconocido);
+    }
+
+    [Fact]
+    public void Generos_disponibles_filtra_solo_los_presentes_en_catalogo()
+    {
+        var disponibles = GenerosCatalogo.Disponibles(["Spanish drama", "Spanish poetry"], hayOtros: true);
+        Assert.Equal(["teatro", "poesia", "otros"], disponibles.Select(g => g.Id).ToArray());
+    }
 }

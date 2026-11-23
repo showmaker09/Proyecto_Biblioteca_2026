@@ -1,5 +1,5 @@
 import { get } from '@/shared/api/http'
-import type { LibroResumen, Orden, PaginaLibros } from '../types'
+import type { Genero, LibroResumen, Orden, PaginaLibros } from '../types'
 
 /** Lo fija la API: ninguna respuesta trae más de 20 libros. */
 export const LIBROS_POR_PAGINA = 20
@@ -9,6 +9,8 @@ export interface ConsultaLibros {
   busqueda: string
   /** `null` = todos los idiomas. */
   idioma: string | null
+  /** `null` = todos los géneros. */
+  genero?: string | null
   orden: Orden
 }
 
@@ -26,10 +28,11 @@ function comprobarPagina(datos: unknown): PaginaLibros {
 }
 
 /** Una tanda del catálogo empezando en la posición `desde`. */
-export async function obtenerLibros({ busqueda, idioma, orden }: ConsultaLibros, desde: number): Promise<PaginaLibros> {
+export async function obtenerLibros({ busqueda, idioma, genero, orden }: ConsultaLibros, desde: number): Promise<PaginaLibros> {
   const parametros = new URLSearchParams({ desde: String(desde), orden })
   if (busqueda) parametros.set('q', busqueda)
   if (idioma) parametros.set('idioma', idioma)
+  if (genero) parametros.set('genero', genero)
   return comprobarPagina(await get<unknown>(`/libros?${parametros}`))
 }
 
@@ -43,4 +46,8 @@ export async function obtenerLibrosPorId(ids: readonly string[]): Promise<LibroR
 
 export function obtenerIdiomas() {
   return get<string[]>('/idiomas')
+}
+
+export function obtenerGeneros() {
+  return get<Genero[]>('/generos')
 }

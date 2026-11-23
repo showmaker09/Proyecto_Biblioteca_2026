@@ -48,6 +48,7 @@ public static class ListarLibros
         string? orden,
         string? q,
         string? idioma,
+        string? genero,
         [FromQuery(Name = "paginas_min")] string? paginasMin,
         [FromQuery(Name = "paginas_max")] string? paginasMax,
         [FromQuery(Name = "en_contenido")] string? enContenido)
@@ -55,7 +56,7 @@ public static class ListarLibros
         var inicio = int.TryParse(desde, out var numero) && numero > 0 ? numero : 0;
         var porOrden = orden is not null && Ordenes.TryGetValue(orden, out var elegido) ? elegido : Ordenes["titulo"];
         var enTexto = EsSi(enContenido);
-        var filtro = Filtro(ids, q, idioma, temas, enTexto);
+        var filtro = Filtro(ids, q, idioma, temas, enTexto, genero);
 
         var etapas = new List<BsonDocument>
         {
@@ -85,7 +86,7 @@ public static class ListarLibros
     /// q sin en_contenido mira título y autor. Con en_contenido, la palabra exacta en capítulos y páginas.
     /// El $regex de palabra completa evita los falsos positivos de un índice $text con stemming.
     /// </summary>
-    public static BsonDocument Filtro(string[]? ids, string? q, string? idioma, string[]? temas, bool enContenido)
+    public static BsonDocument Filtro(string[]? ids, string? q, string? idioma, string[]? temas, bool enContenido, string? genero = null)
     {
         if (ids is { Length: > 0 }) return new BsonDocument("_id", new BsonDocument("$in", new BsonArray(ids.Take(PorPagina))));
 
@@ -114,6 +115,10 @@ public static class ListarLibros
                     new BsonDocument("autor", patron),
                 };
         }
+
+        if (GenerosCatalogo.Filtro(genero) is { } filtroGenero)
+            return filtro.ElementCount == 0 ? filtroGenero : new BsonDocument("$and", new BsonArray { filtro, filtroGenero });
+
         return filtro;
     }
 

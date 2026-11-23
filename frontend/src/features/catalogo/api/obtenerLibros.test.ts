@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { get } from '@/shared/api/http'
-import { obtenerLibros, obtenerLibrosPorId } from './obtenerLibros'
+import { obtenerGeneros, obtenerLibros, obtenerLibrosPorId } from './obtenerLibros'
 
 vi.mock('@/shared/api/http', () => ({ get: vi.fn() }))
 
@@ -19,9 +19,23 @@ describe('obtenerLibros', () => {
     expect(respuesta).toHaveBeenCalledWith('/libros?desde=20&orden=titulo&q=%C3%A1lvaro')
   })
 
+  it('incluye genero cuando está seleccionado', async () => {
+    respuesta.mockResolvedValue({ libros: [libro('a')], total: 1, siguiente: null })
+    await expect(obtenerLibros({ ...CONSULTA, genero: 'teatro' }, 0)).resolves.toMatchObject({ total: 1 })
+    expect(respuesta).toHaveBeenCalledWith('/libros?desde=0&orden=titulo&q=%C3%A1lvaro&genero=teatro')
+  })
+
   it('con el formato antiguo (la lista entera) falla con un error claro en vez de romper la página', async () => {
     respuesta.mockResolvedValue([libro('a')])
     await expect(obtenerLibros(CONSULTA, 0)).rejects.toThrow(/formato inesperado/)
+  })
+})
+
+describe('obtenerGeneros', () => {
+  it('consulta /generos', async () => {
+    respuesta.mockResolvedValue([{ id: 'teatro', nombre: 'Teatro' }])
+    await expect(obtenerGeneros()).resolves.toEqual([{ id: 'teatro', nombre: 'Teatro' }])
+    expect(respuesta).toHaveBeenCalledWith('/generos')
   })
 })
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useProgresos } from '@/shared/lib/progresoLectura'
 import { usePeticion } from '@/shared/lib/usePeticion'
-import { obtenerIdiomas, obtenerLibros } from '../api/obtenerLibros'
+import { obtenerGeneros, obtenerIdiomas, obtenerLibros } from '../api/obtenerLibros'
 import type { Orden } from '../types'
 import { useLibrosPaginados } from './useLibrosPaginados'
 import { useRetrasado } from './useRetrasado'
@@ -40,22 +40,32 @@ export function useCatalogo() {
   // Borrar la búsqueda no espera: la lista completa vuelve al momento.
   const termino = busqueda.trim() === '' ? '' : busquedaRetrasada
   const [idioma, setIdioma] = useState('todos')
+  const [genero, setGenero] = useState('todos')
   const [preferencias, setPreferencias] = useState(leerPreferencias)
   // Total sin filtros (cabecera y «N de M libros»). Lo da cualquier respuesta sin filtros, llegue cuando llegue.
   const [totalCatalogo, setTotalCatalogo] = useState<number | null>(null)
   const { orden } = preferencias
-  const filtrando = termino !== '' || idioma !== 'todos'
+  const filtrando = termino !== '' || idioma !== 'todos' || genero !== 'todos'
 
   const lista = useLibrosPaginados(
     async (desde) => {
-      const pagina = await obtenerLibros({ busqueda: termino, idioma: idioma === 'todos' ? null : idioma, orden }, desde)
+      const pagina = await obtenerLibros(
+        {
+          busqueda: termino,
+          idioma: idioma === 'todos' ? null : idioma,
+          genero: genero === 'todos' ? null : genero,
+          orden,
+        },
+        desde,
+      )
       if (!filtrando) setTotalCatalogo(pagina.total)
       return pagina
     },
-    [termino, idioma, orden],
+    [termino, idioma, genero, orden],
   )
 
   const peticionIdiomas = usePeticion(obtenerIdiomas, [])
+  const peticionGeneros = usePeticion(obtenerGeneros, [])
 
   function cambiar(cambio: Partial<{ vista: Vista; orden: Orden }>) {
     setPreferencias((actual) => {
@@ -78,6 +88,9 @@ export function useCatalogo() {
     setIdioma,
     // Si no llegan, el filtro por idioma simplemente no se muestra.
     idiomas: peticionIdiomas.estado === 'listo' ? peticionIdiomas.datos : [],
+    genero,
+    setGenero,
+    generos: peticionGeneros.estado === 'listo' ? peticionGeneros.datos : [],
     vista: preferencias.vista,
     setVista: (vista: Vista) => cambiar({ vista }),
     orden,

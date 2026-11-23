@@ -1,6 +1,7 @@
 using Biblioteca.Api.Comun;
 using Biblioteca.Api.Comun.Datos;
 using Microsoft.AspNetCore.Http.HttpResults;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Biblioteca.Api.Features.Libros;
@@ -13,9 +14,18 @@ public static class ListarTemas
 
     static async Task<Ok<List<string>>> Manejar(BaseDatos bd, CancellationToken ct)
     {
-        using var cursor = await bd.Libros.DistinctAsync<string>("temas", FilterDefinition<Libro>.Empty, cancellationToken: ct);
-        var temas = await cursor.ToListAsync(ct);
-        temas.RemoveAll(string.IsNullOrWhiteSpace);
+        var etapas = new[]
+        {
+            new BsonDocument("$unwind", "$temas"),
+            new BsonDocument("$group", new BsonDocument("_id", "$temas")),
+        };
+        using var cursor = await bd.Libros.AggregateAsync(PipelineDefinition<Libro, BsonDocument>.Create(etapas), cancellationToken: ct);
+        var documentos = await cursor.ToListAsync(ct);
+        var temas = documentos
+            .Select(d => d.GetValue("_id", BsonNull.Value))
+            .Where(v => v is { IsString: true } && !string.IsNullOrWhiteSpace(v.AsString))
+            .Select(v => v.AsString)
+            .ToList();
         temas.Sort(StringComparer.CurrentCultureIgnoreCase);
         return TypedResults.Ok(temas);
     }
