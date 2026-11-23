@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import { CampoContrasena } from './components/CampoContrasena'
 import estilos from './Auth.module.css'
 
 export function RegistroPage() {
@@ -151,15 +152,12 @@ export function RegistroPage() {
               <label htmlFor="contrasena" className={estilos.etiqueta}>
                 Contraseña (mínimo 10 caracteres)
               </label>
-              <input
+              <CampoContrasena
                 id="contrasena"
-                type="password"
-                required
                 minLength={10}
                 autoComplete="new-password"
                 value={contrasena}
-                onChange={(e) => setContrasena(e.target.value)}
-                className={estilos.entrada}
+                onChange={setContrasena}
               />
             </div>
 

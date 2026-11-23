@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import { CampoContrasena } from './components/CampoContrasena'
 import estilos from './Auth.module.css'
 
 export function EntrarPage() {
@@ -130,14 +131,11 @@ export function EntrarPage() {
               <label htmlFor="contrasena" className={estilos.etiqueta}>
                 Contraseña
               </label>
-              <input
+              <CampoContrasena
                 id="contrasena"
-                type="password"
-                required
                 autoComplete="current-password"
                 value={contrasena}
-                onChange={(e) => setContrasena(e.target.value)}
-                className={estilos.entrada}
+                onChange={setContrasena}
               />
             </div>
 
