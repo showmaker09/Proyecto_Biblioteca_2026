@@ -97,7 +97,11 @@ static partial class ReglasLibro
         };
     }
 
-    public static List<string> LimpiarTemas(List<string?>? temas) => temas?.Select(t => t!.Trim()).ToList() ?? [];
+    public static List<string> LimpiarTemas(List<string?>? temas)
+    {
+        var limpios = temas?.Select(t => t!.Trim()).Where(t => t.Length > 0).ToList() ?? [];
+        return limpios.Count > 0 ? limpios : [GenerosCatalogo.SinEspecificarNombre];
+    }
 
     public static List<Capitulo> ArmarCapitulos(List<CapituloSolicitud?>? capitulos) =>
         capitulos?.Select(c => new Capitulo { Numero = c!.Numero, Titulo = c.Titulo!.Trim(), PaginaInicio = c.PaginaInicio }).ToList() ?? [];

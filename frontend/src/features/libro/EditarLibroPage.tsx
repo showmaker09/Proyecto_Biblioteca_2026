@@ -90,10 +90,11 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
       return
     }
 
-    const temas = temasTexto
+    const temasLimpios = temasTexto
       .split(',')
       .map((t) => t.trim())
       .filter((t) => t.length > 0)
+    const temas = temasLimpios.length > 0 ? temasLimpios : ['Sin especificar']
 
     // Validar capítulos
     for (const cap of capitulos) {

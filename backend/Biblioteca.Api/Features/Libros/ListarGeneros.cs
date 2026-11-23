@@ -26,15 +26,15 @@ public static class ListarGeneros
             .Where(v => v is { IsString: true })
             .Select(v => v.AsString);
 
-        var etapasOtros = new[]
+        var etapasSinEspecificar = new[]
         {
-            new BsonDocument("$match", GenerosCatalogo.Filtro(GenerosCatalogo.OtrosId)!),
+            new BsonDocument("$match", GenerosCatalogo.Filtro(GenerosCatalogo.SinEspecificarId)!),
             new BsonDocument("$limit", 1),
             new BsonDocument("$project", new BsonDocument("_id", 1)),
         };
-        using var cursorOtros = await bd.Libros.AggregateAsync(PipelineDefinition<Libro, BsonDocument>.Create(etapasOtros), cancellationToken: ct);
-        var hayOtros = await cursorOtros.AnyAsync(ct);
+        using var cursorSinEspecificar = await bd.Libros.AggregateAsync(PipelineDefinition<Libro, BsonDocument>.Create(etapasSinEspecificar), cancellationToken: ct);
+        var haySinEspecificar = await cursorSinEspecificar.AnyAsync(ct);
 
-        return TypedResults.Ok(GenerosCatalogo.Disponibles(temas, hayOtros));
+        return TypedResults.Ok(GenerosCatalogo.Disponibles(temas, haySinEspecificar));
     }
 }

@@ -87,13 +87,11 @@ function Ficha({ libro }: { libro: LibroDetalle }) {
                 )}
               </dl>
 
-              {temas.length > 0 && (
-                <ul className={estilos.temas} aria-label="Temas">
-                  {temas.map((t) => (
-                    <li key={t}>{t}</li>
-                  ))}
-                </ul>
-              )}
+              <ul className={estilos.temas} aria-label="Temas">
+                {(temas.length > 0 ? temas : ['Sin especificar']).map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
 
               {progreso && (
                 <div className={estilos.progreso}>

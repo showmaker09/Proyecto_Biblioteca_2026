@@ -8,17 +8,17 @@ const comparar = new Intl.Collator('es', { sensitivity: 'base' }).compare
 const normalizar = (texto: string) => texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 
 const GENEROS: { id: string; nombre: string; patron: RegExp }[] = [
-  { id: 'novela', nombre: 'Novela y ficción', patron: /fiction|novela|romance|satire|s[aá]tira/i },
-  { id: 'cuentos', nombre: 'Cuentos y relatos', patron: /short stories|tales|folklore|fairy|cuentos?|fables|f[aá]bulas|relatos?/i },
+  { id: 'novela', nombre: 'Novela y ficción', patron: /fiction|novela|romance|satire|s[aá]tira|fantas[ií]a|fantasy|adventure|aventura/i },
+  { id: 'cuentos', nombre: 'Cuentos y relatos', patron: /short stories|stories|tales|folklore|fairy|cuentos?|fables|f[aá]bulas|relatos?/i },
   { id: 'teatro', nombre: 'Teatro', patron: /drama|comedy|comedies|tragedy|tragedia|comedia|teatro|plays/i },
-  { id: 'poesia', nombre: 'Poesía', patron: /poetry|poems|poes[ií]a|poemas?/i },
-  { id: 'historia', nombre: 'Historia y biografía', patron: /history|historia|biography|biograf[ií]a|chronicles|cr[oó]nicas?|early accounts|revolution|revoluci[oó]n|war|guerra|antiquities|civilization/i },
-  { id: 'viajes', nombre: 'Viajes', patron: /travel|viajes?|voyages/i },
-  { id: 'ensayo', nombre: 'Ensayo y pensamiento', patron: /philosophy|filosof[ií]a|religion|religi[oó]n|christian|church|essays?|ensayos?|criticism|cr[ií]tica|education|educaci[oó]n|politics|pol[ií]tica|socialism|economics|econom[ií]a|ethics|[eé]tica|psychology|character/i },
+  { id: 'poesia', nombre: 'Poesía', patron: /poetry|poems|poes[ií]a|poemas?|fierro/i },
+  { id: 'historia', nombre: 'Historia y biografía', patron: /history|historia|biography|biograf[ií]a|chronicles|cr[oó]nicas?|early accounts|revolution|revoluci[oó]n|war|guerra|antiquities|civilization|indians|columbus|america --|spain --|puerto rico|vel[aá]zquez|dar[ií]o|zorrilla|lincoln|liga filipina|andalusia/i },
+  { id: 'viajes', nombre: 'Viajes', patron: /travel|viajes?|voyages|sailing|ships/i },
+  { id: 'ensayo', nombre: 'Ensayo y pensamiento', patron: /philosophy|filosof[ií]a|religion|religi[oó]n|christian|church|apostles|essays?|ensayos?|criticism|cr[ií]tica|education|educaci[oó]n|politics|pol[ií]tica|socialism|economics|econom[ií]a|ethics|[eé]tica|psychology|character|capital|wages|democracy|equality|ethnology|research|scientists|dance|recipes|olive oil|project gutenberg|quixote|selections|literature|literatura|periodicals|painting|architecture|palaces|cooking|cocina|art\b|arte\b/i },
 ]
 
 function coincideGenero(temas: readonly string[], genero: string): boolean {
-  if (genero === 'otros') {
+  if (genero === 'sin_especificar') {
     return !temas.some((t) => GENEROS.some((g) => g.patron.test(t)))
   }
   const def = GENEROS.find((g) => g.id === genero)
@@ -62,13 +62,14 @@ export function resolverRuta(ruta: string, metodo = 'GET', cuerpo?: unknown): un
   if (pathname === '/auth/restablecer-contrasena') return undefined
 
   if (metodo === 'POST' && pathname === '/libros') {
-    const c = cuerpo as { id?: string; titulo?: string; autor?: string } | undefined
+    const c = cuerpo as { id?: string; titulo?: string; autor?: string; temas?: string[] } | undefined
+    const temas = c?.temas?.filter((t) => t.trim().length > 0)
     return {
       _id: c?.id || 'mock_creado',
       titulo: c?.titulo || 'Libro Creado',
       autor: c?.autor || 'Autor Mock',
       idioma: 'es',
-      temas: [],
+      temas: temas && temas.length > 0 ? temas : ['Sin especificar'],
       portada: null,
       total_paginas: 1,
       caracteres_totales: 100,
@@ -125,8 +126,8 @@ export function resolverRuta(ruta: string, metodo = 'GET', cuerpo?: unknown): un
     const disponibles = GENEROS.filter((g) => LIBROS.some((l) => l.temas.some((t) => g.patron.test(t)))).map(
       ({ id, nombre }) => ({ id, nombre }),
     )
-    if (LIBROS.some((l) => coincideGenero(l.temas, 'otros'))) {
-      disponibles.push({ id: 'otros', nombre: 'Otros' })
+    if (LIBROS.some((l) => coincideGenero(l.temas, 'sin_especificar'))) {
+      disponibles.push({ id: 'sin_especificar', nombre: 'Sin especificar' })
     }
     return disponibles
   }

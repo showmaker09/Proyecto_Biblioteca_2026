@@ -77,19 +77,20 @@ public class FiltroLibrosTests
     }
 
     [Fact]
-    public void Filtro_por_genero_otros_usa_nor_y_ignora_desconocidos()
+    public void Filtro_por_genero_sin_especificar_usa_nor_y_ignora_desconocidos()
     {
-        var otros = ListarLibros.Filtro(null, null, null, null, false, "otros");
-        Assert.Contains("$nor", otros.ToString());
+        var sinEspecificar = ListarLibros.Filtro(null, null, null, null, false, "sin_especificar");
+        Assert.Contains("$nor", sinEspecificar.ToString());
 
         var desconocido = ListarLibros.Filtro(null, null, null, null, false, "inexistente");
         Assert.Empty(desconocido);
     }
 
     [Fact]
-    public void Generos_disponibles_filtra_solo_los_presentes_en_catalogo()
+    public void Generos_disponibles_filtra_solo_los_presentes_y_agrega_sin_especificar()
     {
-        var disponibles = GenerosCatalogo.Disponibles(["Spanish drama", "Spanish poetry"], hayOtros: true);
-        Assert.Equal(["teatro", "poesia", "otros"], disponibles.Select(g => g.Id).ToArray());
+        var disponibles = GenerosCatalogo.Disponibles(["Spanish drama", "Spanish poetry"], haySinEspecificar: true);
+        Assert.Equal(["teatro", "poesia", "sin_especificar"], disponibles.Select(g => g.Id).ToArray());
+        Assert.Equal("Sin especificar", disponibles.Last().Nombre);
     }
 }

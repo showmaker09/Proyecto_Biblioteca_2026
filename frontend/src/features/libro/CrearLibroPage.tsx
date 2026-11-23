@@ -269,7 +269,7 @@ export function CrearLibroPage() {
         titulo: titulo.trim(),
         autor: autor.trim(),
         idioma: idioma.trim().toLowerCase() || 'es',
-        temas: temas.length > 0 ? temas : undefined,
+        temas: temas.length > 0 ? temas : ['Sin especificar'],
         portada: portada.trim() ? portada.trim() : null,
         capitulos: capitulos.length > 0 ? capitulos : undefined,
         paginas,
@@ -387,13 +387,11 @@ export function CrearLibroPage() {
                     )}
                   </dl>
 
-                  {listaTemas.length > 0 && (
-                    <ul className={estilos.temas} aria-label="Temas">
-                      {listaTemas.map((t) => (
-                        <li key={t}>{t}</li>
-                      ))}
-                    </ul>
-                  )}
+                  <ul className={estilos.temas} aria-label="Temas">
+                    {(listaTemas.length > 0 ? listaTemas : ['Sin especificar']).map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
 
                   <div className={estilos.accionesVistaPrevia}>
                     <button

@@ -39,6 +39,12 @@ describe('servidor falso: GET /libros', () => {
     expect(resolverRuta('/generos')).toEqual([{ id: 'teatro', nombre: 'Teatro' }])
     expect(ids('/libros?genero=teatro')).toHaveLength(3)
     expect(ids('/libros?genero=poesia')).toEqual([])
+    expect(ids('/libros?genero=sin_especificar')).toEqual([])
+  })
+
+  it('al crear un libro sin temas le asigna "Sin especificar"', () => {
+    const creado = resolverRuta('/libros', 'POST', { id: '999_nuevo', titulo: 'Nuevo', autor: 'Autor' }) as any
+    expect(creado.temas).toEqual(['Sin especificar'])
   })
 
   it('los resúmenes no traen páginas ni capítulos', () => {
