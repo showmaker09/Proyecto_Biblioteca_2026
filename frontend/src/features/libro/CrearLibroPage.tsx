@@ -13,6 +13,10 @@ import estilos from './CrearLibroPage.module.css'
 
 type Fase = 'formulario' | 'escaneando' | 'vista-previa'
 
+function normalizarPortadaGutenberg(url: string): string {
+  return url.replace(/^https:\/\/www\.gutenberg\.org\/cache\/epub\//i, 'https://gutenberg.pglaf.org/cache/epub/')
+}
+
 export function CrearLibroPage() {
   useTituloDocumento('Nuevo libro')
   const { usuario } = useAuth()
@@ -31,7 +35,7 @@ export function CrearLibroPage() {
   const [portadaFallida, setPortadaFallida] = useState<string | null>(null)
   const [portadaCargada, setPortadaCargada] = useState<string | null>(null)
 
-  const portadaLimpia = portada.trim()
+  const portadaLimpia = normalizarPortadaGutenberg(portada.trim())
   const portadaHttpsValida = !portadaLimpia || /^https:\/\/\S+$/i.test(portadaLimpia)
   const portadaInvalida = Boolean(portadaLimpia) && (!portadaHttpsValida || portadaFallida === portadaLimpia)
 
@@ -281,7 +285,7 @@ export function CrearLibroPage() {
         autor: autor.trim(),
         idioma: idioma.trim().toLowerCase() || 'es',
         temas: temas.length > 0 ? temas : ['Sin especificar'],
-        portada: portada.trim() ? portada.trim() : null,
+        portada: portadaLimpia ? portadaLimpia : null,
         capitulos: capitulos.length > 0 ? capitulos : undefined,
         paginas,
       })

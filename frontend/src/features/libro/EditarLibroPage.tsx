@@ -22,6 +22,10 @@ export function EditarLibroPage() {
   )
 }
 
+function normalizarPortadaGutenberg(url: string): string {
+  return url.replace(/^https:\/\/www\.gutenberg\.org\/cache\/epub\//i, 'https://gutenberg.pglaf.org/cache/epub/')
+}
+
 function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
   const { usuario } = useAuth()
   const navigate = useNavigate()
@@ -33,12 +37,12 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
   const [autor, setAutor] = useState(libro.autor)
   const [idioma, setIdioma] = useState(libro.idioma)
   const [temasTexto, setTemasTexto] = useState(libro.temas.join(', '))
-  const [portada, setPortada] = useState(libro.portada ?? '')
+  const [portada, setPortada] = useState(() => normalizarPortadaGutenberg(libro.portada ?? ''))
   const [portadaFallida, setPortadaFallida] = useState<string | null>(null)
   const [portadaCargada, setPortadaCargada] = useState<string | null>(null)
   const [capitulos, setCapitulos] = useState<Capitulo[]>(libro.capitulos ?? [])
 
-  const portadaLimpia = portada.trim()
+  const portadaLimpia = normalizarPortadaGutenberg(portada.trim())
   const portadaHttpsValida = !portadaLimpia || /^https:\/\/\S+$/i.test(portadaLimpia)
   const portadaInvalida = Boolean(portadaLimpia) && (!portadaHttpsValida || portadaFallida === portadaLimpia)
 
@@ -129,7 +133,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
           autor: autor.trim(),
           idioma: idioma.trim().toLowerCase() || 'es',
           temas,
-          portada: portada.trim() ? portada.trim() : null,
+          portada: portadaLimpia ? portadaLimpia : null,
           capitulos: capitulos.length > 0 ? capitulos : [],
         })
 
@@ -155,7 +159,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
           autor: autor.trim(),
           idioma: idioma.trim().toLowerCase() || 'es',
           temas,
-          portada: portada.trim() ? portada.trim() : null,
+          portada: portadaLimpia ? portadaLimpia : null,
           capitulos: capitulos.length > 0 ? capitulos : [],
           paginas,
         })
