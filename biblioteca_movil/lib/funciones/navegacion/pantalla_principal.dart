@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../nucleo/tema.dart';
+import '../ajustes/avatares_perfil.dart';
 import '../ajustes/pantalla_ajustes.dart';
 import '../catalogo/pantalla_catalogo.dart';
 import '../inicio/pantalla_inicio.dart';
 
 /// Tras el login. Abre directamente en **Biblioteca** (como en la web), seguido
-/// de **Colección** (lectura en curso) y **Ajustes**. Cada pestaña gestiona su
+/// de **Colección** (lectura en curso) y **Perfil**. Cada pestaña gestiona su
 /// propio encabezado editorial limpio y comparte una píldora flotante inferior
 /// que se esconde al bajar por el contenido y vuelve al subir.
 class PantallaPrincipal extends StatefulWidget {
@@ -75,7 +76,7 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
     final tecladoAbierto = MediaQuery.viewInsetsOf(context).bottom > 0;
     final visible = _navVisible && !tecladoAbierto;
 
-    // En Ajustes el propio widget sincroniza el contraste de la barra de estado
+    // En Perfil el propio widget sincroniza el contraste de la barra de estado
     // con el color de fondo del perfil y el scroll.
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -210,11 +211,15 @@ class _DestinoNav {
     required this.etiqueta,
     required this.icono,
     required this.iconoActivo,
+    this.esPerfil = false,
   });
 
   final String etiqueta;
   final IconData icono;
   final IconData iconoActivo;
+
+  /// Si hay avatar elegido, se muestra en lugar del icono.
+  final bool esPerfil;
 }
 
 /// Barra inferior flotante de cristal esmerilado: blanco translúcido con un
@@ -242,9 +247,10 @@ class BarraNavegacionPildora extends StatelessWidget {
       iconoActivo: Icons.collections_bookmark_rounded,
     ),
     _DestinoNav(
-      etiqueta: 'Ajustes',
-      icono: Icons.settings_outlined,
-      iconoActivo: Icons.settings_rounded,
+      etiqueta: 'Perfil',
+      icono: Icons.person_outline_rounded,
+      iconoActivo: Icons.person_rounded,
+      esPerfil: true,
     ),
   ];
 
@@ -401,6 +407,7 @@ class _BotonDestinoPildora extends StatelessWidget {
     final color = activo
         ? ColoresBiblioteca.acentoTexto
         : ColoresBiblioteca.pizarra600;
+    final avatar = destino.esPerfil ? avatarDelPerfil(context) : null;
 
     return Semantics(
       button: true,
@@ -421,11 +428,31 @@ class _BotonDestinoPildora extends StatelessWidget {
                   scale: activo ? 1.06 : 1.0,
                   duration: duracion,
                   curve: Curves.easeOutBack,
-                  child: Icon(
-                    activo ? destino.iconoActivo : destino.icono,
-                    size: 20,
-                    color: color,
-                  ),
+                  child: avatar == null
+                      ? Icon(
+                          activo ? destino.iconoActivo : destino.icono,
+                          size: 20,
+                          color: color,
+                        )
+                      : DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: activo
+                                  ? ColoresBiblioteca.acentoTexto
+                                  : ColoresBiblioteca.pizarra300,
+                              width: 1.5,
+                              strokeAlign: BorderSide.strokeAlignOutside,
+                            ),
+                          ),
+                          child: ExcludeSemantics(
+                            child: CirculoAvatar(
+                              avatar: avatar,
+                              iniciales: '',
+                              tamano: 21,
+                            ),
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 2),
                 AnimatedDefaultTextStyle(

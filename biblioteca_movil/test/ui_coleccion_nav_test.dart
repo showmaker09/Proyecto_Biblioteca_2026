@@ -257,8 +257,8 @@ void main() {
       expect(find.text('Para empezar a leer'), findsNothing);
       expect(find.text('En el estante'), findsNothing);
 
-      // 5. Cambiar a Ajustes desde la píldora.
-      await tester.tap(find.text('Ajustes'));
+      // 5. Cambiar a Perfil desde la píldora.
+      await tester.tap(find.text('Perfil'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
       expect(find.text('Isaac Castillo'), findsOneWidget);
@@ -522,7 +522,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Ajustes'), findsOneWidget);
+      // El nombre del usuario ocupa el título de la cabecera.
+      expect(find.text('Ajustes'), findsNothing);
       expect(find.text('Isaac Castillo'), findsOneWidget);
       expect(find.text('Administrador'), findsOneWidget);
       expect(find.text('Abrir escáner'), findsOneWidget);

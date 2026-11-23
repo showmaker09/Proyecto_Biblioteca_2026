@@ -28,6 +28,7 @@ class PreferenciasLectura extends ChangeNotifier {
   static const _claveVelocidadVoz = 'lector_velocidad_voz';
   static const _claveVoz = 'lector_voz';
   static const _claveFondoPerfil = 'ajustes_fondo_perfil';
+  static const _claveAvatarPerfil = 'ajustes_avatar_perfil';
   static const tamanos = [16.0, 18.0, 20.0, 22.0, 24.0, 26.0, 28.0];
   static const interlineados = [1.35, 1.55, 1.8];
   static const velocidadesVoz = [0.75, 1.0, 1.25, 1.5, 2.0];
@@ -38,6 +39,16 @@ class PreferenciasLectura extends ChangeNotifier {
     'burdeos',
     'grafito',
     'cielo',
+  ];
+  static const avataresPerfil = [
+    'libro',
+    'pluma',
+    'buho',
+    'lampara',
+    'taza',
+    'gafas',
+    'luna',
+    'estante',
   ];
 
   SharedPreferences? _preferencias;
@@ -50,6 +61,10 @@ class PreferenciasLectura extends ChangeNotifier {
 
   /// Clave del tema de color de la cabecera de perfil en Ajustes.
   String fondoPerfil = 'noche';
+
+  /// Avatar ilustrado del perfil (`assets/svg/avatares/<clave>.svg`); `null`
+  /// muestra las iniciales.
+  String? avatarPerfil;
 
   /// Voz elegida para leer en voz alta (`nombre|locale`); `null` es la
   /// automática del idioma del libro.
@@ -80,6 +95,8 @@ class PreferenciasLectura extends ChangeNotifier {
     if (guardado != null && fondosPerfil.contains(guardado)) {
       fondoPerfil = guardado;
     }
+    final avatar = caja.getString(_claveAvatarPerfil);
+    avatarPerfil = avataresPerfil.contains(avatar) ? avatar : null;
     notifyListeners();
   }
 
@@ -90,6 +107,20 @@ class PreferenciasLectura extends ChangeNotifier {
     notifyListeners();
     final caja = await _caja();
     await caja.setString(_claveFondoPerfil, clave);
+  }
+
+  /// Cambia y guarda el avatar del perfil; `null` vuelve a las iniciales.
+  Future<void> fijarAvatarPerfil(String? clave) async {
+    if (clave != null && !avataresPerfil.contains(clave)) return;
+    if (avatarPerfil == clave) return;
+    avatarPerfil = clave;
+    notifyListeners();
+    final caja = await _caja();
+    if (clave == null) {
+      await caja.remove(_claveAvatarPerfil);
+    } else {
+      await caja.setString(_claveAvatarPerfil, clave);
+    }
   }
 
   Future<void> fijar({

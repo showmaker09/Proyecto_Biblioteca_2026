@@ -63,7 +63,8 @@ class BibliotecaApp extends StatelessWidget {
         Provider<CasosDashboard>(
           create: (c) => CasosDashboard(c.read<ClienteBiblioteca>()),
         ),
-        ChangeNotifierProvider(create: (_) => PreferenciasLectura()),
+        // Se cargan al crearse: la píldora de navegación ya muestra el avatar.
+        ChangeNotifierProvider(create: (_) => PreferenciasLectura()..cargar()),
         ChangeNotifierProvider(create: (_) => MarcadoresLectura()),
         Provider<MotorVoz>(create: (_) => MotorVozSistema()),
         Provider<CasosEscaner>(create: (_) => CasosEscaner()),

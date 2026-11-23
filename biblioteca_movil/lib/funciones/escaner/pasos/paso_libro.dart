@@ -8,6 +8,7 @@ import '../../../nucleo/plan_logistico.dart';
 import '../../../nucleo/tema.dart';
 import '../../../nucleo/widgets/encabezado_editorial.dart';
 import '../../../nucleo/widgets/hoja_inferior.dart';
+import '../../ajustes/avatares_perfil.dart';
 import '../almacen_libros.dart';
 import '../controlador_escaneo.dart';
 import '../widgets/widgets_escaneo.dart';
@@ -566,6 +567,7 @@ class _TarjetaIntegrante extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actual = integrante;
+    final avatar = avatarDelPerfil(context);
     final detalle = actual == null
         ? 'Selecciona tu nombre para continuar'
         : numero == null
@@ -594,6 +596,9 @@ class _TarjetaIntegrante extends StatelessWidget {
                     size: 20,
                     color: ColoresBiblioteca.pizarra600,
                   )
+                // El integrante vinculado es esta cuenta: lleva su avatar.
+                : avatar != null
+                ? CirculoAvatar(avatar: avatar, iniciales: '', tamano: 40)
                 : Text(
                     iniciales(actual.nombre),
                     style: const TextStyle(
@@ -611,11 +616,12 @@ class _TarjetaIntegrante extends StatelessWidget {
               children: [
                 Text(
                   actual == null ? 'Elige quién digitaliza' : actual.nombre,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: 'serif',
                     fontSize: 16,
+                    height: 1.2,
                     fontWeight: FontWeight.w700,
                     color: ColoresBiblioteca.texto,
                   ),

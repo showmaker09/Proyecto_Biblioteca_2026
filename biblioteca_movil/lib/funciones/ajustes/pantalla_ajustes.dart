@@ -10,6 +10,7 @@ import '../../nucleo/tema.dart';
 import '../../nucleo/widgets/cristal_carpeta.dart';
 import '../lector/widgets/hojas_lector.dart';
 import '../lector/widgets/reproductor_voz.dart';
+import 'avatares_perfil.dart';
 
 /// Paleta cromática personalizable para la cabecera de perfil en Ajustes.
 class _TemaFondoPerfil {
@@ -94,8 +95,8 @@ _TemaFondoPerfil _temaPerfilDe(String clave) => _temasPerfil.firstWhere(
 );
 
 /// Pantalla de Ajustes sin controles duplicados:
-/// - Cabecera arquitectónica con cuadrícula, pestaña de carpeta y selector de
-///   color de fondo del perfil (guardado en el teléfono).
+/// - Cabecera arquitectónica con cuadrícula, pestaña de carpeta, selector de
+///   color de fondo y avatar ilustrado del perfil (guardados en el teléfono).
 /// - Cápsula única de preferencias completas de lectura (`Apariencia`).
 /// - 3 interruptores rápidos en una sola fila (tema, tipografía y voz).
 /// - Para administradores: medallones circulares + tarjeta destacada única con
@@ -115,6 +116,7 @@ class _PantallaAjustesState extends State<PantallaAjustes> {
   var _encabezadoOculto = false;
   // Respaldo local cuando el widget se monta sin Provider<PreferenciasLectura>.
   var _fondoLocal = 'noche';
+  String? _avatarLocal;
 
   @override
   void initState() {
@@ -189,6 +191,22 @@ class _PantallaAjustesState extends State<PantallaAjustes> {
     prefs?.fijarFondoPerfil(clave);
   }
 
+  Future<void> _elegirAvatar(
+    PreferenciasLectura? prefs,
+    String? actual,
+    String iniciales,
+  ) async {
+    final elegido = await mostrarSelectorAvatar(
+      context,
+      actual: actual,
+      iniciales: iniciales,
+    );
+    if (elegido == null || !mounted) return;
+    HapticFeedback.selectionClick();
+    setState(() => _avatarLocal = elegido.clave);
+    prefs?.fijarAvatarPerfil(elegido.clave);
+  }
+
   List<_HerramientaAdmin> _herramientasAdmin(BuildContext context) => [
     _HerramientaAdmin(
       etiquetaCorta: 'Escanear',
@@ -232,6 +250,8 @@ class _PantallaAjustesState extends State<PantallaAjustes> {
     final prefs = _preferenciasLectura(context, listen: true);
     final claveFondo = prefs?.fondoPerfil ?? _fondoLocal;
     final temaPerfil = _temaPerfilDe(claveFondo);
+    final avatar = prefs == null ? _avatarLocal : prefs.avatarPerfil;
+    final iniciales = _iniciales(usuario?.nombre);
 
     final noche = prefs?.noche ?? false;
     final serif = prefs?.serif ?? true;
@@ -262,7 +282,9 @@ class _PantallaAjustesState extends State<PantallaAjustes> {
             _CabeceraCarpetaAjustes(
               rellenoSuperior: arriba,
               tema: temaPerfil,
-              iniciales: _iniciales(usuario?.nombre),
+              iniciales: iniciales,
+              avatar: avatar,
+              alElegirAvatar: () => _elegirAvatar(prefs, avatar, iniciales),
               nombre: usuario?.nombre ?? 'Sesión',
               correo: usuario?.correo ?? '',
               esAdmin: esAdmin,
@@ -395,6 +417,8 @@ class _CabeceraCarpetaAjustes extends StatelessWidget {
     required this.rellenoSuperior,
     required this.tema,
     required this.iniciales,
+    required this.avatar,
+    required this.alElegirAvatar,
     required this.nombre,
     required this.correo,
     required this.esAdmin,
@@ -406,6 +430,8 @@ class _CabeceraCarpetaAjustes extends StatelessWidget {
   final double rellenoSuperior;
   final _TemaFondoPerfil tema;
   final String iniciales;
+  final String? avatar;
+  final VoidCallback alElegirAvatar;
   final String nombre;
   final String correo;
   final bool esAdmin;
@@ -475,16 +501,19 @@ class _CabeceraCarpetaAjustes extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(20, rellenoSuperior + 14, 20, 18),
+              // Banner alto: el degradado respira por encima del nombre y
+              // deja aire hasta la pestaña de la carpeta.
+              padding: EdgeInsets.fromLTRB(20, rellenoSuperior + 28, 20, 48),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
+                      // El nombre ocupa el sitio del título de la pestaña.
                       Expanded(
                         child: Text(
-                          'Ajustes',
-                          maxLines: 1,
+                          nombre,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontFamily: 'serif',
@@ -496,39 +525,69 @@ class _CabeceraCarpetaAjustes extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Avatar circular con aro luminoso en el acento del perfil.
-                      Container(
-                        width: 42,
-                        height: 42,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: claro
-                              ? ColoresBiblioteca.acento
-                              : ColoresBiblioteca.fondo,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: tema.acento.withValues(
-                              alpha: claro ? 0.45 : 0.85,
-                            ),
-                            width: 2.2,
-                            strokeAlign: BorderSide.strokeAlignOutside,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: tema.acento.withValues(alpha: 0.32),
-                              blurRadius: 12,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          iniciales,
-                          style: TextStyle(
-                            fontFamily: 'serif',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: claro
-                                ? ColoresBiblioteca.acentoTexto
-                                : ColoresBiblioteca.texto,
+                      const SizedBox(width: 16),
+                      // Avatar circular con aro luminoso en el acento del
+                      // perfil; al tocarlo se elige ilustración o iniciales.
+                      Tooltip(
+                        message: 'Cambiar avatar',
+                        child: GestureDetector(
+                          onTap: alElegirAvatar,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: tema.acento.withValues(
+                                      alpha: claro ? 0.45 : 0.85,
+                                    ),
+                                    width: 2.2,
+                                    strokeAlign: BorderSide.strokeAlignOutside,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: tema.acento.withValues(
+                                        alpha: 0.32,
+                                      ),
+                                      blurRadius: 12,
+                                    ),
+                                  ],
+                                ),
+                                child: CirculoAvatar(
+                                  avatar: avatar,
+                                  iniciales: iniciales,
+                                  tamano: 54,
+                                  colorFondo: claro
+                                      ? ColoresBiblioteca.acento
+                                      : ColoresBiblioteca.fondo,
+                                  colorTexto: claro
+                                      ? ColoresBiblioteca.acentoTexto
+                                      : ColoresBiblioteca.texto,
+                                ),
+                              ),
+                              Positioned(
+                                right: -3,
+                                bottom: -3,
+                                child: Container(
+                                  width: 21,
+                                  height: 21,
+                                  decoration: BoxDecoration(
+                                    color: ColoresBiblioteca.superficie,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: ColoresBiblioteca.pizarra200,
+                                    ),
+                                    boxShadow: ColoresBiblioteca.sombraTarjeta,
+                                  ),
+                                  child: const Icon(
+                                    Icons.edit_rounded,
+                                    size: 11,
+                                    color: ColoresBiblioteca.texto,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -576,21 +635,8 @@ class _CabeceraCarpetaAjustes extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    nombre,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'serif',
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      height: 1.18,
-                      color: tema.textoPrincipal,
-                    ),
-                  ),
                   if (correo.isNotEmpty) ...[
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 8),
                     Text(
                       correo,
                       maxLines: 1,
