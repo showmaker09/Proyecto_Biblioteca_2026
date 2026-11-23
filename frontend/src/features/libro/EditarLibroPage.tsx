@@ -133,19 +133,19 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
           capitulos: capitulos.length > 0 ? capitulos : [],
         })
 
-        setExito('Libro actualizado con éxito (PATCH).')
+        setExito('Libro actualizado con éxito.')
         setTimeout(() => {
           navigate(`/libros/${libro._id}`)
         }, 1200)
       } else {
-        // PUT: Reemplazo completo de páginas y metadatos
+        // Reemplazo completo de páginas y metadatos
         const paginas = contenidoPaginas
           .split(/\n---\n/)
           .map((p) => p.trim())
           .filter((p) => p.length > 0)
 
         if (paginas.length === 0) {
-          setError('En el modo reemplazo completo (PUT) debes ingresar al menos una página de texto.')
+          setError('Para reemplazar el contenido debes ingresar al menos una página de texto.')
           setCargando(false)
           return
         }
@@ -160,7 +160,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
           paginas,
         })
 
-        setExito('Libro reemplazado por completo con éxito (PUT).')
+        setExito('Libro reemplazado por completo con éxito.')
         setTimeout(() => {
           navigate(`/libros/${libro._id}`)
         }, 1200)
@@ -175,10 +175,9 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
   return (
     <div className={estilos.pagina}>
       <header className={estilos.cabecera}>
-        <span className={estilos.badge}>Administración</span>
         <h1 className={estilos.titulo}>Editar libro</h1>
         <p className={estilos.subtitulo}>
-          Modifica los datos del libro <strong>{libro.titulo}</strong> (ID: <code>{libro._id}</code>)
+          Modifica los datos del libro <strong>{libro.titulo}</strong>
         </p>
       </header>
 
@@ -190,7 +189,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
           className={`${estilos.pestana} ${modo === 'patch' ? estilos.pestanaActiva : ''}`}
           onClick={() => setModo('patch')}
         >
-          Actualizar datos (PATCH)
+          Actualizar datos
         </button>
         <button
           type="button"
@@ -199,25 +198,13 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
           className={`${estilos.pestana} ${modo === 'put' ? estilos.pestanaActiva : ''}`}
           onClick={() => setModo('put')}
         >
-          Reemplazar contenido completo (PUT)
+          Reemplazar contenido completo
         </button>
       </div>
 
       <form className={estilos.formulario} onSubmit={handleSubmit}>
         {error && <div className={estilos.error}>{error}</div>}
         {exito && <div className={estilos.exito}>{exito}</div>}
-
-        {modo === 'patch' ? (
-          <div className={estilos.alertaAviso}>
-            ℹ️ <strong>Modo PATCH activado:</strong> Modificarás el título, autor, idioma, portada, temas y capítulos.
-            Las <strong>{libro.total_paginas} páginas</strong> actuales se conservarán intactas.
-          </div>
-        ) : (
-          <div className={estilos.alertaAviso}>
-            ⚠️ <strong>Modo PUT activado:</strong> Este modo reemplazará por completo el libro existente, incluyendo todo su
-            contenido de páginas.
-          </div>
-        )}
 
         <div className={estilos.campo}>
           <label htmlFor="titulo" className={estilos.etiqueta}>
@@ -250,7 +237,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
 
           <div className={estilos.campo}>
             <label htmlFor="idioma" className={estilos.etiqueta}>
-              Idioma (código) *
+              Idioma *
             </label>
             <input
               id="idioma"
@@ -280,7 +267,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
 
         <div className={estilos.campo}>
           <label htmlFor="portada" className={estilos.etiqueta}>
-            URL de portada (HTTPS externa)
+            Enlace de portada (opcional)
           </label>
           <div className={estilos.portadaFila}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -405,7 +392,7 @@ function FormularioEdicion({ libro }: { libro: LibroDetalle }) {
             Cancelar
           </Link>
           <button type="submit" className="boton" disabled={cargando}>
-            {cargando ? 'Guardando cambios...' : modo === 'patch' ? 'Guardar cambios (PATCH)' : 'Reemplazar libro (PUT)'}
+            {cargando ? 'Guardando cambios...' : modo === 'patch' ? 'Guardar cambios' : 'Reemplazar libro'}
           </button>
         </div>
       </form>

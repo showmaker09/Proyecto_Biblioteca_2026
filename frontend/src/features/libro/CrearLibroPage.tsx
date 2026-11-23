@@ -601,7 +601,6 @@ export function CrearLibroPage() {
   return (
     <div className={estilos.pagina}>
       <header className={estilos.cabecera}>
-        <span className={estilos.badge}>Paso 1 de 2: Administración</span>
         <h1 className={estilos.titulo}>Agregar nuevo libro</h1>
         <p className={estilos.subtitulo}>
           Sube un documento PDF para escanear sus páginas automáticamente, previsualizarlo con el lector y publicarlo.
@@ -632,7 +631,7 @@ export function CrearLibroPage() {
         <div className={estilos.rejilla}>
           <div className={estilos.campo}>
             <label htmlFor="id" className={estilos.etiqueta}>
-              Identificador único (_id) *
+              Identificador del libro *
             </label>
             <input
               id="id"
@@ -665,7 +664,7 @@ export function CrearLibroPage() {
         <div className={estilos.rejilla}>
           <div className={estilos.campo}>
             <label htmlFor="idioma" className={estilos.etiqueta}>
-              Idioma (código) *
+              Idioma *
             </label>
             <input
               id="idioma"
@@ -695,7 +694,7 @@ export function CrearLibroPage() {
 
         <div className={estilos.campo}>
           <label htmlFor="portada" className={estilos.etiqueta}>
-            URL de portada (opcional)
+            Enlace de portada (opcional)
           </label>
           <div className={estilos.portadaFila}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
