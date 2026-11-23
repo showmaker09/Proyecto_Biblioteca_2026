@@ -102,12 +102,16 @@ class ContenedorAuth extends StatelessWidget {
                   170.0,
                   anchoLibro,
                 );
-                final altoLibroReal = anchoLibroReal * (276 / 220);
+                final altoLibroReal =
+                    anchoLibroReal * EscaparateLibrosClasicos.proporcion;
                 // El libro nace detrás de la hoja blanca y asoma ~72% por arriba.
                 final topLibro = (altoHero + 46 - altoLibroReal * 0.74).clamp(
                   18.0,
                   double.infinity,
                 );
+                // Bajo el hombro de la hoja (con margen para su filete) el
+                // libro ya no se pinta: entra y sale del bolsillo sin fundidos.
+                final recorteLibro = altoHero + 46 + 2 - topLibro;
 
                 return SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
@@ -125,6 +129,7 @@ class ContenedorAuth extends StatelessWidget {
                             offset: const Offset(-26, 0),
                             child: EscaparateLibrosClasicos(
                               ancho: anchoLibroReal,
+                              recorte: recorteLibro,
                             ),
                           ),
                         ),

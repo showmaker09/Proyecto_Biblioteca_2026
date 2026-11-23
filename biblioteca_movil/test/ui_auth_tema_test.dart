@@ -1,13 +1,17 @@
+import 'dart:async';
+
 import 'package:biblioteca_movil/aplicacion.dart';
 import 'package:biblioteca_movil/funciones/cuenta/casos_cuenta.dart';
+import 'package:biblioteca_movil/funciones/cuenta/estante_carga.dart';
+import 'package:biblioteca_movil/funciones/cuenta/libro_3d.dart';
 import 'package:biblioteca_movil/funciones/cuenta/libro_flotante_3d.dart';
 import 'package:biblioteca_movil/funciones/cuenta/pantalla_login.dart';
 import 'package:biblioteca_movil/funciones/cuenta/pantalla_registro.dart';
+import 'package:biblioteca_movil/funciones/cuenta/puerta.dart';
 import 'package:biblioteca_movil/nucleo/almacen_sesion.dart';
 import 'package:biblioteca_movil/nucleo/cliente_biblioteca.dart';
 import 'package:biblioteca_movil/nucleo/tema.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -93,7 +97,7 @@ void main() {
         'https://backend-para-movil.onrender.com',
       );
       expect(find.byType(EscaparateLibrosClasicos), findsOneWidget);
-      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(find.byType(Libro3D), findsOneWidget);
       expect(find.byKey(const ValueKey(0)), findsOneWidget);
       expect(find.textContaining('API http://'), findsNothing);
 
@@ -134,6 +138,64 @@ void main() {
         findsOneWidget,
       );
       expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Puerta muestra tres tomos que se reacomodan en la repisa mientras abre la sesión',
+    (tester) async {
+      final almacen = AlmacenSesion(caja: CajaMemoria());
+      await almacen.guardarRefresco('refresco-guardado');
+      final cliente = ClienteBiblioteca(
+        base: 'http://127.0.0.1:8000',
+        almacen: almacen,
+        // La API no contesta: la puerta se queda cargando.
+        httpCliente: MockClient((_) => Completer<http.Response>().future),
+      );
+      addTearDown(cliente.dispose);
+
+      await tester.pumpWidget(_envolver(const Puerta(), cliente));
+      await tester.pump();
+
+      expect(find.byType(EstanteCarga), findsOneWidget);
+      expect(find.byType(Libro3D), findsNWidgets(3));
+      expect(find.text('Abriendo la biblioteca…'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      // En el primer movimiento, el tomo I salta del principio al final.
+      final tomoI = find.byKey(const ValueKey(0));
+      final antes = tester.getCenter(tomoI);
+      for (var t = 0; t < 1500; t += 16) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(tester.getCenter(tomoI).dx, greaterThan(antes.dx + 40));
+
+      // Sin respuesta en 45 s, avisa del error y ofrece reintentar.
+      await tester.pump(const Duration(seconds: 46));
+      await tester.pump();
+      expect(find.byType(EstanteCarga), findsNothing);
+      expect(find.text('Reintentar'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'EstanteCarga se queda quieta si el sistema reduce el movimiento',
+    (tester) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(child: EstanteCarga()),
+          ),
+        ),
+      );
+
+      final tomoI = find.byKey(const ValueKey(0));
+      final antes = tester.getCenter(tomoI);
+      await tester.pump(const Duration(seconds: 2));
+      expect(tester.getCenter(tomoI), antes);
+      expect(tester.binding.hasScheduledFrame, isFalse);
     },
   );
 }

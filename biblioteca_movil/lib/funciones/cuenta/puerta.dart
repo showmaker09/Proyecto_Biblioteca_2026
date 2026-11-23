@@ -5,6 +5,7 @@ import '../../nucleo/cliente_biblioteca.dart';
 import '../../nucleo/navegacion.dart';
 import '../../nucleo/tema.dart';
 import 'casos_cuenta.dart';
+import 'estante_carga.dart';
 import 'widgets_auth.dart';
 
 /// Al arrancar, renueva el JWT con el refresco guardado o manda al login.
@@ -65,14 +66,8 @@ class _PuertaState extends State<Puerta> {
                 ? const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      MarcaBiblioteca(tamano: 48),
-                      SizedBox(height: 20),
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2.5),
-                      ),
-                      SizedBox(height: 14),
+                      EstanteCarga(),
+                      SizedBox(height: 10),
                       Text(
                         'Abriendo la biblioteca…',
                         style: TextStyle(color: ColoresBiblioteca.textoSuave),
