@@ -313,15 +313,16 @@
   left: clamp(1.25rem, 7vw, 6rem);
   top: 50%;
   translate: 0 -50%;
-  max-width: min(17ch, 86vw);
+  max-width: min(44rem, 86vw);
 }
 
 .cita {
   margin: 0;
   font-family: var(--fuente-display);
-  font-size: clamp(2.4rem, 5.6vw, 5.6rem);
-  line-height: 1.02;
+  font-size: clamp(1.75rem, 3.4vw, 3.25rem);
+  line-height: 1.12;
   letter-spacing: -0.02em;
+  max-width: 22ch;
   color: var(--tinta);
 }
 

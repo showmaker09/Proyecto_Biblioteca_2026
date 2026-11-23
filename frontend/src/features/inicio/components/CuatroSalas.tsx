@@ -273,6 +273,7 @@ export function CuatroSalas() {
             start: 'top top',
             end: () => `+=${distancia()}`,
             pin: true,
+            pinSpacing: true,
             scrub: 1,
             anticipatePin: 1,
             invalidateOnRefresh: true,

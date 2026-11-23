@@ -77,6 +77,7 @@ export function ExperienciaInmersiva() {
             onComplete: () => {
               raiz.style.overflow = ''
               lenisRef.current?.start()
+              ScrollTrigger.refresh()
             },
           })
           .to(contadorRef.current, { yPercent: -110, duration: 0.6, ease: 'power3.in' })
@@ -260,6 +261,7 @@ export function ExperienciaInmersiva() {
         )
 
       actualizarCapitulo(0)
+      ScrollTrigger.refresh()
     },
     { scope: contenedorRef, dependencies: [listo] },
   )

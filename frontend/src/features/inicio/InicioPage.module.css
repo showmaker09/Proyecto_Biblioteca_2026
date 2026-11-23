@@ -4,8 +4,7 @@
 
 .pagina {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  display: block;
   background: #ffffff;
   color: var(--tinta, #141414);
 }
