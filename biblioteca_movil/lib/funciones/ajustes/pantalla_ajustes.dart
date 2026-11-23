@@ -195,9 +195,9 @@ class _PantallaAjustesState extends State<PantallaAjustes> {
       icono: Icons.document_scanner_outlined,
       iconoActivo: Icons.document_scanner_rounded,
       categoria: 'Herramienta admin',
-      titulo: 'Escanear una página',
+      titulo: 'Digitalizar un libro',
       descripcion:
-          'La foto se procesa en el teléfono y se guarda en formato .txt lista para publicar.',
+          'Registra los datos, escanea las páginas y publícalo directo en el catálogo.',
       etiquetaCta: 'Abrir escáner',
       alEjecutar: () => Navigator.pushNamed(context, '/escaner'),
     ),
@@ -206,9 +206,9 @@ class _PantallaAjustesState extends State<PantallaAjustes> {
       icono: Icons.publish_outlined,
       iconoActivo: Icons.publish_rounded,
       categoria: 'Flujo editorial',
-      titulo: 'Publicar textos',
+      titulo: 'Publicar un libro',
       descripcion:
-          'Verifica tus archivos locales en memoria interna y súbelos al catálogo en MongoDB.',
+          'Elige un libro guardado en el teléfono, revísalo y súbelo al catálogo.',
       etiquetaCta: 'Ir a publicar',
       alEjecutar: () => Navigator.pushNamed(context, '/publicar'),
     ),

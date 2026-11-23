@@ -57,7 +57,7 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
       );
       var locales = 0;
       try {
-        locales = (await escaner.textosGuardados()).length;
+        locales = (await escaner.librosLocales()).length;
       } catch (_) {}
 
       if (!mounted) return;
@@ -211,7 +211,7 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Archivos .txt en memoria interna: $_txtLocales'
+                  'Libros en el teléfono: $_txtLocales'
                   '${siguienteNum == null ? '' : ' · Siguiente libro pendiente: #$siguienteNum'}',
                   style: tema.textTheme.bodySmall,
                 ),

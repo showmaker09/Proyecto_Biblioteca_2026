@@ -2,11 +2,17 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- Hasta Android 10 hace falta para guardar los libros escaneados en
+         Documentos/Biblioteca; desde Android 11 la app escribe ahí sin permiso. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
     <application
         android:label="Biblioteca"
         android:name="${applicationName}"
         android:allowBackup="false"
         android:fullBackupContent="false"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

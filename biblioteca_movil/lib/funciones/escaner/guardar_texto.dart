@@ -16,6 +16,11 @@ const int maxPaginasLibro = 5000;
 
 bool nombreDeTextoValido(String nombre) => _nombreSeguro.hasMatch(nombre.trim());
 
+/// Id de libro (= nombre de su carpeta): minúsculas, números y guion bajo.
+bool idLibroValido(String id) => _formatoIdLibro.hasMatch(id);
+
+bool idiomaValido(String idioma) => _formatoIdioma.hasMatch(idioma.trim());
+
 String nombreVisible(String ruta) {
   final barra = ruta.replaceAll('\\', '/');
   final corte = barra.lastIndexOf('/');

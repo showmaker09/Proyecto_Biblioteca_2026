@@ -1,24 +1,45 @@
 import 'dart:io';
+import 'dart:ui';
 
 import '../../nucleo/modelos.dart';
 import '../../nucleo/plan_logistico.dart';
+import 'almacen_libros.dart';
+import 'carpeta_publica.dart';
 import 'guardar_texto.dart';
 import 'motor_ocr.dart';
+import 'reconstruir_texto.dart';
 
 class CasosEscaner {
-  CasosEscaner({MotorOcr? motor, GuardarTexto? guardar})
-    : motor = motor ?? MotorOcr(),
-      guardar = guardar ?? GuardarTexto();
+  CasosEscaner({
+    MotorOcr? motor,
+    GuardarTexto? guardar,
+    AlmacenLibros? almacen,
+    PublicadosLocales? publicados,
+  }) : motor = motor ?? MotorOcr(),
+       guardar = guardar ?? GuardarTexto(),
+       almacen =
+           almacen ??
+           AlmacenLibros(
+             resolver: CarpetaPublica.resolver,
+             alEscribir: CarpetaPublica.indexar,
+           ),
+       publicados = publicados ?? PublicadosLocales();
 
   final MotorOcr motor;
   final GuardarTexto guardar;
+  final AlmacenLibros almacen;
+  final PublicadosLocales publicados;
 
-  Future<String> reconocer(String rutaJpeg) => motor.reconocer(rutaJpeg);
+  Future<LecturaOcr> leer(String rutaJpeg, Size tamanoImagen) =>
+      motor.leer(rutaJpeg, tamanoImagen);
 
-  Future<File> guardarTexto(String nombre, String texto) =>
-      guardar.guardar(nombre, texto);
+  Future<void> cerrarOcr() => motor.cerrar();
 
-  Future<List<File>> textosGuardados() => guardar.listar();
+  Future<List<LibroLocal>> librosLocales() => almacen.listar();
+
+  /// `.txt` sueltos que guardó la versión anterior del escáner dentro de la
+  /// app; se pueden convertir en un libro.
+  Future<List<File>> textosSueltos() => guardar.listar();
 
   Future<String> leerTexto(File archivo) => guardar.leer(archivo);
 

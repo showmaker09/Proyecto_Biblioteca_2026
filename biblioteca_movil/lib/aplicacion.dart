@@ -5,8 +5,7 @@ import 'funciones/catalogo/pantalla_ficha.dart';
 import 'funciones/cuenta/pantalla_login.dart';
 import 'funciones/cuenta/pantalla_registro.dart';
 import 'funciones/cuenta/puerta.dart';
-import 'funciones/escaner/pantalla_publicar.dart';
-import 'funciones/escaner/vista_camara.dart';
+import 'funciones/escaner/pantalla_escaneo.dart';
 import 'funciones/lector/pantalla_lector.dart';
 import 'funciones/navegacion/pantalla_principal.dart';
 import 'nucleo/tema.dart';
@@ -26,8 +25,8 @@ class Aplicacion extends StatelessWidget {
         '/login': (_) => const PantallaLogin(),
         '/registro': (_) => const PantallaRegistro(),
         '/catalogo': (_) => const PantallaPrincipal(),
-        '/escaner': (_) => const VistaCamara(),
-        '/publicar': (_) => const PantallaPublicar(),
+        '/escaner': (_) => const PantallaEscaneo(),
+        '/publicar': (_) => const PantallaEscaneo(paraPublicar: true),
         '/admin/progreso': (_) => const PantallaDashboard(),
       },
       onGenerateRoute: _ruta,
