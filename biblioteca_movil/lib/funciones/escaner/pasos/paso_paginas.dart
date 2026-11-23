@@ -88,7 +88,13 @@ class _PasoPaginasState extends State<PasoPaginas> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     SystemChrome.setPreferredOrientations(const [DeviceOrientation.portraitUp]);
     _pantalla.actividad();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _abrirCamara());
+    // La cámara se abre al terminar el fundido de entrada (280 ms en
+    // PantallaEscaneo): abrirla ocupa el hilo principal un momento y, a mitad
+    // de la transición, la trababa.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Timer(duracionAnimada(context, 300), () => unawaited(_abrirCamara()));
+    });
   }
 
   @override
@@ -582,13 +588,19 @@ class _PasoPaginasState extends State<PasoPaginas> with WidgetsBindingObserver {
     }
     // La vista previa llena la pantalla sin deformarse (BoxFit.cover); la
     // foto congelada usa el mismo encaje, así el marco coincide con ella.
-    return ClipRect(
-      child: FittedBox(
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: math.min(previa.width, previa.height),
-          height: math.max(previa.width, previa.height),
-          child: CameraPreview(camara),
+    // Entra con un fundido para que los primeros cuadros no salten de golpe.
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: duracionAnimada(context, 260),
+      builder: (context, valor, hijo) => Opacity(opacity: valor, child: hijo),
+      child: ClipRect(
+        child: FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: math.min(previa.width, previa.height),
+            height: math.max(previa.width, previa.height),
+            child: CameraPreview(camara),
+          ),
         ),
       ),
     );

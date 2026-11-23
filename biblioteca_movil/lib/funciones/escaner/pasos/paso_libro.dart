@@ -141,6 +141,8 @@ class _PasoLibroState extends State<PasoLibro> {
       return;
     }
     final portada = _portada.text.trim();
+    // El teclado se cierra aquí y no encima de la cámara del paso siguiente.
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _guardando = true);
     try {
       await _c.guardarLibro(
@@ -817,13 +819,14 @@ class _VistaId extends StatelessWidget {
         Container(
           padding: const EdgeInsets.fromLTRB(16, 10, 6, 10),
           decoration: BoxDecoration(
-            color: ColoresBiblioteca.pizarra50,
+            color: ColoresBiblioteca.superficie,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: error == null
                   ? ColoresBiblioteca.pizarra200
                   : ColoresBiblioteca.errorTexto,
             ),
+            boxShadow: ColoresBiblioteca.sombraTarjeta,
           ),
           child: Row(
             children: [
@@ -894,9 +897,24 @@ class _MasDetalles extends StatelessWidget {
         TarjetaEscaneo(
           alPulsar: alPulsar,
           radio: 16,
-          padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
+              Container(
+                width: 38,
+                height: 38,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: ColoresBiblioteca.pizarra100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.tune_rounded,
+                  size: 19,
+                  color: ColoresBiblioteca.pizarra600,
+                ),
+              ),
+              const SizedBox(width: 12),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -919,13 +937,24 @@ class _MasDetalles extends StatelessWidget {
                   ],
                 ),
               ),
-              AnimatedRotation(
-                turns: abierto ? 0.5 : 0,
-                duration: duracion,
-                curve: curvaDeslizamiento,
-                child: const Icon(
-                  Icons.expand_more_rounded,
-                  color: ColoresBiblioteca.pizarra500,
+              const SizedBox(width: 8),
+              Container(
+                width: 30,
+                height: 30,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: ColoresBiblioteca.pizarra100,
+                  shape: BoxShape.circle,
+                ),
+                child: AnimatedRotation(
+                  turns: abierto ? 0.5 : 0,
+                  duration: duracion,
+                  curve: curvaDeslizamiento,
+                  child: const Icon(
+                    Icons.expand_more_rounded,
+                    size: 20,
+                    color: ColoresBiblioteca.pizarra600,
+                  ),
                 ),
               ),
             ],
@@ -938,8 +967,9 @@ class _MasDetalles extends StatelessWidget {
               ? CrossFadeState.showSecond
               : CrossFadeState.showFirst,
           firstChild: const SizedBox(width: double.infinity),
+          // Abajo deja sitio a la sombra del último campo: el fundido recorta.
           secondChild: Padding(
-            padding: const EdgeInsets.only(top: 14),
+            padding: const EdgeInsets.only(top: 14, bottom: 12),
             child: child,
           ),
         ),

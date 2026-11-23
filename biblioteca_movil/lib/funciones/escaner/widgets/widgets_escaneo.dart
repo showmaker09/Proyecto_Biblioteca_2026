@@ -73,8 +73,9 @@ class TarjetaEscaneo extends StatelessWidget {
   }
 }
 
-/// Campo relleno y redondeado del login (`CampoAuth`), con las opciones que
-/// necesita un formulario: mayúsculas, varias líneas y aviso de cambios.
+/// Campo blanco y redondeado que se despega del lienzo con la sombra de las
+/// tarjetas, con las opciones que necesita un formulario: mayúsculas, varias
+/// líneas y aviso de cambios.
 class CampoEscaneo extends StatelessWidget {
   const CampoEscaneo({
     super.key,
@@ -106,15 +107,15 @@ class CampoEscaneo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const radio = BorderRadius.all(Radius.circular(16));
-    const bordeBase = OutlineInputBorder(
+    const bordeBase = _BordeConSombra(
       borderRadius: radio,
       borderSide: BorderSide(color: ColoresBiblioteca.pizarra200),
     );
-    const bordeFoco = OutlineInputBorder(
+    const bordeFoco = _BordeConSombra(
       borderRadius: radio,
       borderSide: BorderSide(color: ColoresBiblioteca.focoBorde, width: 1.5),
     );
-    const bordeError = OutlineInputBorder(
+    const bordeError = _BordeConSombra(
       borderRadius: radio,
       borderSide: BorderSide(color: ColoresBiblioteca.errorTexto, width: 1.4),
     );
@@ -131,11 +132,7 @@ class CampoEscaneo extends StatelessWidget {
       style: const TextStyle(fontSize: 15.5, color: ColoresBiblioteca.texto),
       decoration: InputDecoration(
         filled: true,
-        fillColor: WidgetStateColor.resolveWith(
-          (estados) => estados.contains(WidgetState.focused)
-              ? ColoresBiblioteca.fondo
-              : ColoresBiblioteca.pizarra50,
-        ),
+        fillColor: ColoresBiblioteca.superficie,
         labelText: etiqueta,
         labelStyle: const TextStyle(
           fontSize: 15,
@@ -171,6 +168,80 @@ class CampoEscaneo extends StatelessWidget {
         errorBorder: bordeError,
         focusedErrorBorder: bordeError,
       ),
+    );
+  }
+}
+
+/// Contorno de [CampoEscaneo] con la sombra de las tarjetas, pintada solo por
+/// fuera para no velar el relleno ni alcanzar el texto de ayuda.
+class _BordeConSombra extends OutlineInputBorder {
+  const _BordeConSombra({
+    super.borderSide,
+    super.borderRadius,
+    super.gapPadding,
+  });
+
+  @override
+  _BordeConSombra copyWith({
+    BorderSide? borderSide,
+    BorderRadius? borderRadius,
+    double? gapPadding,
+  }) => _BordeConSombra(
+    borderSide: borderSide ?? this.borderSide,
+    borderRadius: borderRadius ?? this.borderRadius,
+    gapPadding: gapPadding ?? this.gapPadding,
+  );
+
+  // El foco anima el contorno con lerp; sin esto la sombra parpadearía.
+  @override
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) =>
+      _conSombra(super.lerpFrom(a, t));
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) =>
+      _conSombra(super.lerpTo(b, t));
+
+  static ShapeBorder? _conSombra(ShapeBorder? borde) =>
+      borde is OutlineInputBorder && borde is! _BordeConSombra
+      ? _BordeConSombra(
+          borderSide: borde.borderSide,
+          borderRadius: borde.borderRadius,
+          gapPadding: borde.gapPadding,
+        )
+      : borde;
+
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double? gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection? textDirection,
+  }) {
+    final forma = borderRadius.toRRect(rect);
+    canvas
+      ..save()
+      ..clipPath(
+        Path()
+          ..fillType = PathFillType.evenOdd
+          ..addRect(rect.inflate(48))
+          ..addRRect(forma),
+      );
+    for (final sombra in ColoresBiblioteca.sombraTarjeta) {
+      canvas.drawRRect(
+        forma.shift(sombra.offset).inflate(sombra.spreadRadius),
+        sombra.toPaint(),
+      );
+    }
+    canvas.restore();
+    super.paint(
+      canvas,
+      rect,
+      gapStart: gapStart,
+      gapExtent: gapExtent,
+      gapPercentage: gapPercentage,
+      textDirection: textDirection,
     );
   }
 }
@@ -424,84 +495,253 @@ class AvisoEscaneo extends StatelessWidget {
   }
 }
 
-/// Barra de progreso sobria en 3 segmentos para el asistente de digitalización.
+/// Los 3 pasos del asistente: círculos unidos por una línea que avanza hasta
+/// el paso actual. Con [actual] igual a `pasosAsistente.length` los tres
+/// quedan completados y un barrido verde los recorre (el libro se publicó).
 class IndicadorPasos extends StatelessWidget {
-  const IndicadorPasos({super.key, required this.actual, this.noche = false});
+  const IndicadorPasos({super.key, required this.actual});
 
   final int actual;
-  final bool noche;
 
   @override
   Widget build(BuildContext context) {
-    final duracion = duracionAnimada(context, 240);
     final cantidad = pasosAsistente.length;
+    final terminado = actual >= cantidad;
+    final hasta = actual.clamp(0, cantidad - 1).toDouble();
 
     return Semantics(
-      label: 'Paso ${actual + 1} de $cantidad: ${pasosAsistente[actual]}',
+      label: terminado
+          ? 'Los $cantidad pasos completados'
+          : 'Paso ${actual + 1} de $cantidad: ${pasosAsistente[actual]}',
       child: ExcludeSemantics(
-        child: Row(
-          children: [
-            for (var i = 0; i < cantidad; i++) ...[
-              if (i > 0) const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AnimatedContainer(
-                      duration: duracion,
-                      curve: curvaDeslizamiento,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(999),
-                        color: i <= actual
-                            ? (noche ? Colors.white : ColoresBiblioteca.acento)
-                            : (noche
-                                  ? const Color(0x33FFFFFF)
-                                  : ColoresBiblioteca.pizarra200),
-                      ),
+        // Al llegar a un paso, la línea entra desde el anterior.
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: hasta > 0 ? hasta - 1 : 0, end: hasta),
+          duration: duracionAnimada(context, 560),
+          curve: curvaDeslizamiento,
+          builder: (context, avance, _) => TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: terminado ? hasta : 0),
+            duration: duracionAnimada(context, 700),
+            curve: Curves.easeInOutCubic,
+            builder: (context, verde, _) => Row(
+              children: [
+                for (var i = 0; i < cantidad; i++)
+                  Expanded(
+                    child: _NodoPaso(
+                      indice: i,
+                      actual: actual,
+                      avance: avance,
+                      verde: terminado ? verde : null,
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        if (i < actual) ...[
-                          Icon(
-                            Icons.check_rounded,
-                            size: 12,
-                            color: noche
-                                ? Colors.white70
-                                : ColoresBiblioteca.exito,
-                          ),
-                          const SizedBox(width: 3),
-                        ],
-                        Flexible(
-                          child: Text(
-                            pasosAsistente[i],
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: i == actual
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              color: i == actual
-                                  ? (noche
-                                        ? Colors.white
-                                        : ColoresBiblioteca.texto)
-                                  : (noche
-                                        ? Colors.white60
-                                        : ColoresBiblioteca.pizarra500),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Un paso del indicador: su círculo, media línea a cada lado y su nombre.
+class _NodoPaso extends StatelessWidget {
+  const _NodoPaso({
+    required this.indice,
+    required this.actual,
+    required this.avance,
+    required this.verde,
+  });
+
+  final int indice;
+  final int actual;
+
+  /// Hasta dónde llega la línea, en pasos (1.5 = a medio camino del tercero).
+  final double avance;
+
+  /// Hasta dónde llega el barrido verde al publicar; `null` antes de eso.
+  final double? verde;
+
+  @override
+  Widget build(BuildContext context) {
+    final cantidad = pasosAsistente.length;
+    final hecho = indice < actual;
+    final esActual = indice == actual;
+    // La curva frena al final: el círculo se enciende cuando la línea ya casi
+    // lo alcanza, no cuando termina la animación.
+    final encendido = hecho || avance >= indice - 0.05;
+    final enVerde = verde != null && verde! >= indice - 0.05;
+    final tinta = enVerde ? ColoresBiblioteca.exito : ColoresBiblioteca.acento;
+    final duracion = duracionAnimada(context, 220);
+    // AnimatedDefaultTextStyle reemplaza el estilo heredado; se parte de él
+    // para no perder la fuente del tema.
+    final heredado = DefaultTextStyle.of(context).style;
+
+    // Media línea que empieza en [inicio] (en pasos): negra hasta [avance] y
+    // verde encima hasta [verde].
+    Widget tramo(double inicio, EdgeInsets margen) {
+      Widget relleno(double hasta, Color color) => FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: ((hasta - inicio) * 2).clamp(0.0, 1.0),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(999),
+          ),
+        ),
+      );
+
+      return Padding(
+        padding: margen,
+        child: Container(
+          height: 2,
+          decoration: BoxDecoration(
+            color: ColoresBiblioteca.pizarra200,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              relleno(avance, ColoresBiblioteca.acento),
+              if (verde != null) relleno(verde!, ColoresBiblioteca.exito),
             ],
+          ),
+        ),
+      );
+    }
+
+    final nodo = AnimatedScale(
+      scale: encendido ? 1 : 0.86,
+      duration: duracionAnimada(context, 360),
+      curve: Curves.easeOutBack,
+      child: AnimatedContainer(
+        duration: duracion,
+        width: 26,
+        height: 26,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: encendido ? tinta : ColoresBiblioteca.pizarra100,
+          boxShadow: [
+            BoxShadow(
+              color: esActual && encendido
+                  ? const Color(0x1A111111)
+                  : const Color(0x00111111),
+              spreadRadius: 4,
+            ),
           ],
         ),
+        child: AnimatedSwitcher(
+          duration: duracion,
+          transitionBuilder: (hijo, animacion) =>
+              ScaleTransition(scale: animacion, child: hijo),
+          child: hecho
+              ? const Icon(
+                  Icons.check_rounded,
+                  key: ValueKey('hecho'),
+                  size: 15,
+                  color: ColoresBiblioteca.acentoTexto,
+                )
+              : AnimatedDefaultTextStyle(
+                  key: const ValueKey('numero'),
+                  duration: duracion,
+                  style: heredado.merge(
+                    TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                      color: encendido
+                          ? ColoresBiblioteca.acentoTexto
+                          : ColoresBiblioteca.pizarra500,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  child: Text('${indice + 1}'),
+                ),
+        ),
+      ),
+    );
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 28,
+          child: Row(
+            children: [
+              Expanded(
+                child: indice == 0
+                    ? const SizedBox()
+                    : tramo(indice - 0.5, const EdgeInsets.only(right: 6)),
+              ),
+              Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
+                children: [if (esActual && encendido) const _OndaPaso(), nodo],
+              ),
+              Expanded(
+                child: indice == cantidad - 1
+                    ? const SizedBox()
+                    : tramo(indice.toDouble(), const EdgeInsets.only(left: 6)),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        AnimatedDefaultTextStyle(
+          duration: duracion,
+          style: heredado.merge(
+            TextStyle(
+              fontSize: 12,
+              fontWeight: esActual
+                  ? FontWeight.w700
+                  : hecho
+                  ? FontWeight.w600
+                  : FontWeight.w500,
+              color: esActual
+                  ? ColoresBiblioteca.texto
+                  : hecho
+                  ? ColoresBiblioteca.pizarra600
+                  : ColoresBiblioteca.pizarra500,
+            ),
+          ),
+          child: Text(
+            pasosAsistente[indice],
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dos ondas que salen del paso actual cuando se enciende, y se detienen.
+class _OndaPaso extends StatelessWidget {
+  const _OndaPaso();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 2),
+        duration: duracionAnimada(context, 2400),
+        builder: (context, valor, _) {
+          final t = valor % 1;
+          final alfa = valor >= 2 ? 0.0 : 0.4 * (1 - t);
+          return Transform.scale(
+            scale: 1 + 0.8 * Curves.easeOutCubic.transform(t),
+            child: Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: ColoresBiblioteca.acento.withValues(alpha: alfa),
+                  width: 1.5,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -555,7 +795,8 @@ class BotonCristal extends StatelessWidget {
   }
 }
 
-/// Cabecera editorial compacta y limpia para los pasos del asistente.
+/// Cabecera del asistente: una sola superficie blanca, redondeada abajo como
+/// una tarjeta, con el título y los pasos.
 class CabeceraAsistente extends StatelessWidget {
   const CabeceraAsistente({
     super.key,
@@ -569,6 +810,8 @@ class CabeceraAsistente extends StatelessWidget {
 
   final String titulo;
   final String? subtitulo;
+
+  /// Paso actual; `pasosAsistente.length` los marca todos como completados.
   final int paso;
   final VoidCallback alVolver;
   final Widget? accion;
@@ -581,7 +824,8 @@ class CabeceraAsistente extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: ColoresBiblioteca.superficie,
-        border: Border(bottom: BorderSide(color: ColoresBiblioteca.pizarra200)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+        boxShadow: ColoresBiblioteca.sombraTarjeta,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -591,7 +835,7 @@ class CabeceraAsistente extends StatelessWidget {
               16,
               arriba + 10,
               16,
-              mostrarPasos ? 12 : 14,
+              mostrarPasos ? 20 : 16,
             ),
             child: Row(
               children: [
@@ -639,7 +883,7 @@ class CabeceraAsistente extends StatelessWidget {
           ),
           if (mostrarPasos)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 18),
               child: IndicadorPasos(actual: paso),
             ),
         ],

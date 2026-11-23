@@ -87,9 +87,9 @@ class _Asistente extends StatelessWidget {
         ),
         PasoEscaneo.publicar => _ConCabecera(
           key: const ValueKey(PasoEscaneo.publicar),
-          paso: 2,
+          // Ya publicado: los 3 pasos quedan completados en verde.
+          paso: c.publicado != null ? pasosAsistente.length : 2,
           titulo: c.publicado != null ? 'Publicado' : 'Publicar libro',
-          mostrarPasos: c.publicado == null,
           accion: c.publicado == null && (c.libro?.totalPaginas ?? 0) > 0
               ? BotonCristal(
                   icono: Icons.ios_share_rounded,
@@ -146,7 +146,6 @@ class _ConCabecera extends StatelessWidget {
     required this.alVolver,
     required this.child,
     this.accion,
-    this.mostrarPasos = true,
   });
 
   final int paso;
@@ -154,7 +153,6 @@ class _ConCabecera extends StatelessWidget {
   final VoidCallback alVolver;
   final Widget child;
   final Widget? accion;
-  final bool mostrarPasos;
 
   @override
   Widget build(BuildContext context) {
@@ -170,19 +168,26 @@ class _ConCabecera extends StatelessWidget {
         ? '${integrante.primerNombre} · Bloque ${integrante.etiquetaBloque}'
         : null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        CabeceraAsistente(
-          titulo: titulo,
-          subtitulo: subtitulo,
-          paso: paso,
-          alVolver: alVolver,
-          accion: accion,
-          mostrarPasos: mostrarPasos,
-        ),
-        Expanded(child: child),
-      ],
+    // Fondo propio: al pasar a la cámara el Scaffold se oscurece desde el
+    // primer cuadro y, sin él, el lienzo se vería negro durante el fundido.
+    return ColoredBox(
+      color: ColoresBiblioteca.lienzo,
+      // De abajo arriba: la cabecera se pinta después del contenido y su
+      // sombra queda encima de lo que se desplaza por debajo.
+      child: Column(
+        verticalDirection: VerticalDirection.up,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: child),
+          CabeceraAsistente(
+            titulo: titulo,
+            subtitulo: subtitulo,
+            paso: paso,
+            alVolver: alVolver,
+            accion: accion,
+          ),
+        ],
+      ),
     );
   }
 }
